@@ -1,0 +1,6 @@
+sem2/
+main
+*.o
+.*.swp
+.tags
+test.sh
