@@ -434,8 +434,8 @@ bignumber bignumber::operator* (const bignumber& r) const
 		d_cell t = 0;
 		for (size_t j = 0; j < r.cells; ++j)
 		{
-			t =	static_cast<d_cell>(arr[i]) * static_cast<d_cell>(r.arr[j])
-				+ t / bitmodule(CELL_BITS) + result.at(i + j);
+			t = static_cast<d_cell>(arr[i]) * static_cast<d_cell>(r.arr[j])
+			    + t / bitmodule(CELL_BITS) + result.at(i + j);
 			result.at(i + j) = t % bitmodule(CELL_BITS);
 		}
 		result.at(i + r.cells) = t / bitmodule(CELL_BITS);
@@ -569,13 +569,13 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 			if (debug)
 			{
 				std::cout << "\tjust for ruby:\n\t\t0x"
-					<<hex<<get(v,2)<<" * 0x"<<hex<<q<<" > "
-					<<"( 0x"<<hex<<get_u(j)<<"*0x"<<hex<<b
-					<<" + 0x"<<hex<<get_u(j+1)<<" - 0x"<<hex<<q<<"*0x"<<hex<<get(v, 1)<<" )*0x"
-					<<hex<<b<<" + 0x"<<hex<<get_u(j+2)
-					<<endl;
+				          <<hex<<get(v,2)<<" * 0x"<<hex<<q<<" > "
+				          <<"( 0x"<<hex<<get_u(j)<<"*0x"<<hex<<b
+				          <<" + 0x"<<hex<<get_u(j+1)<<" - 0x"<<hex<<q<<"*0x"<<hex<<get(v, 1)<<" )*0x"
+				          <<hex<<b<<" + 0x"<<hex<<get_u(j+2)
+				          <<endl;
 				std::cout << "\trecalculated q as 0x"
-					<< get(v,2) * q << " > 0x" << ( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2) <<endl;
+				          << get(v,2) * q << " > 0x" << ( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2) <<endl;
 			}
 			q -= 1;
 			assert(q >= 1 && q < b);
