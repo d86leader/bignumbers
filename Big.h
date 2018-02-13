@@ -27,6 +27,7 @@ inline constexpr d_cell bitmodule(size_t);
 
 class Big
 {
+private:
 	friend ostream& operator<< (ostream& out, const Big&);
 	friend istream& operator>> (istream& in, Big&);
 
@@ -46,7 +47,7 @@ class Big
 public:
 	Big();
 	Big(const Big&);
-	~Big();
+	Big(Big&&);
 
 	template<typename T>
 	Big(const T& rvalue);
@@ -90,47 +91,4 @@ public:
 	pair<Big, Big> quot_rem(const Big& r) const;
 };
 
-
-inline constexpr d_cell bitmodule(size_t bits)
-{
-	return static_cast<d_cell>(1) << bits;
-}
-template<typename T> Big& Big::operator= (const T& r)
-{
-	m_positive = r >= 0;
-	auto value = m_positive? r : -r;
-
-	vector<cell> result(0);
-	while (value > 0)
-	{
-		result.push_back(value % bitmodule(CELL_BITS));
-		value /= bitmodule(CELL_BITS);
-	}
-
-	m_cell_amount  = result.size();
-	m_length = m_cell_amount * CELL_LENGTH;
-	m_arr.reset( new cell [m_cell_amount] );
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = result[i];
-	
-	return *this;
-}
-template<typename T>
-Big::Big(const T& r)
-{
-	m_positive = r >= 0;
-	auto value = m_positive? r : -r;
-
-	vector<cell> result(0);
-	while (value > 0)
-	{
-		result.push_back(value % bitmodule(CELL_BITS));
-		value /= bitmodule(CELL_BITS);
-	}
-
-	m_cell_amount  = result.size();
-	m_length = m_cell_amount * CELL_LENGTH;
-	m_arr.reset( new cell [m_cell_amount] );
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = result[i];
-}
+#include "Big-inline.inc"
