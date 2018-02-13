@@ -2,7 +2,7 @@
 #include <memory>
 #include <string>
 
-#include "bignumbers.h"
+#include "Big.h"
 
 using std::endl;
 
@@ -10,8 +10,8 @@ int main(int argc, char** _argv)
 {
 	vector<string> argv (_argv, _argv + argc);
 
-	bignumber a;
-	bignumber b;
+	Big a;
+	Big b;
 
 	for (int i = 0; i < 100; ++i)
 	{

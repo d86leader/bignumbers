@@ -1,4 +1,4 @@
-#include "bignumbers.h"
+#include "Big.h"
 
 const bool debug = false;
 
@@ -7,7 +7,7 @@ bool overflown(const d_cell& value)
 	return (value >> CELL_BITS) != 0;
 }
 
-bignumber::bignumber()
+Big::Big()
 : length (0)
 , cells  (0) // clength/CELL_LENGTH rounded up
 , arr    (nullptr)
@@ -15,7 +15,7 @@ bignumber::bignumber()
 {}
 
 
-bignumber::bignumber(const bignumber& r)
+Big::Big(const Big& r)
 : length (r.length)
 , cells  (r.cells)
 , arr    (new cell [cells])
@@ -25,7 +25,7 @@ bignumber::bignumber(const bignumber& r)
 }
 
 
-bignumber::bignumber(const vector<d_cell>& v)
+Big::Big(const vector<d_cell>& v)
 : length (v.size() * CELL_LENGTH)
 , cells  (v.size())
 , arr    (new cell [v.size()])
@@ -34,7 +34,7 @@ bignumber::bignumber(const vector<d_cell>& v)
 	for (size_t i = 0; i < cells; ++i)
 		arr[i] = static_cast<cell>(v[i]);
 }
-bignumber::bignumber(const vector<cell>& v)
+Big::Big(const vector<cell>& v)
 : length (v.size() * CELL_LENGTH)
 , cells  (v.size())
 , arr    (new cell [v.size()])
@@ -45,35 +45,35 @@ bignumber::bignumber(const vector<cell>& v)
 }
 
 
-bignumber::~bignumber()
+Big::~Big()
 {}
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
 
-bignumber bignumber::abs() const
+Big Big::abs() const
 {
-	bignumber t {*this};
+	Big t {*this};
 	t.sign = true;
 	return t;
 }
-bignumber bignumber::neg() const
+Big Big::neg() const
 {
-	bignumber t {*this};
+	Big t {*this};
 	t.sign = false;
 	return t;
 }
 
 
-bool bignumber::is_nil() const
+bool Big::is_nil() const
 {
 	return cells == 0;
 }
 
 
 //shifts left by amount
-bignumber bignumber::shift(size_t amount) const
+Big Big::shift(size_t amount) const
 {
 	assert (amount >= 0);
 	if (amount == 0) return *this;
@@ -83,11 +83,11 @@ bignumber bignumber::shift(size_t amount) const
 		r.push_back(0);
 	for (size_t i = 0; i < cells; ++i)
 		r.push_back(arr[i]);
-	return bignumber(r);
+	return Big(r);
 }
 
 
-void bignumber::generate(size_t size)
+void Big::generate(size_t size)
 {
 	srand(time(NULL));
 	vector<cell> r;
@@ -95,14 +95,14 @@ void bignumber::generate(size_t size)
 	{
 		r.push_back(rand() % bitmodule(CELL_BITS));
 	}
-	*this = bignumber(r);
+	*this = Big(r);
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
 
-string bignumber::dump(bool printsign) const
+string Big::dump(bool printsign) const
 {
 	if (cells == 0)
 		return string("0x0");
@@ -141,7 +141,7 @@ inline int digit(char c)
 		return c - 'A' + 10;
 	return -1;
 }
-bignumber& bignumber::restore(const string& str) //aa ff b0 1c
+Big& Big::restore(const string& str) //aa ff b0 1c
 {
 	length = ( str.size() + 1 ) / 3; //each byte is two symbols && space save for the first one
 	cells  = (length - 1 + CELL_LENGTH)/CELL_LENGTH;
@@ -172,14 +172,14 @@ bignumber& bignumber::restore(const string& str) //aa ff b0 1c
 
 	return *this;
 }
-bignumber& bignumber::restore(const char* str)
+Big& Big::restore(const char* str)
 {
 	string s {str};
 	return this->restore(s);
 }
 
 
-d_cell bignumber::operator[] (const size_t& index) const
+d_cell Big::operator[] (const size_t& index) const
 {
 	return static_cast<d_cell>(arr[index]);
 }
@@ -188,7 +188,7 @@ d_cell bignumber::operator[] (const size_t& index) const
 ////////////////////////////////////////////////////////////////////////////////
 
 
-bignumber& bignumber::operator= (const bignumber& r)
+Big& Big::operator= (const Big& r)
 {
 	length = r.length;
 	cells  = r.cells;
@@ -204,7 +204,7 @@ bignumber& bignumber::operator= (const bignumber& r)
 ////////////////////////////////////////////////////////////////////////////////
 
 
-bool bignumber::operator== (const bignumber& r) const
+bool Big::operator== (const Big& r) const
 {
 	if (cells != r.cells)
 		return false;
@@ -217,13 +217,13 @@ bool bignumber::operator== (const bignumber& r) const
 	}
 	return true;
 }
-bool bignumber::operator!= (const bignumber& r) const
+bool Big::operator!= (const Big& r) const
 {
 	return ! (*this == r);
 }
 
 
-bool bignumber::operator> (const bignumber& r) const
+bool Big::operator> (const Big& r) const
 {
 	if (sign && !r.sign)
 		return true;
@@ -242,7 +242,7 @@ bool bignumber::operator> (const bignumber& r) const
 }
 
 
-bool bignumber::operator>= (const bignumber& r) const
+bool Big::operator>= (const Big& r) const
 {
 	if (cells > r.cells) return true;
 	if (cells < r.cells) return false;
@@ -261,13 +261,13 @@ bool bignumber::operator>= (const bignumber& r) const
 }
 
 
-bool bignumber::operator< (const bignumber& r) const
+bool Big::operator< (const Big& r) const
 {
 	return r > *this;
 }
 
 
-bool bignumber::operator<= (const bignumber& r) const
+bool Big::operator<= (const Big& r) const
 {
 	return r >= *this;
 }
@@ -276,43 +276,43 @@ bool bignumber::operator<= (const bignumber& r) const
 ////////////////////////////////////////////////////////////////////////////////
 
 
-bignumber bignumber::operator+ (const cell& r) const
+Big Big::operator+ (const cell& r) const
 {
-	bignumber t = r;
+	Big t = r;
 	return *this + t;
 }
 
 
-bignumber bignumber::operator- (const cell& r) const
+Big Big::operator- (const cell& r) const
 {
-	bignumber t = r;
+	Big t = r;
 	return *this - t;
 }
 
 
-bignumber bignumber::operator/ (const cell& r) const
+Big Big::operator/ (const cell& r) const
 {
-	bignumber t;
+	Big t;
 	t = r;
 	return *this / t;
 }
-bignumber bignumber::operator/ (const d_cell& r) const
+Big Big::operator/ (const d_cell& r) const
 {
-	bignumber t;
+	Big t;
 	t = r;
 	return *this / t;
 }
 
 
-bignumber bignumber::operator* (const cell& r) const
+Big Big::operator* (const cell& r) const
 {
-	bignumber t;
+	Big t;
 	t = r;
 	return *this * t;
 }
-bignumber bignumber::operator* (const d_cell& r) const
+Big Big::operator* (const d_cell& r) const
 {
-	bignumber t;
+	Big t;
 	t = r;
 	return *this * t;
 }
@@ -321,7 +321,7 @@ bignumber bignumber::operator* (const d_cell& r) const
 ////////////////////////////////////////////////////////////////////////////////
 
 
-bignumber bignumber::operator+ (const bignumber& r) const
+Big Big::operator+ (const Big& r) const
 {
 	if (!sign && !r.sign)
 		return (this->abs() + r.abs()).neg();
@@ -357,14 +357,14 @@ bignumber bignumber::operator+ (const bignumber& r) const
 	if (result.back() == 0)
 		result.pop_back();
 
-	return bignumber {result};
+	return Big {result};
 }
 
 
-bignumber bignumber::operator- (const bignumber& r) const
+Big Big::operator- (const Big& r) const
 {
 	if (*this == r)
-		return bignumber {0};
+		return Big {0};
 
 	if (sign && !r.sign)
 		return *this + r.abs();
@@ -411,15 +411,15 @@ bignumber bignumber::operator- (const bignumber& r) const
 		result.pop_back();
 	
 	if (result.size() == 0)
-		return bignumber ();
-	return bignumber {result};
+		return Big ();
+	return Big {result};
 }
 
 
-bignumber bignumber::operator* (const bignumber& r) const
+Big Big::operator* (const Big& r) const
 {
 	if (r.is_nil() || this->is_nil())
-		return bignumber(0);
+		return Big(0);
 	if (!sign && r.sign)
 		return (this->abs() * r).neg();
 	if (sign && !r.sign)
@@ -444,11 +444,11 @@ bignumber bignumber::operator* (const bignumber& r) const
 	while(result.size() > 0 && result.back() == 0)
 		result.pop_back();
 	
-	return bignumber(result);
+	return Big(result);
 }
 
 
-bignumber bignumber::operator/ (const bignumber& r) const
+Big Big::operator/ (const Big& r) const
 {
 	//it doesn't work with zeroes
 	if (this->is_nil())
@@ -461,7 +461,7 @@ bignumber bignumber::operator/ (const bignumber& r) const
 }
 
 
-bignumber bignumber::operator% (const bignumber& r) const
+Big Big::operator% (const Big& r) const
 {
 	//it doesn't work with zeroes
 	if (this->is_nil())
@@ -477,7 +477,7 @@ bignumber bignumber::operator% (const bignumber& r) const
 ////////////////////////////////////////////////////////////////////////////////
 
 
-pair<bignumber, bignumber> bignumber::quot_rem_small(const bignumber& r) const
+pair<Big, Big> Big::quot_rem_small(const Big& r) const
 {
 	auto d = r.arr[0];
 	auto quot_i  = vector<cell>();
@@ -502,18 +502,18 @@ pair<bignumber, bignumber> bignumber::quot_rem_small(const bignumber& r) const
 
 	//invert the quotient
 	auto q_vec = vector<cell>(quot_i.rbegin(), b);
-	auto quot  = bignumber(q_vec);
-	bignumber rem;
+	auto quot  = Big(q_vec);
+	Big rem;
 	rem = current;
 	return make_pair( quot, rem );
 }
 
 
-pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) const
+pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 {
 	//simple case: divisor is smaller than divider
 	if (*this < divider)
-		return make_pair(bignumber(0), *this);
+		return make_pair(Big(0), *this);
 	//normalization
 	auto d = bitmodule(CELL_BITS) / ( divider.arr[divider.cells-1] + 1 );
 	auto u = *this * d;   //normalized divident
@@ -537,7 +537,7 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 		else
 			return u.arr[ u_ini_size - i ];
 	};
-	auto get   = [](const bignumber& a, const size_t& i) -> d_cell{
+	auto get   = [](const Big& a, const size_t& i) -> d_cell{
 		if(i == 0)
 			return 0;
 		else
@@ -636,7 +636,7 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 
 
 	//denormalization
-	auto quotient  = bignumber(r_quot);
+	auto quotient  = Big(r_quot);
 	if (debug)
 	{
 		std::cout <<"calling " << u << " / " << hex <<d <<endl;
@@ -647,7 +647,7 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 }
 
 
-pair<bignumber, bignumber> bignumber::quot_rem (const bignumber& divider) const
+pair<Big, Big> Big::quot_rem (const Big& divider) const
 {
 	if (this->is_nil())
 		return make_pair(*this, *this);
@@ -713,7 +713,7 @@ cell unhex(const string& s)
 }
 
 
-ostream& operator << (ostream& out, const bignumber& number)
+ostream& operator << (ostream& out, const Big& number)
 {
 	if (number == 0)
 	{
@@ -735,7 +735,7 @@ ostream& operator << (ostream& out, const bignumber& number)
 }
 
 
-istream& operator >> (istream& in, bignumber& number)
+istream& operator >> (istream& in, Big& number)
 {
 	string s; in >> s;
 	if (s == "0")
@@ -751,7 +751,7 @@ istream& operator >> (istream& in, bignumber& number)
 	{
 		r.push_back(unhex(*i));
 	}
-	number = bignumber(r);
+	number = Big(r);
 
 	return in;
 }
