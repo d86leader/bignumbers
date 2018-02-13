@@ -8,40 +8,40 @@ bool overflown(const d_cell& value)
 }
 
 Big::Big()
-: length (0)
-, cells  (0) // clength/CELL_LENGTH rounded up
-, arr    (nullptr)
-, sign   (true)
+: m_length (0)
+, m_cell_amount  (0) // clength/CELL_LENGTH rounded up
+, m_arr    (nullptr)
+, m_positive   (true)
 {}
 
 
 Big::Big(const Big& r)
-: length (r.length)
-, cells  (r.cells)
-, arr    (new cell [cells])
-, sign   (r.sign)
+: m_length (r.m_length)
+, m_cell_amount  (r.m_cell_amount)
+, m_arr    (new cell [m_cell_amount])
+, m_positive   (r.m_positive)
 {
-	memcpy( arr.get(), r.arr.get(), cells*CELL_LENGTH );
+	memcpy( m_arr.get(), r.m_arr.get(), m_cell_amount*CELL_LENGTH );
 }
 
 
 Big::Big(const vector<d_cell>& v)
-: length (v.size() * CELL_LENGTH)
-, cells  (v.size())
-, arr    (new cell [v.size()])
-, sign   (true)
+: m_length (v.size() * CELL_LENGTH)
+, m_cell_amount  (v.size())
+, m_arr    (new cell [v.size()])
+, m_positive   (true)
 {
-	for (size_t i = 0; i < cells; ++i)
-		arr[i] = static_cast<cell>(v[i]);
+	for (size_t i = 0; i < m_cell_amount; ++i)
+		m_arr[i] = static_cast<cell>(v[i]);
 }
 Big::Big(const vector<cell>& v)
-: length (v.size() * CELL_LENGTH)
-, cells  (v.size())
-, arr    (new cell [v.size()])
-, sign   (true)
+: m_length (v.size() * CELL_LENGTH)
+, m_cell_amount  (v.size())
+, m_arr    (new cell [v.size()])
+, m_positive   (true)
 {
-	for (size_t i = 0; i < cells; ++i)
-		arr[i] = v[i];
+	for (size_t i = 0; i < m_cell_amount; ++i)
+		m_arr[i] = v[i];
 }
 
 
@@ -55,20 +55,20 @@ Big::~Big()
 Big Big::abs() const
 {
 	Big t {*this};
-	t.sign = true;
+	t.m_positive = true;
 	return t;
 }
 Big Big::neg() const
 {
 	Big t {*this};
-	t.sign = false;
+	t.m_positive = false;
 	return t;
 }
 
 
 bool Big::is_nil() const
 {
-	return cells == 0;
+	return m_cell_amount == 0;
 }
 
 
@@ -81,8 +81,8 @@ Big Big::shift(size_t amount) const
 	auto r = vector<cell>(0);
 	while (amount --> 0)
 		r.push_back(0);
-	for (size_t i = 0; i < cells; ++i)
-		r.push_back(arr[i]);
+	for (size_t i = 0; i < m_cell_amount; ++i)
+		r.push_back(m_arr[i]);
 	return Big(r);
 }
 
@@ -102,16 +102,16 @@ void Big::generate(size_t size)
 ////////////////////////////////////////////////////////////////////////////////
 
 
-string Big::dump(bool printsign) const
+string Big::dump(bool printm_positive) const
 {
-	if (cells == 0)
+	if (m_cell_amount == 0)
 		return string("0x0");
 
 	std::stringstream dumpstream;
 
-	if (printsign)
+	if (printm_positive)
 	{
-		if (sign)
+		if (m_positive)
 			dumpstream << "pos 0x";
 		else
 			dumpstream << "neg 0x";
@@ -121,11 +121,11 @@ string Big::dump(bool printsign) const
 
 	dumpstream << std::hex << std::setfill('0') << std::setw(CELL_LENGTH*2);
 
-	for (size_t i = cells - 1; i > 0; --i)
+	for (size_t i = m_cell_amount - 1; i > 0; --i)
 	{
-		dumpstream << arr[i] <<'_' << std::setfill('0') << std::setw(CELL_LENGTH*2);;
+		dumpstream << m_arr[i] <<'_' << std::setfill('0') << std::setw(CELL_LENGTH*2);;
 	}
-	dumpstream << arr[0] << std::dec;
+	dumpstream << m_arr[0] << std::dec;
 
 	string r {dumpstream.str()};
 	return r;
@@ -143,12 +143,12 @@ inline int digit(char c)
 }
 Big& Big::restore(const string& str) //aa ff b0 1c
 {
-	length = ( str.size() + 1 ) / 3; //each byte is two symbols && space save for the first one
-	cells  = (length - 1 + CELL_LENGTH)/CELL_LENGTH;
-	sign   = true;
-	arr.reset( new cell [cells] );
-	for (size_t i = 0; i < cells; ++i)
-		arr[i] = 0;
+	m_length = ( str.size() + 1 ) / 3; //each byte is two symbols && space save for the first one
+	m_cell_amount  = (m_length - 1 + CELL_LENGTH)/CELL_LENGTH;
+	m_positive   = true;
+	m_arr.reset( new cell [m_cell_amount] );
+	for (size_t i = 0; i < m_cell_amount; ++i)
+		m_arr[i] = 0;
 
 	auto   j = str.size() - 1;
 	size_t i = 0;
@@ -157,8 +157,8 @@ Big& Big::restore(const string& str) //aa ff b0 1c
 	for(; j > 1; j -= 3)
 	{
 		auto byte = (digit(str[j-1]) * 16) + digit(str[j]);
-		arr[i] <<= 8;
-		arr[i] += byte;
+		m_arr[i] <<= 8;
+		m_arr[i] += byte;
 		shifted += 8;
 		if (shifted == CELL_BITS)
 		{
@@ -167,8 +167,8 @@ Big& Big::restore(const string& str) //aa ff b0 1c
 		}
 	}
 	auto byte = (digit(str[j-1]) * 16) + digit(str[j]);
-	arr[i] <<= 8;
-	arr[i] += byte;
+	m_arr[i] <<= 8;
+	m_arr[i] += byte;
 
 	return *this;
 }
@@ -181,7 +181,7 @@ Big& Big::restore(const char* str)
 
 d_cell Big::operator[] (const size_t& index) const
 {
-	return static_cast<d_cell>(arr[index]);
+	return static_cast<d_cell>(m_arr[index]);
 }
 
 
@@ -190,12 +190,12 @@ d_cell Big::operator[] (const size_t& index) const
 
 Big& Big::operator= (const Big& r)
 {
-	length = r.length;
-	cells  = r.cells;
-	sign   = r.sign;
-	arr.reset( new cell [cells] );
+	m_length = r.m_length;
+	m_cell_amount  = r.m_cell_amount;
+	m_positive   = r.m_positive;
+	m_arr.reset( new cell [m_cell_amount] );
 
-	memcpy( arr.get(), r.arr.get(), cells*CELL_LENGTH );
+	memcpy( m_arr.get(), r.m_arr.get(), m_cell_amount*CELL_LENGTH );
 
 	return *this;
 }
@@ -206,13 +206,13 @@ Big& Big::operator= (const Big& r)
 
 bool Big::operator== (const Big& r) const
 {
-	if (cells != r.cells)
+	if (m_cell_amount != r.m_cell_amount)
 		return false;
-	if (sign != r.sign && cells != 0)
+	if (m_positive != r.m_positive && m_cell_amount != 0)
 		return false;
-	for (size_t i = 0; i < cells; ++i)
+	for (size_t i = 0; i < m_cell_amount; ++i)
 	{
-		if (arr[i] != r.arr[i])
+		if (m_arr[i] != r.m_arr[i])
 			return false;
 	}
 	return true;
@@ -225,18 +225,18 @@ bool Big::operator!= (const Big& r) const
 
 bool Big::operator> (const Big& r) const
 {
-	if (sign && !r.sign)
+	if (m_positive && !r.m_positive)
 		return true;
-	if (!sign && r.sign)
+	if (!m_positive && r.m_positive)
 		return false;
-	if (!sign && !r.sign)
+	if (!m_positive && !r.m_positive)
 		return r.abs() > this->abs();
-	if (cells > r.cells) return true;
-	if (cells < r.cells) return false;
-	for (size_t i = cells; i > 0; --i)
+	if (m_cell_amount > r.m_cell_amount) return true;
+	if (m_cell_amount < r.m_cell_amount) return false;
+	for (size_t i = m_cell_amount; i > 0; --i)
 	{
-		if (arr[i-1] > r.arr[i-1]) return true;
-		if (arr[i-1] < r.arr[i-1]) return false;
+		if (m_arr[i-1] > r.m_arr[i-1]) return true;
+		if (m_arr[i-1] < r.m_arr[i-1]) return false;
 	}
 	return false;
 }
@@ -244,18 +244,18 @@ bool Big::operator> (const Big& r) const
 
 bool Big::operator>= (const Big& r) const
 {
-	if (cells > r.cells) return true;
-	if (cells < r.cells) return false;
-	if (sign && !r.sign)
+	if (m_cell_amount > r.m_cell_amount) return true;
+	if (m_cell_amount < r.m_cell_amount) return false;
+	if (m_positive && !r.m_positive)
 		return true;
-	if (!sign && r.sign)
+	if (!m_positive && r.m_positive)
 		return false;
-	if (!sign && !r.sign)
+	if (!m_positive && !r.m_positive)
 		return r.abs() >= this->abs();
-	for (size_t i = cells; i > 0; --i)
+	for (size_t i = m_cell_amount; i > 0; --i)
 	{
-		if (arr[i-1] > r.arr[i-1]) return true;
-		if (arr[i-1] < r.arr[i-1]) return false;
+		if (m_arr[i-1] > r.m_arr[i-1]) return true;
+		if (m_arr[i-1] < r.m_arr[i-1]) return false;
 	}
 	return true;
 }
@@ -323,22 +323,22 @@ Big Big::operator* (const d_cell& r) const
 
 Big Big::operator+ (const Big& r) const
 {
-	if (!sign && !r.sign)
+	if (!m_positive && !r.m_positive)
 		return (this->abs() + r.abs()).neg();
-	if (!sign)
+	if (!m_positive)
 		return r - this->abs();
-	if (!r.sign)
+	if (!r.m_positive)
 		return *this - r.abs();
 
-	auto bigger_array = (cells > r.cells) ? arr.get() : r.arr.get();
-	auto high_index = max(cells, r.cells);
-	auto low_index  = min(cells, r.cells);
+	auto bigger_m_array = (m_cell_amount > r.m_cell_amount) ? m_arr.get() : r.m_arr.get();
+	auto high_index = max(m_cell_amount, r.m_cell_amount);
+	auto low_index  = min(m_cell_amount, r.m_cell_amount);
 	auto result = vector<d_cell>(high_index+1, 0);
 
 	size_t i;
 	for (i = 0; i < low_index; ++i)
 	{
-		result[i] += static_cast<d_cell>(arr[i]) + static_cast<d_cell>(r.arr[i]);
+		result[i] += static_cast<d_cell>(m_arr[i]) + static_cast<d_cell>(r.m_arr[i]);
 		if (overflown(result[i]))
 		{
 			result[i+1] += 1;
@@ -347,7 +347,7 @@ Big Big::operator+ (const Big& r) const
 	}
 	for (; i < high_index; ++i)
 	{
-		result[i] += static_cast<d_cell>(bigger_array[i]);
+		result[i] += static_cast<d_cell>(bigger_m_array[i]);
 		if (overflown(result[i]))
 		{
 			result[i+1] += 1;
@@ -366,46 +366,46 @@ Big Big::operator- (const Big& r) const
 	if (*this == r)
 		return Big {0};
 
-	if (sign && !r.sign)
+	if (m_positive && !r.m_positive)
 		return *this + r.abs();
-	if (!sign && r.sign)
+	if (!m_positive && r.m_positive)
 		return (this->abs() + r).neg();
-	if (!sign && !r.sign)
+	if (!m_positive && !r.m_positive)
 		return r.abs() + *this;
 
 	if (*this < r)
 		return (r - *this).neg();
 
 	//now it's just a subtraction a - b with a >= 0, b >= 0 and a >= b
-	auto result = vector<cell>(cells);
+	auto result = vector<cell>(m_cell_amount);
 	size_t i;
-	for (i = 0; i < r.cells; ++i)
+	for (i = 0; i < r.m_cell_amount; ++i)
 	{
-		if (arr[i] < r.arr[i])
+		if (m_arr[i] < r.m_arr[i])
 		{
-			result.at(i) = bitmodule(CELL_BITS) + static_cast<d_cell>(arr[i]) - r.arr[i];
+			result.at(i) = bitmodule(CELL_BITS) + static_cast<d_cell>(m_arr[i]) - r.m_arr[i];
 
 			//lend the 1
 			for (auto j = i + 1; ; ++j)
 			{
-				if (arr[j] != 0)
+				if (m_arr[j] != 0)
 				{
-					arr[j] -= 1;
+					m_arr[j] -= 1;
 					break;
 				}
 				else
 				{
-					arr[j] = CELL_MAXVALUE;
+					m_arr[j] = CELL_MAXVALUE;
 				}
 			}
 		}
 		else
 		{
-			result.at(i) = arr[i] - r.arr[i];
+			result.at(i) = m_arr[i] - r.m_arr[i];
 		}
 	}
-	for (; i < cells; ++i)
-		result.at(i) = arr[i];
+	for (; i < m_cell_amount; ++i)
+		result.at(i) = m_arr[i];
 
 	while (result.size() > 0 && result.back() == 0)
 		result.pop_back();
@@ -420,25 +420,25 @@ Big Big::operator* (const Big& r) const
 {
 	if (r.is_nil() || this->is_nil())
 		return Big(0);
-	if (!sign && r.sign)
+	if (!m_positive && r.m_positive)
 		return (this->abs() * r).neg();
-	if (sign && !r.sign)
+	if (m_positive && !r.m_positive)
 		return (*this * r.abs()).neg();
-	if (!sign && !r.sign) {}
+	if (!m_positive && !r.m_positive) {}
 		//actions are the same actually
 	
-	auto result = vector<d_cell>(r.cells + cells + 2);
+	auto result = vector<d_cell>(r.m_cell_amount + m_cell_amount + 2);
 
-	for (size_t i = 0; i < cells; ++i)
+	for (size_t i = 0; i < m_cell_amount; ++i)
 	{
 		d_cell t = 0;
-		for (size_t j = 0; j < r.cells; ++j)
+		for (size_t j = 0; j < r.m_cell_amount; ++j)
 		{
-			t = static_cast<d_cell>(arr[i]) * static_cast<d_cell>(r.arr[j])
+			t = static_cast<d_cell>(m_arr[i]) * static_cast<d_cell>(r.m_arr[j])
 			    + t / bitmodule(CELL_BITS) + result.at(i + j);
 			result.at(i + j) = t % bitmodule(CELL_BITS);
 		}
-		result.at(i + r.cells) = t / bitmodule(CELL_BITS);
+		result.at(i + r.m_cell_amount) = t / bitmodule(CELL_BITS);
 	}
 
 	while(result.size() > 0 && result.back() == 0)
@@ -454,7 +454,7 @@ Big Big::operator/ (const Big& r) const
 	if (this->is_nil())
 		return *this;
 	assert(! r.is_nil());
-	if (r.cells == 1)
+	if (r.m_cell_amount == 1)
 		return quot_rem_small(r).first;
 	else
 		return quot_rem_big  (r).first;
@@ -467,7 +467,7 @@ Big Big::operator% (const Big& r) const
 	if (this->is_nil())
 		return *this;
 	assert(! r.is_nil());
-	if (r.cells == 1)
+	if (r.m_cell_amount == 1)
 		return quot_rem_small(r).second;
 	else
 		return quot_rem_big  (r).second;
@@ -479,23 +479,23 @@ Big Big::operator% (const Big& r) const
 
 pair<Big, Big> Big::quot_rem_small(const Big& r) const
 {
-	auto d = r.arr[0];
+	auto d = r.m_arr[0];
 	auto quot_i  = vector<cell>();
 	auto current = d_cell(0);
 
-	for (size_t index = cells; index > 0; --index)
+	for (size_t index = m_cell_amount; index > 0; --index)
 	{
 		auto i = index - 1;
 
 		current *= bitmodule(CELL_BITS);
-		current += arr[i];
+		current += m_arr[i];
 
 		quot_i.push_back(current / d);
 		current -= quot_i.back() * d;
 	}
 
 	auto b = quot_i.rend();
-	//drop all zeroes in significant positions
+	//drop all zeroes in m_positiveificant positions
 	while (b != quot_i.rbegin() && *--b == 0) {}
 	//b should point to right after what should be inside
 	++b;
@@ -515,7 +515,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	if (*this < divider)
 		return make_pair(Big(0), *this);
 	//normalization
-	auto d = bitmodule(CELL_BITS) / ( divider.arr[divider.cells-1] + 1 );
+	auto d = bitmodule(CELL_BITS) / ( divider.m_arr[divider.m_cell_amount-1] + 1 );
 	auto u = *this * d;   //normalized divident
 	auto v = divider * d; //normalized divisor
 
@@ -527,21 +527,21 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	//initialization
 	auto quot = vector<cell>();       //result vector
 	auto b    = bitmodule(CELL_BITS); //oftenly used module
-	auto n    = v.cells;
-	auto m    = u.cells - n;
+	auto n    = v.m_cell_amount;
+	auto m    = u.m_cell_amount - n;
 	//get like in our written algorithm
-	auto u_ini_size = u.cells;
+	auto u_ini_size = u.m_cell_amount;
 	auto get_u = [&u_ini_size, &u](const size_t& i)      -> d_cell{
 		if (i == 0)
 			return 0;
 		else
-			return u.arr[ u_ini_size - i ];
+			return u.m_arr[ u_ini_size - i ];
 	};
 	auto get   = [](const Big& a, const size_t& i) -> d_cell{
 		if(i == 0)
 			return 0;
 		else
-			return a.arr[a.cells - i];
+			return a.m_arr[a.m_cell_amount - i];
 	};
 
 	//main cycle
@@ -589,7 +589,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		auto slice = (v*q).shift(shiftam);
 
 		//further improve accuracy of q
-		//if subtraction of v * q from u[j - v.cells ... j]
+		//if subtraction of v * q from u[j - v.m_cell_amount ... j]
 		//would require borrowing
 		if (q != 0 && u < slice)
 		{
@@ -625,7 +625,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	}
 
 
-	//drop all zeroes in significant positions of quotient
+	//drop all zeroes in m_positiveificant positions of quotient
 	auto q_rend = quot.rend();
 	while (q_rend != quot.rbegin() && *--q_rend == 0) {}
 	//b should point to right after what should be inside
@@ -652,7 +652,7 @@ pair<Big, Big> Big::quot_rem (const Big& divider) const
 	if (this->is_nil())
 		return make_pair(*this, *this);
 	assert(!divider.is_nil());
-	if (divider.cells == 1)
+	if (divider.m_cell_amount == 1)
 		return quot_rem_small(divider);
 	else
 		return quot_rem_big(divider);
@@ -721,14 +721,14 @@ ostream& operator << (ostream& out, const Big& number)
 		return out;
 	}
 	out << hex;
-	for (size_t i = number.cells; i > 0; --i)
+	for (size_t i = number.m_cell_amount; i > 0; --i)
 	{
 		//don't pad if it's the first symbol
-		if (i != number.cells)
+		if (i != number.m_cell_amount)
 			out.width(CELL_LENGTH * 2);
 
 		out.fill('0');
-		out << number.arr[i-1];
+		out << number.m_arr[i-1];
 	}
 	out << dec;
 	return out;
@@ -744,10 +744,10 @@ istream& operator >> (istream& in, Big& number)
 		return in;
 	}
 
-	auto cells = split_all(s, CELL_LENGTH * 2);
+	auto m_cell_amount = split_all(s, CELL_LENGTH * 2);
 
 	vector<cell> r;
-	for (auto i = cells.begin(); i != cells.end(); ++i)
+	for (auto i = m_cell_amount.begin(); i != m_cell_amount.end(); ++i)
 	{
 		r.push_back(unhex(*i));
 	}

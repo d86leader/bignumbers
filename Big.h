@@ -30,10 +30,10 @@ class Big
 	friend ostream& operator<< (ostream& out, const Big&);
 	friend istream& operator>> (istream& in, Big&);
 
-	size_t             length; //amount of bytes
-	size_t             cells;  //amount of cells
-	unique_ptr<cell[]> arr;
-	bool               sign;
+	size_t             m_length; //amount of bytes
+	size_t             m_cell_amount;
+	unique_ptr<cell[]> m_arr;
+	bool               m_positive;
 
 	//this constructor assumes that (d_cell)(cell)v[i] == v[i] for each i
 	Big(const vector<d_cell>& v);
@@ -59,7 +59,7 @@ public:
 	bool      is_nil()    const;
 	Big shift(size_t) const;
 
-	string     dump(bool printsign = true) const;
+	string     dump(bool printm_positive = true) const;
 	Big& restore(const string& str);
 	Big& restore(const char*   str);
 
@@ -97,8 +97,8 @@ inline constexpr d_cell bitmodule(size_t bits)
 }
 template<typename T> Big& Big::operator= (const T& r)
 {
-	sign = r >= 0;
-	auto value = sign? r : -r;
+	m_positive = r >= 0;
+	auto value = m_positive? r : -r;
 
 	vector<cell> result(0);
 	while (value > 0)
@@ -107,19 +107,19 @@ template<typename T> Big& Big::operator= (const T& r)
 		value /= bitmodule(CELL_BITS);
 	}
 
-	cells  = result.size();
-	length = cells * CELL_LENGTH;
-	arr.reset( new cell [cells] );
-	for (size_t i = 0; i < cells; ++i)
-		arr[i] = result[i];
+	m_cell_amount  = result.size();
+	m_length = m_cell_amount * CELL_LENGTH;
+	m_arr.reset( new cell [m_cell_amount] );
+	for (size_t i = 0; i < m_cell_amount; ++i)
+		m_arr[i] = result[i];
 	
 	return *this;
 }
 template<typename T>
 Big::Big(const T& r)
 {
-	sign = r >= 0;
-	auto value = sign? r : -r;
+	m_positive = r >= 0;
+	auto value = m_positive? r : -r;
 
 	vector<cell> result(0);
 	while (value > 0)
@@ -128,9 +128,9 @@ Big::Big(const T& r)
 		value /= bitmodule(CELL_BITS);
 	}
 
-	cells  = result.size();
-	length = cells * CELL_LENGTH;
-	arr.reset( new cell [cells] );
-	for (size_t i = 0; i < cells; ++i)
-		arr[i] = result[i];
+	m_cell_amount  = result.size();
+	m_length = m_cell_amount * CELL_LENGTH;
+	m_arr.reset( new cell [m_cell_amount] );
+	for (size_t i = 0; i < m_cell_amount; ++i)
+		m_arr[i] = result[i];
 }
