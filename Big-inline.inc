@@ -99,6 +99,33 @@ inline Big::Big(const std::vector<cell>& v)
 }
 
 
+inline Big& Big::operator= (const Big& r)
+{
+	m_length      = r.m_length;
+	m_cell_amount = r.m_cell_amount;
+	m_positive    = r.m_positive;
+	m_arr.reset( new cell [m_cell_amount] );
+
+	for (size_t i = 0; i < m_cell_amount; ++i)
+	{
+		m_arr[i] = r.m_arr[i];
+	}
+
+	return *this;
+}
+
+
+inline Big& Big::operator= (Big&& r)
+{
+	m_length      = r.m_length;
+	m_cell_amount = r.m_cell_amount;
+	m_positive    = r.m_positive;
+	m_arr = std::move(r.m_arr) ;
+
+	return *this;
+}
+
+
 inline Big Big::operator/ (const Big& r) const
 {
 	//it doesn't work with zeroes

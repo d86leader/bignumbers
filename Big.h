@@ -42,21 +42,18 @@ public:
 	Big();
 	Big(const Big&);
 	Big(Big&&);
+	template<typename T> Big(const T& rvalue);
 
-	template<typename T>
-	Big(const T& rvalue);
-
-	Big& operator= (const Big& r);
-	//TODO: implement
-//	Big& operator= (Big&& r);
-	template<typename T> Big& operator= (const T& r);
+	Big& operator= (const Big&);
+	Big& operator= (Big&&);
+	template<typename T> Big& operator= (const T&);
 
 	Big  abs()       const;
 	Big  neg()       const;
 	bool is_nil()    const;
 	Big  shift(size_t) const;
 
-	std::string dump(bool printm_positive = true) const;
+	std::string dump(bool printsign = true) const;
 	Big& restore(const std::string& str);
 	Big& restore(const char*        str);
 

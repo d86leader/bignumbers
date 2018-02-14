@@ -67,14 +67,14 @@ Big Big::generate(size_t size)
 ////////////////////////////////////////////////////////////////////////////////
 
 
-string Big::dump(bool printsign) const
+string Big::dump(bool print_sign) const
 {
 	if (m_cell_amount == 0)
 		return string("0x0");
 
 	std::stringstream dumpstream;
 
-	if (printsign)
+	if (print_sign)
 	{
 		if (m_positive)
 			dumpstream << "pos 0x";
@@ -151,25 +151,6 @@ Big& Big::restore(const char* str)
 d_cell Big::operator[] (const size_t& index) const
 {
 	return static_cast<d_cell>(m_arr[index]);
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-Big& Big::operator= (const Big& r)
-{
-	m_length      = r.m_length;
-	m_cell_amount = r.m_cell_amount;
-	m_positive    = r.m_positive;
-	m_arr.reset( new cell [m_cell_amount] );
-
-	for (size_t i = 0; i < m_cell_amount; ++i)
-	{
-		m_arr[i] = r.m_arr[i];
-	}
-
-	return *this;
 }
 
 
