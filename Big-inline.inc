@@ -1,11 +1,15 @@
 // vim: filetype=cpp
 #pragma once
+//won't ever be included, but is there for my checkers to work
 #include "Big.h"
 
 inline constexpr Big::d_cell Big::bitmodule(size_t bits)
 {
 	return static_cast<Big::d_cell>(1) << bits;
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
 
 
 inline Big::Big()
@@ -55,6 +59,9 @@ inline Big::Big(const T& r)
 	for (size_t i = 0; i < m_cell_amount; ++i)
 		m_arr[i] = result[i];
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
 
 
 inline Big& Big::operator= (const Big& r)
@@ -107,6 +114,9 @@ inline Big& Big::operator= (const T& r)
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
+
+
 inline Big::Big(const std::vector<Big::d_cell>& v)
 : m_length      (v.size() * CELL_LENGTH)
 , m_cell_amount (v.size())
@@ -125,6 +135,9 @@ inline Big::Big(const std::vector<cell>& v)
 	for (size_t i = 0; i < m_cell_amount; ++i)
 		m_arr[i] = v[i];
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
 
 
 inline std::pair<Big, Big> Big::quot_rem (const Big& divider) const
@@ -170,6 +183,9 @@ inline Big Big::operator% (const Big& r) const
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
+
+
 inline Big Big::abs() const
 {
 	Big t (*this);
@@ -189,4 +205,82 @@ inline bool Big::is_nil() const
 inline Big::d_cell Big::operator[] (const size_t& index) const
 {
 	return static_cast<d_cell>(m_arr[index]);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+template<typename T>
+inline Big Big::operator+ (const T& r) const
+{
+	Big t = r;
+	return *this + t;
+}
+
+template<typename T>
+inline Big Big::operator- (const T& r) const
+{
+	Big t = r;
+	return *this - t;
+}
+
+template<typename T>
+inline Big Big::operator* (const T& r) const
+{
+	Big t = r;
+	return *this * t;
+}
+
+template<typename T>
+inline Big Big::operator/ (const T& r) const
+{
+	Big t = r;
+	return *this / t;
+}
+
+template<typename T>
+inline Big Big::operator% (const T& r) const
+{
+	Big t = r;
+	return *this % t;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+template<typename T>
+inline Big& Big::operator+= (const T& r)
+{
+	Big t = r;
+	return *this = *this + t;
+}
+
+template<typename T>
+inline Big& Big::operator-= (const T& r)
+{
+	Big t = r;
+	return *this = *this - t;
+}
+
+template<typename T>
+inline Big& Big::operator*= (const T& r)
+{
+	Big t = r;
+	return *this = *this * t;
+}
+
+template<typename T>
+inline Big& Big::operator/= (const T& r)
+{
+	Big t = r;
+	return *this = *this / t;
+}
+
+template<typename T>
+inline Big& Big::operator%= (const T& r)
+{
+	Big t = r;
+	return *this = *this % t;
 }

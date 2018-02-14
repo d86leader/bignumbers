@@ -84,6 +84,18 @@ public:
 	Big operator/ (const Big& r) const;
 	Big operator% (const Big& r) const;
 
+	template<typename T> Big operator+ (const T& r) const;
+	template<typename T> Big operator- (const T& r) const;
+	template<typename T> Big operator* (const T& r) const;
+	template<typename T> Big operator/ (const T& r) const;
+	template<typename T> Big operator% (const T& r) const;
+
+	template<typename T> Big& operator+= (const T& r);
+	template<typename T> Big& operator-= (const T& r);
+	template<typename T> Big& operator*= (const T& r);
+	template<typename T> Big& operator/= (const T& r);
+	template<typename T> Big& operator%= (const T& r);
+
 	std::pair<Big, Big> quot_rem(const Big& r) const;
 };
 
