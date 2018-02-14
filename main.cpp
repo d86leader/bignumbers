@@ -10,7 +10,7 @@ using std::endl;
 
 int main(int argc, char** _argv)
 {
-//	vector<string> argv (_argv, _argv + argc);
+	std::vector<std::string> argv (_argv, _argv + argc);
 	srand(time(nullptr));
 
 	Big a;
