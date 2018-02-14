@@ -142,7 +142,7 @@ inline bool Big::is_nil() const
 }
 
 
-pair<Big, Big> Big::quot_rem (const Big& divider) const
+inline pair<Big, Big> Big::quot_rem (const Big& divider) const
 {
 	if (this->is_nil())
 		return make_pair(*this, *this);
