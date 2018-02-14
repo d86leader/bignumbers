@@ -36,6 +36,8 @@ private:
 	std::pair<Big, Big> quot_rem_big  (const Big& r) const;
 	std::pair<Big, Big> quot_rem_small(const Big& r) const;
 
+	void negate_this() {m_positive = !m_positive;}
+
 public:
 	static Big generate(size_t size);
 
@@ -52,6 +54,8 @@ public:
 	Big  abs()       const;
 	Big  neg()       const;
 	bool is_nil()    const;
+	bool is_positive() const {return m_positive;}
+
 	Big  shift(size_t) const;
 
 	std::string dump(bool print_sign = true) const;
