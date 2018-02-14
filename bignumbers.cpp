@@ -165,7 +165,7 @@ bignumber& bignumber::restore(const string& str) //aa ff b0 1c
 
 	for(; j > 1; j -= 3)
 	{
-		auto byte = (digit(str[j-1]) * 16) + digit(str[j]);
+		auto byte = (digit(str.at(j-1)) * 16) + digit(str.at(j));
 		arr[i] <<= 8;
 		arr[i] += byte;
 		shifted += 8;
@@ -175,7 +175,7 @@ bignumber& bignumber::restore(const string& str) //aa ff b0 1c
 			i += 1;
 		}
 	}
-	auto byte = (digit(str[j-1]) * 16) + digit(str[j]);
+	auto byte = (digit(str.at(j-1)) * 16) + digit(str.at(j));
 	arr[i] <<= 8;
 	arr[i] += byte;
 
@@ -488,9 +488,14 @@ bignumber bignumber::operator% (const bignumber& r) const
 
 pair<bignumber, bignumber> bignumber::quot_rem_small(const bignumber& r) const
 {
-	auto d = r.arr[0];
-	auto quot_i  = vector<cell>();
-	auto current = d_cell(0);
+	d_cell d = r.arr[0];
+	vector<cell> quot_i;
+	d_cell current = 0;
+
+	if (arr.get()[cells - 1] == 0)
+	{
+		throw "checking for leading zero";
+	}
 
 	for (size_t index = cells; index > 0; --index)
 	{
@@ -518,7 +523,7 @@ pair<bignumber, bignumber> bignumber::quot_rem_small(const bignumber& r) const
 }
 
 
-pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) const
+pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider, bool force_debug) const
 {
 	//simple case: divisor is smaller than divider
 	if (*this < divider)
@@ -528,7 +533,7 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 	auto u = *this * d;   //normalized divident
 	auto v = divider * d; //normalized divisor
 
-	if (debug)
+	if (force_debug)
 	{
 		std::cout << "normalized by " << hex << d << " resulting in " << u.dump(false) << " / " << v.dump(false) <<endl;
 	}
@@ -556,7 +561,7 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 	//main cycle
 	for (size_t j = 0; j <= m; ++j)
 	{
-		if (debug)
+		if (force_debug)
 		{
 			std::cout << "iteration corresponding to " << j <<endl;
 			std::cout << "\tcurrent u =\t" << u.dump(false) <<endl;
@@ -567,7 +572,7 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 			q = b - 1;
 		else
 			q = (get_u(j)*b + get_u(j+1)) / get(v, 1);
-		if (debug)
+		if (force_debug)
 		{
 			std::cout << "calculated q = " << hex << q <<endl;
 		}
@@ -575,7 +580,7 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 		//improving accuracy of q (fucking Knuth)
 		while ( get(v,2) * q > ( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2) )
 		{
-			if (debug)
+			if (force_debug)
 			{
 				std::cout << "\tjust for ruby:\n\t\t0x"
 				          <<hex<<get(v,2)<<" * 0x"<<hex<<q<<" > "
@@ -587,9 +592,12 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 				          << get(v,2) * q << " > 0x" << ( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2) <<endl;
 			}
 			q -= 1;
-			assert(q >= 1 && q < b);
+			if (!(q >= 1 && q < b))
+			{
+				throw "improving accuracy of q";
+			}
 		}
-		if (debug)
+		if (force_debug)
 		{
 			std::cout << "recalculated q = " << hex << q <<endl;
 		}
@@ -602,7 +610,7 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 		//would require borrowing
 		if (q != 0 && u < slice)
 		{
-			if (debug)
+			if (force_debug)
 			{
 				std::cout << "further reduced q as\t" << (v*q).dump(false) << " GT slice\n";
 			}
@@ -611,14 +619,14 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 		}
 
 		//subtraction
-		if (debug)
+		if (force_debug)
 		{
 			std::cout << "about to subtract " <<v.dump(false) << " * " << hex << q
 				<< " =\n\t\t\t" << (v*q).dump(false) <<endl;
 			std::cout << "subtracting from\t" << u.dump(false) << " a slice shifted by " << shiftam <<endl;
 		}
 		u = u - slice;
-		if (debug)
+		if (force_debug)
 		{
 			std::cout << "subtracted to become\t" << u.dump(false) <<endl;
 		}
@@ -626,7 +634,7 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 		//pushing the quotient
 		//q :: d_cell, but can fit into cell
 		quot.push_back( static_cast<cell>(q) );
-		if (debug)
+		if (force_debug)
 		{
 			std::cout << "pushed " << hex << quot.back() << " to result\n";
 			std::cout <<endl;
@@ -646,7 +654,7 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 
 	//denormalization
 	auto quotient  = bignumber(r_quot);
-	if (debug)
+	if (force_debug)
 	{
 		std::cout <<"calling " << u << " / " << hex <<d <<endl;
 	}
@@ -656,15 +664,27 @@ pair<bignumber, bignumber> bignumber::quot_rem_big  (const bignumber& divider) c
 }
 
 
-pair<bignumber, bignumber> bignumber::quot_rem (const bignumber& divider) const
+pair<bignumber, bignumber> bignumber::quot_rem (const bignumber& divider, bool force_debug) const
 {
 	if (this->is_nil())
 		return make_pair(*this, *this);
 	assert(!divider.is_nil());
 	if (divider.cells == 1)
+	{
+		if (force_debug)
+		{
+			std::cout << "called small version\n";
+		}
 		return quot_rem_small(divider);
+	}
 	else
-		return quot_rem_big(divider);
+	{
+		if (force_debug)
+		{
+			std::cout << "called big version\n";
+		}
+		return quot_rem_big(divider, force_debug);
+	}
 }
 
 

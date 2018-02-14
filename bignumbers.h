@@ -42,7 +42,7 @@ class bignumber
 
 	d_cell operator[] (const size_t& index) const;
 
-	pair<bignumber, bignumber> quot_rem_big  (const bignumber& r) const;
+	pair<bignumber, bignumber> quot_rem_big  (const bignumber& r, bool force_debug = false) const;
 	pair<bignumber, bignumber> quot_rem_small(const bignumber& r) const;
 public:
 	bignumber();
@@ -88,7 +88,7 @@ public:
 	bignumber operator/ (const bignumber& r) const;
 	bignumber operator% (const bignumber& r) const;
 
-	pair<bignumber, bignumber> quot_rem(const bignumber& r) const;
+	pair<bignumber, bignumber> quot_rem(const bignumber& r, bool force_debug = false) const;
 };
 
 
