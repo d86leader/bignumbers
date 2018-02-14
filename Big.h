@@ -40,6 +40,7 @@ public:
 	static Big generate(size_t size);
 
 	Big();
+
 	Big(const Big&);
 	Big(Big&&);
 	template<typename T> Big(const T& rvalue);
@@ -53,7 +54,7 @@ public:
 	bool is_nil()    const;
 	Big  shift(size_t) const;
 
-	std::string dump(bool printsign = true) const;
+	std::string dump(bool print_sign = true) const;
 	Big& restore(const std::string& str);
 	Big& restore(const char*        str);
 

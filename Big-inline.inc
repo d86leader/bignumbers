@@ -1,53 +1,10 @@
 // vim: filetype=cpp
 #pragma once
+#include "Big.h"
 
 inline constexpr Big::d_cell Big::bitmodule(size_t bits)
 {
 	return static_cast<Big::d_cell>(1) << bits;
-}
-
-
-template<typename T>
-inline Big& Big::operator= (const T& r)
-{
-	m_positive = r >= 0;
-	auto value = m_positive? r : -r;
-
-	std::vector<cell> result(0);
-	while (value > 0)
-	{
-		result.push_back(value % Big::bitmodule(CELL_BITS));
-		value /= Big::bitmodule(CELL_BITS);
-	}
-
-	m_cell_amount  = result.size();
-	m_length = m_cell_amount * CELL_LENGTH;
-	m_arr.reset( new cell [m_cell_amount] );
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = result[i];
-	
-	return *this;
-}
-
-
-template<typename T>
-inline Big::Big(const T& r)
-{
-	m_positive = r >= 0;
-	auto value = m_positive? r : -r;
-
-	std::vector<cell> result(0);
-	while (value > 0)
-	{
-		result.push_back(value % Big::bitmodule(CELL_BITS));
-		value /= Big::bitmodule(CELL_BITS);
-	}
-
-	m_cell_amount  = result.size();
-	m_length = m_cell_amount * CELL_LENGTH;
-	m_arr.reset( new cell [m_cell_amount] );
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = result[i];
 }
 
 
@@ -79,23 +36,24 @@ inline Big::Big(Big&& r)
 {}
 
 
-inline Big::Big(const std::vector<Big::d_cell>& v)
-: m_length      (v.size() * CELL_LENGTH)
-, m_cell_amount (v.size())
-, m_arr         (new cell [v.size()])
-, m_positive    (true)
+template<typename T>
+inline Big::Big(const T& r)
 {
+	m_positive = r >= 0;
+	auto value = m_positive? r : -r;
+
+	std::vector<cell> result(0);
+	while (value > 0)
+	{
+		result.push_back(value % Big::bitmodule(CELL_BITS));
+		value /= Big::bitmodule(CELL_BITS);
+	}
+
+	m_cell_amount  = result.size();
+	m_length = m_cell_amount * CELL_LENGTH;
+	m_arr.reset( new cell [m_cell_amount] );
 	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = static_cast<cell>(v[i]);
-}
-inline Big::Big(const std::vector<cell>& v)
-: m_length      (v.size() * CELL_LENGTH)
-, m_cell_amount (v.size())
-, m_arr         (new cell [v.size()])
-, m_positive    (true)
-{
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = v[i];
+		m_arr[i] = result[i];
 }
 
 
@@ -126,35 +84,75 @@ inline Big& Big::operator= (Big&& r)
 }
 
 
-inline Big Big::operator/ (const Big& r) const
+template<typename T>
+inline Big& Big::operator= (const T& r)
 {
-	//it doesn't work with zeroes
-	if (this->is_nil())
-		return *this;
-	assert(! r.is_nil());
-	if (r.m_cell_amount == 1)
-		return quot_rem_small(r).first;
-	else
-		return quot_rem_big  (r).first;
+	m_positive = r >= 0;
+	auto value = m_positive? r : -r;
+
+	std::vector<cell> result(0);
+	while (value > 0)
+	{
+		result.push_back(value % Big::bitmodule(CELL_BITS));
+		value /= Big::bitmodule(CELL_BITS);
+	}
+
+	m_cell_amount  = result.size();
+	m_length = m_cell_amount * CELL_LENGTH;
+	m_arr.reset( new cell [m_cell_amount] );
+	for (size_t i = 0; i < m_cell_amount; ++i)
+		m_arr[i] = result[i];
+	
+	return *this;
 }
 
 
+inline Big::Big(const std::vector<Big::d_cell>& v)
+: m_length      (v.size() * CELL_LENGTH)
+, m_cell_amount (v.size())
+, m_arr         (new cell [v.size()])
+, m_positive    (true)
+{
+	for (size_t i = 0; i < m_cell_amount; ++i)
+		m_arr[i] = static_cast<cell>(v[i]);
+}
+inline Big::Big(const std::vector<cell>& v)
+: m_length      (v.size() * CELL_LENGTH)
+, m_cell_amount (v.size())
+, m_arr         (new cell [v.size()])
+, m_positive    (true)
+{
+	for (size_t i = 0; i < m_cell_amount; ++i)
+		m_arr[i] = v[i];
+}
+
+
+inline std::pair<Big, Big> Big::quot_rem (const Big& divider) const
+{
+	//TODO: sign handling
+	if (this->is_nil())
+		return std::make_pair(*this, *this);
+	assert(!divider.is_nil());
+	if (divider.m_cell_amount == 1)
+		return quot_rem_small(divider);
+	else
+		return quot_rem_big(divider);
+}
+
+inline Big Big::operator/ (const Big& r) const
+{
+	return quot_rem(r).first;
+}
+
 inline Big Big::operator% (const Big& r) const
 {
-	//it doesn't work with zeroes
-	if (this->is_nil())
-		return *this;
-	assert(!r.is_nil());
-	if (r.m_cell_amount == 1)
-		return quot_rem_small(r).second;
-	else
-		return quot_rem_big  (r).second;
+	return quot_rem(r).second;
 }
 
 
 inline Big Big::abs() const
 {
-	Big t {*this};
+	Big t (*this);
 	t.m_positive = true;
 	return t;
 }
@@ -164,21 +162,11 @@ inline Big Big::neg() const
 	t.m_positive = false;
 	return t;
 }
-
-
 inline bool Big::is_nil() const
 {
 	return m_cell_amount == 0;
 }
-
-
-inline std::pair<Big, Big> Big::quot_rem (const Big& divider) const
+inline Big::d_cell Big::operator[] (const size_t& index) const
 {
-	if (this->is_nil())
-		return std::make_pair(*this, *this);
-	assert(!divider.is_nil());
-	if (divider.m_cell_amount == 1)
-		return quot_rem_small(divider);
-	else
-		return quot_rem_big(divider);
+	return static_cast<d_cell>(m_arr[index]);
 }

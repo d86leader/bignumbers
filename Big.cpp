@@ -148,12 +148,6 @@ Big& Big::restore(const char* str)
 }
 
 
-d_cell Big::operator[] (const size_t& index) const
-{
-	return static_cast<d_cell>(m_arr[index]);
-}
-
-
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -579,6 +573,8 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 
 	return std::make_pair(quotient, remainder);
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 
