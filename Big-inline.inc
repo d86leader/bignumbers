@@ -13,7 +13,7 @@ inline Big& Big::operator= (const T& r)
 	m_positive = r >= 0;
 	auto value = m_positive? r : -r;
 
-	vector<cell> result(0);
+	std::vector<cell> result(0);
 	while (value > 0)
 	{
 		result.push_back(value % bitmodule(CELL_BITS));
@@ -36,7 +36,7 @@ inline Big::Big(const T& r)
 	m_positive = r >= 0;
 	auto value = m_positive? r : -r;
 
-	vector<cell> result(0);
+	std::vector<cell> result(0);
 	while (value > 0)
 	{
 		result.push_back(value % bitmodule(CELL_BITS));
@@ -65,7 +65,10 @@ inline Big::Big(const Big& r)
 , m_arr         (new cell [m_cell_amount])
 , m_positive    (r.m_positive)
 {
-	memcpy( m_arr.get(), r.m_arr.get(), m_cell_amount*CELL_LENGTH );
+	for (size_t i = 0; i < m_cell_amount; ++i)
+	{
+		m_arr[i] = r.m_arr[i];
+	}
 }
 
 inline Big::Big(Big&& r)
@@ -76,7 +79,7 @@ inline Big::Big(Big&& r)
 {}
 
 
-inline Big::Big(const vector<d_cell>& v)
+inline Big::Big(const std::vector<d_cell>& v)
 : m_length      (v.size() * CELL_LENGTH)
 , m_cell_amount (v.size())
 , m_arr         (new cell [v.size()])
@@ -85,7 +88,7 @@ inline Big::Big(const vector<d_cell>& v)
 	for (size_t i = 0; i < m_cell_amount; ++i)
 		m_arr[i] = static_cast<cell>(v[i]);
 }
-inline Big::Big(const vector<cell>& v)
+inline Big::Big(const std::vector<cell>& v)
 : m_length      (v.size() * CELL_LENGTH)
 , m_cell_amount (v.size())
 , m_arr         (new cell [v.size()])
@@ -114,7 +117,7 @@ inline Big Big::operator% (const Big& r) const
 	//it doesn't work with zeroes
 	if (this->is_nil())
 		return *this;
-	assert(! r.is_nil());
+	assert(!r.is_nil());
 	if (r.m_cell_amount == 1)
 		return quot_rem_small(r).second;
 	else
@@ -142,10 +145,10 @@ inline bool Big::is_nil() const
 }
 
 
-inline pair<Big, Big> Big::quot_rem (const Big& divider) const
+inline std::pair<Big, Big> Big::quot_rem (const Big& divider) const
 {
 	if (this->is_nil())
-		return make_pair(*this, *this);
+		return std::make_pair(*this, *this);
 	assert(!divider.is_nil());
 	if (divider.m_cell_amount == 1)
 		return quot_rem_small(divider);

@@ -2,18 +2,9 @@
 
 #include <memory>
 #include <iostream>
-#include <iomanip>
-#include <cstring>
-#include <algorithm>
 #include <vector>
-#include <cinttypes>
-#include <sstream>
 #include <cassert>
 #include <map>
-#include <cstdlib>
-#include <ctime>
-
-using namespace std;
 
 typedef uint16_t cell;
 typedef uint64_t d_cell; //double cell
@@ -28,22 +19,22 @@ inline constexpr d_cell bitmodule(size_t);
 class Big
 {
 private:
-	friend ostream& operator<< (ostream& out, const Big&);
-	friend istream& operator>> (istream& in, Big&);
+	friend std::ostream& operator<< (std::ostream& out, const Big&);
+	friend std::istream& operator>> (std::istream& in, Big&);
 
-	size_t             m_length; //amount of bytes
-	size_t             m_cell_amount;
-	unique_ptr<cell[]> m_arr;
-	bool               m_positive;
+	size_t                  m_length; //amount of bytes
+	size_t                  m_cell_amount;
+	std::unique_ptr<cell[]> m_arr;
+	bool                    m_positive;
 
 	//this constructor assumes that (d_cell)(cell)v[i] == v[i] for each i
-	Big(const vector<d_cell>& v);
-	Big(const vector<cell>&   v);
+	Big(const std::vector<d_cell>& v);
+	Big(const std::vector<cell>&   v);
 
 	d_cell operator[] (const size_t& index) const;
 
-	pair<Big, Big> quot_rem_big  (const Big& r) const;
-	pair<Big, Big> quot_rem_small(const Big& r) const;
+	std::pair<Big, Big> quot_rem_big  (const Big& r) const;
+	std::pair<Big, Big> quot_rem_small(const Big& r) const;
 
 public:
 	static Big generate(size_t size);
@@ -56,16 +47,18 @@ public:
 	Big(const T& rvalue);
 
 	Big& operator= (const Big& r);
+	//TODO: implement
+//	Big& operator= (Big&& r);
 	template<typename T> Big& operator= (const T& r);
 
-	Big abs()       const;
-	Big neg()       const;
-	bool      is_nil()    const;
-	Big shift(size_t) const;
+	Big  abs()       const;
+	Big  neg()       const;
+	bool is_nil()    const;
+	Big  shift(size_t) const;
 
-	string     dump(bool printm_positive = true) const;
-	Big& restore(const string& str);
-	Big& restore(const char*   str);
+	std::string dump(bool printm_positive = true) const;
+	Big& restore(const std::string& str);
+	Big& restore(const char*        str);
 
 	bool operator== (const Big& r) const;
 	bool operator!= (const Big& r) const;
@@ -89,7 +82,7 @@ public:
 	Big operator/ (const Big& r) const;
 	Big operator% (const Big& r) const;
 
-	pair<Big, Big> quot_rem(const Big& r) const;
+	std::pair<Big, Big> quot_rem(const Big& r) const;
 };
 
 #include "Big-inline.inc"

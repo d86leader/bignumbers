@@ -1,5 +1,18 @@
 #include "Big.h"
 
+#include <iomanip>
+#include <algorithm>
+#include <cinttypes>
+#include <sstream>
+#include <ctime>
+
+using std::pair;
+using std::string;
+using std::vector;
+using std::hex;
+using std::endl;
+using std::dec;
+
 const bool debug = false;
 
 namespace
@@ -143,12 +156,15 @@ d_cell Big::operator[] (const size_t& index) const
 
 Big& Big::operator= (const Big& r)
 {
-	m_length = r.m_length;
-	m_cell_amount  = r.m_cell_amount;
-	m_positive   = r.m_positive;
+	m_length      = r.m_length;
+	m_cell_amount = r.m_cell_amount;
+	m_positive    = r.m_positive;
 	m_arr.reset( new cell [m_cell_amount] );
 
-	memcpy( m_arr.get(), r.m_arr.get(), m_cell_amount*CELL_LENGTH );
+	for (size_t i = 0; i < m_cell_amount; ++i)
+	{
+		m_arr[i] = r.m_arr[i];
+	}
 
 	return *this;
 }
@@ -285,8 +301,8 @@ Big Big::operator+ (const Big& r) const
 
 	auto bigger_m_array =
 		(m_cell_amount > r.m_cell_amount) ? m_arr.get() : r.m_arr.get();
-	auto high_index = max(m_cell_amount, r.m_cell_amount);
-	auto low_index  = min(m_cell_amount, r.m_cell_amount);
+	auto high_index = std::max(m_cell_amount, r.m_cell_amount);
+	auto low_index  = std::min(m_cell_amount, r.m_cell_amount);
 	auto result = vector<d_cell>(high_index+1, 0);
 
 	size_t i;
@@ -439,7 +455,7 @@ pair<Big, Big> Big::quot_rem_small(const Big& r) const
 	auto quot  = Big(q_vec);
 	Big rem;
 	rem = current;
-	return make_pair( quot, rem );
+	return std::make_pair( quot, rem );
 }
 
 
@@ -447,7 +463,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 {
 	//simple case: divisor is smaller than divider
 	if (*this < divider)
-		return make_pair(Big(0), *this);
+		return std::make_pair(Big(0), *this);
 	//normalization
 	auto d = bitmodule(CELL_BITS) / ( divider.m_arr[divider.m_cell_amount-1] + 1 );
 	auto u = *this * d;   //normalized divident
@@ -577,7 +593,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	}
 	auto remainder = u / d;
 
-	return make_pair(quotient, remainder);
+	return std::make_pair(quotient, remainder);
 }
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -635,7 +651,7 @@ namespace
 }
 
 
-ostream& operator << (ostream& out, const Big& number)
+std::ostream& operator << (std::ostream& out, const Big& number)
 {
 	if (number == 0)
 	{
@@ -657,7 +673,7 @@ ostream& operator << (ostream& out, const Big& number)
 }
 
 
-istream& operator >> (istream& in, Big& number)
+std::istream& operator >> (std::istream& in, Big& number)
 {
 	string s; in >> s;
 	if (s == "0")
