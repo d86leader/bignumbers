@@ -4,3 +4,5 @@ main
 .*.swp
 .tags
 test.sh
+specific
+mod-test
