@@ -6,5 +6,8 @@ all: main.cpp Big.o
 Big.o: Big.cpp Big.h Big-inline.inc
 	${CXX} -c $< -o $@ $(CXXHEADERS)
 
+specific: specific.cpp Big.o
+	${CXX} -g $^ -o specific $(CXXHEADERS)
+
 clean:
 	rm *.o main

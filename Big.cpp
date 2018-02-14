@@ -27,34 +27,38 @@ Big Big::shift(size_t amount) const
 }
 
 
-void Big::generate(size_t size)
+Big Big::generate(size_t size)
 {
 	srand(time(NULL));
 	vector<cell> r;
-	while (size --> 0)
+	// pushing tail digints, they can be zero
+	while (size --> 1)
 	{
-		cell x = 0;
-		while (x == 0)
-		{
-			x = rand() % bitmodule(CELL_BITS);
-		}
-		r.push_back(x);
+		r.push_back(rand() % bitmodule(CELL_BITS));
 	}
-	*this = Big(r);
+	// pushing the leading non-zero digit
+	cell t = rand();
+	while (t == 0)
+	{
+		t = rand();
+	}
+	r.push_back(t);
+
+	return Big(r);
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
 
-string Big::dump(bool printm_positive) const
+string Big::dump(bool printsign) const
 {
 	if (m_cell_amount == 0)
 		return string("0x0");
 
 	std::stringstream dumpstream;
 
-	if (printm_positive)
+	if (printsign)
 	{
 		if (m_positive)
 			dumpstream << "pos 0x";
@@ -89,6 +93,7 @@ namespace
 		return -1;
 	}
 }
+
 Big& Big::restore(const string& str) //aa ff b0 1c
 {
 	m_length = ( str.size() + 1 ) / 3; //each byte is two symbols && space save for the first one
@@ -104,7 +109,7 @@ Big& Big::restore(const string& str) //aa ff b0 1c
 
 	for(; j > 1; j -= 3)
 	{
-		auto byte = (digit(str[j-1]) * 16) + digit(str[j]);
+		auto byte = (digit(str.at(j-1)) * 16) + digit(str.at(j));
 		m_arr[i] <<= 8;
 		m_arr[i] += byte;
 		shifted += 8;
@@ -114,7 +119,7 @@ Big& Big::restore(const string& str) //aa ff b0 1c
 			i += 1;
 		}
 	}
-	auto byte = (digit(str[j-1]) * 16) + digit(str[j]);
+	auto byte = (digit(str.at(j-1)) * 16) + digit(str.at(j));
 	m_arr[i] <<= 8;
 	m_arr[i] += byte;
 
@@ -403,9 +408,14 @@ Big Big::operator* (const Big& r) const
 
 pair<Big, Big> Big::quot_rem_small(const Big& r) const
 {
-	auto d = r.m_arr[0];
-	auto quot_i  = vector<cell>();
-	auto current = d_cell(0);
+	d_cell d = r.m_arr[0];
+	vector<cell> quot_i;
+	d_cell current = 0;
+
+	if (m_arr[m_cell_amount - 1] == 0)
+	{
+		throw "checking for leading zero";
+	}
 
 	for (size_t index = m_cell_amount; index > 0; --index)
 	{
@@ -419,7 +429,7 @@ pair<Big, Big> Big::quot_rem_small(const Big& r) const
 	}
 
 	auto b = quot_i.rend();
-	//drop all zeroes in m_positiveificant positions
+	//drop all zeroes in significant positions
 	while (b != quot_i.rbegin() && *--b == 0) {}
 	//b should point to right after what should be inside
 	++b;
@@ -549,7 +559,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	}
 
 
-	//drop all zeroes in m_positiveificant positions of quotient
+	//drop all zeroes in significant positions of quotient
 	auto q_rend = quot.rend();
 	while (q_rend != quot.rbegin() && *--q_rend == 0) {}
 	//b should point to right after what should be inside

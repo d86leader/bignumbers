@@ -44,7 +44,10 @@ private:
 
 	pair<Big, Big> quot_rem_big  (const Big& r) const;
 	pair<Big, Big> quot_rem_small(const Big& r) const;
+
 public:
+	static Big generate(size_t size);
+
 	Big();
 	Big(const Big&);
 	Big(Big&&);
@@ -63,8 +66,6 @@ public:
 	string     dump(bool printm_positive = true) const;
 	Big& restore(const string& str);
 	Big& restore(const char*   str);
-
-	void generate(size_t size);
 
 	bool operator== (const Big& r) const;
 	bool operator!= (const Big& r) const;
