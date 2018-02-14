@@ -64,7 +64,7 @@ public:
 	bignumber& restore(const string& str);
 	bignumber& restore(const char*   str);
 
-	void generate(size_t size);
+	static bignumber generate(size_t size);
 
 	bool operator== (const bignumber& r) const;
 	bool operator!= (const bignumber& r) const;

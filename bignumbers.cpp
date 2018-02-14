@@ -87,15 +87,24 @@ bignumber bignumber::shift(size_t amount) const
 }
 
 
-void bignumber::generate(size_t size)
+bignumber bignumber::generate(size_t size)
 {
 	srand(time(NULL));
 	vector<cell> r;
-	while (size --> 0)
+	// pushing tail digints, they can be zero
+	while (size --> 1)
 	{
 		r.push_back(rand() % bitmodule(CELL_BITS));
 	}
-	*this = bignumber(r);
+	// pushing the leading non-zero digit
+	cell t = rand();
+	while (t == 0)
+	{
+		t = rand();
+	}
+	r.push_back(t);
+
+	return bignumber(r);
 }
 
 
