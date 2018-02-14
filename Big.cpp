@@ -15,11 +15,14 @@ using std::dec;
 
 const bool debug = false;
 
+using cell = Big::cell;
+using d_cell = Big::d_cell;
+
 namespace
 {
 	inline bool overflown(const d_cell& value)
 	{
-		return (value >> CELL_BITS) != 0;
+		return (value >> Big::CELL_BITS) != 0;
 	}
 }
 
@@ -47,7 +50,7 @@ Big Big::generate(size_t size)
 	// pushing tail digints, they can be zero
 	while (size --> 1)
 	{
-		r.push_back(rand() % bitmodule(CELL_BITS));
+		r.push_back(rand() % Big::bitmodule(Big::CELL_BITS));
 	}
 	// pushing the leading non-zero digit
 	cell t = rand();
@@ -126,7 +129,7 @@ Big& Big::restore(const string& str) //aa ff b0 1c
 		m_arr[i] <<= 8;
 		m_arr[i] += byte;
 		shifted += 8;
-		if (shifted == CELL_BITS)
+		if (shifted == Big::CELL_BITS)
 		{
 			shifted = 0;
 			i += 1;
@@ -313,7 +316,7 @@ Big Big::operator+ (const Big& r) const
 		if (overflown(result[i]))
 		{
 			result[i+1] += 1;
-			result[i]   %= bitmodule(CELL_BITS);
+			result[i]   %= Big::bitmodule(Big::CELL_BITS);
 		}
 	}
 	for (; i < high_index; ++i)
@@ -322,7 +325,7 @@ Big Big::operator+ (const Big& r) const
 		if (overflown(result[i]))
 		{
 			result[i+1] += 1;
-			result[i]   %= bitmodule(CELL_BITS);
+			result[i]   %= Big::bitmodule(Big::CELL_BITS);
 		}
 	}
 	if (result.back() == 0)
@@ -354,7 +357,7 @@ Big Big::operator- (const Big& r) const
 	{
 		if (m_arr[i] < r.m_arr[i])
 		{
-			result.at(i) = bitmodule(CELL_BITS) + static_cast<d_cell>(m_arr[i]) - r.m_arr[i];
+			result.at(i) = Big::bitmodule(Big::CELL_BITS) + static_cast<d_cell>(m_arr[i]) - r.m_arr[i];
 
 			//lend the 1
 			for (auto j = i + 1; ; ++j)
@@ -406,10 +409,10 @@ Big Big::operator* (const Big& r) const
 		for (size_t j = 0; j < r.m_cell_amount; ++j)
 		{
 			t = static_cast<d_cell>(m_arr[i]) * static_cast<d_cell>(r.m_arr[j])
-			    + t / bitmodule(CELL_BITS) + result.at(i + j);
-			result.at(i + j) = t % bitmodule(CELL_BITS);
+			    + t / Big::bitmodule(Big::CELL_BITS) + result.at(i + j);
+			result.at(i + j) = t % Big::bitmodule(Big::CELL_BITS);
 		}
-		result.at(i + r.m_cell_amount) = t / bitmodule(CELL_BITS);
+		result.at(i + r.m_cell_amount) = t / Big::bitmodule(Big::CELL_BITS);
 	}
 
 	while(result.size() > 0 && result.back() == 0)
@@ -437,7 +440,7 @@ pair<Big, Big> Big::quot_rem_small(const Big& r) const
 	{
 		auto i = index - 1;
 
-		current *= bitmodule(CELL_BITS);
+		current *= Big::bitmodule(Big::CELL_BITS);
 		current += m_arr[i];
 
 		quot_i.push_back(current / d);
@@ -465,7 +468,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	if (*this < divider)
 		return std::make_pair(Big(0), *this);
 	//normalization
-	auto d = bitmodule(CELL_BITS) / ( divider.m_arr[divider.m_cell_amount-1] + 1 );
+	auto d = Big::bitmodule(Big::CELL_BITS) / ( divider.m_arr[divider.m_cell_amount-1] + 1 );
 	auto u = *this * d;   //normalized divident
 	auto v = divider * d; //normalized divisor
 
@@ -476,7 +479,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 
 	//initialization
 	auto quot = vector<cell>();       //result vector
-	auto b    = bitmodule(CELL_BITS); //oftenly used module
+	auto b    = Big::bitmodule(Big::CELL_BITS); //oftenly used module
 	auto n    = v.m_cell_amount;
 	auto m    = u.m_cell_amount - n;
 	//get like in our written algorithm
@@ -663,7 +666,7 @@ std::ostream& operator << (std::ostream& out, const Big& number)
 	{
 		//don't pad if it's the first symbol
 		if (i != number.m_cell_amount)
-			out.width(CELL_LENGTH * 2);
+			out.width(Big::CELL_LENGTH * 2);
 
 		out.fill('0');
 		out << number.m_arr[i-1];
@@ -682,7 +685,7 @@ std::istream& operator >> (std::istream& in, Big& number)
 		return in;
 	}
 
-	auto m_cell_amount = split_all(s, CELL_LENGTH * 2);
+	auto m_cell_amount = split_all(s, Big::CELL_LENGTH * 2);
 
 	vector<cell> r;
 	for (auto i = m_cell_amount.begin(); i != m_cell_amount.end(); ++i)

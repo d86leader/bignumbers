@@ -6,18 +6,18 @@
 #include <cassert>
 #include <map>
 
-typedef uint16_t cell;
-typedef uint64_t d_cell; //double cell
-
-constexpr size_t CELL_LENGTH = sizeof(cell);
-constexpr size_t CELL_BITS   = sizeof(cell) * 8;
-
-constexpr cell CELL_MAXVALUE = static_cast<cell>(0) - 1;
-inline constexpr d_cell bitmodule(size_t);
-
-
 class Big
 {
+public:
+	typedef uint16_t cell;
+	typedef uint64_t d_cell; //double cell
+
+	static constexpr size_t CELL_LENGTH = sizeof(cell);
+	static constexpr size_t CELL_BITS   = sizeof(cell) * 8;
+
+	static constexpr cell CELL_MAXVALUE = static_cast<cell>(0) - 1;
+	static inline constexpr d_cell bitmodule(size_t);
+
 private:
 	friend std::ostream& operator<< (std::ostream& out, const Big&);
 	friend std::istream& operator>> (std::istream& in, Big&);

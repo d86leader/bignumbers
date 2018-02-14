@@ -1,9 +1,9 @@
 // vim: filetype=cpp
 #pragma once
 
-inline constexpr d_cell bitmodule(size_t bits)
+inline constexpr Big::d_cell Big::bitmodule(size_t bits)
 {
-	return static_cast<d_cell>(1) << bits;
+	return static_cast<Big::d_cell>(1) << bits;
 }
 
 
@@ -16,8 +16,8 @@ inline Big& Big::operator= (const T& r)
 	std::vector<cell> result(0);
 	while (value > 0)
 	{
-		result.push_back(value % bitmodule(CELL_BITS));
-		value /= bitmodule(CELL_BITS);
+		result.push_back(value % Big::bitmodule(CELL_BITS));
+		value /= Big::bitmodule(CELL_BITS);
 	}
 
 	m_cell_amount  = result.size();
@@ -39,8 +39,8 @@ inline Big::Big(const T& r)
 	std::vector<cell> result(0);
 	while (value > 0)
 	{
-		result.push_back(value % bitmodule(CELL_BITS));
-		value /= bitmodule(CELL_BITS);
+		result.push_back(value % Big::bitmodule(CELL_BITS));
+		value /= Big::bitmodule(CELL_BITS);
 	}
 
 	m_cell_amount  = result.size();
@@ -79,7 +79,7 @@ inline Big::Big(Big&& r)
 {}
 
 
-inline Big::Big(const std::vector<d_cell>& v)
+inline Big::Big(const std::vector<Big::d_cell>& v)
 : m_length      (v.size() * CELL_LENGTH)
 , m_cell_amount (v.size())
 , m_arr         (new cell [v.size()])
