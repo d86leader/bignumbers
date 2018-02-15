@@ -575,6 +575,39 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 }
 
 
+std::pair<Big, Big> Big::quot_rem (const Big& divider) const
+{
+	if (this->is_nil())
+		return std::make_pair(*this, *this);
+	assert(!divider.is_nil());
+
+	if (!divider.m_positive)
+	{
+		auto t = quot_rem(divider.abs());
+		t.first.negate_this();
+		return t;
+	}
+	if (!m_positive)
+	{
+		auto t = this->abs().quot_rem(divider);
+		t.first.negate_this();
+
+		if (!t.second.is_nil())
+		{
+			t.first = t.first - 1;
+			t.second = divider - t.second;
+		}
+
+		return t;
+	}
+
+	if (divider.m_cell_amount == 1)
+		return quot_rem_small(divider);
+	else
+		return quot_rem_big(divider);
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 
