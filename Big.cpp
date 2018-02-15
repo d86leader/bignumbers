@@ -583,13 +583,25 @@ std::pair<Big, Big> Big::quot_rem (const Big& divider) const
 
 	if (!divider.m_positive)
 	{
-		auto t = quot_rem(divider.abs());
+		//let's do a trick. Cast away constness, set another sign for divider,
+		//and after all is done return the sign
+		auto mut_divider = const_cast<Big&>(divider);
+		mut_divider.m_positive = true;
+
+		auto t = quot_rem(mut_divider);
 		t.first.negate_this();
+
+		mut_divider.m_positive = false;
 		return t;
 	}
 	if (!m_positive)
 	{
-		auto t = this->abs().quot_rem(divider);
+		//let's do a trick. Cast away constness, set another sign for divident,
+		//and after all is done return the sign
+		auto mut_this = const_cast<Big*>(this);
+		mut_this->m_positive = true;
+
+		auto t = mut_this->abs().quot_rem(divider);
 		t.first.negate_this();
 
 		if (!t.second.is_nil())
@@ -598,6 +610,7 @@ std::pair<Big, Big> Big::quot_rem (const Big& divider) const
 			t.second = divider - t.second;
 		}
 
+		mut_this->m_positive = false;
 		return t;
 	}
 
