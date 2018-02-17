@@ -265,18 +265,11 @@ Big Big::operator* (const d_cell& r) const
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 
-Big Big::operator+ (const Big& r) const
+Big Big::atomic_plus(const Big& r) const
 {
-	if (!m_positive && !r.m_positive)
-		return (this->abs() + r.abs()).neg();
-	if (!m_positive)
-		return r - this->abs();
-	if (!r.m_positive)
-		return *this - r.abs();
-
 	auto bigger_m_array =
 		(m_cell_amount > r.m_cell_amount) ? m_arr.get() : r.m_arr.get();
 	auto high_index = std::max(m_cell_amount, r.m_cell_amount);
@@ -304,28 +297,20 @@ Big Big::operator+ (const Big& r) const
 		}
 	}
 	if (result.back() == 0)
+	{
 		result.pop_back();
+	}
 
 	return Big {result};
 }
 
 
-Big Big::operator- (const Big& r) const
+Big Big::atomic_minus(const Big& r) const
 {
-	if (*this == r)
-		return Big {0};
+	if (*this == r) return Big {0};
+	if (*this < r)  return (r - *this).neg();
 
-	if (m_positive && !r.m_positive)
-		return *this + r.abs();
-	if (!m_positive && r.m_positive)
-		return (this->abs() + r).neg();
-	if (!m_positive && !r.m_positive)
-		return r.abs() + *this;
-
-	if (*this < r)
-		return (r - *this).neg();
-
-	//now it's just a subtraction a - b with a >= 0, b >= 0 and a >= b
+	//now it's just a subtraction a - b with a >= 0, b >= 0 and a > b
 	auto result = vector<cell>(m_cell_amount);
 	size_t i;
 	for (i = 0; i < r.m_cell_amount; ++i)
@@ -362,6 +347,35 @@ Big Big::operator- (const Big& r) const
 	if (result.size() == 0)
 		return Big ();
 	return Big {result};
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+Big Big::operator+ (const Big& r) const
+{
+	if (!m_positive && !r.m_positive)
+		return (this->abs() + r.abs()).neg();
+	if (!m_positive)
+		return r - this->abs();
+	if (!r.m_positive)
+		return *this - r.abs();
+
+	return this->atomic_plus(r);
+}
+
+
+Big Big::operator- (const Big& r) const
+{
+	if (m_positive && !r.m_positive)
+		return *this + r.abs();
+	if (!m_positive && r.m_positive)
+		return (this->abs() + r).neg();
+	if (!m_positive && !r.m_positive)
+		return r.abs() + *this;
+
+	return this->atomic_minus(r);
 }
 
 
