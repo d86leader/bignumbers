@@ -307,8 +307,33 @@ Big Big::atomic_plus(const Big& r) const
 
 Big Big::atomic_minus(const Big& r) const
 {
-	if (*this == r) return Big {0};
-	if (*this < r)  return (r - *this).neg();
+	auto& mut_this = *const_cast<Big*>(this);
+	auto& mut_r    =  const_cast<Big&>(r);
+
+	// this is needed for comparison. TODO: write something better
+	bool save_this_sign = mut_this.m_positive;
+	mut_this.m_positive = true;
+	bool save_r_sign = mut_r.m_positive;
+	mut_r.m_positive = true;
+
+	if (*this == r)
+	{
+		mut_this.m_positive = save_this_sign;
+		mut_r.m_positive = save_r_sign;
+
+		return Big (0);
+	}
+	if (*this < r)
+	{
+		mut_this.m_positive = save_this_sign;
+		mut_r.m_positive = save_r_sign;
+
+		auto&& t = r.atomic_minus(*this);
+		t.negate_this();
+		return t;
+	}
+	mut_this.m_positive = save_this_sign;
+	mut_r.m_positive = save_r_sign;
 
 	//now it's just a subtraction a - b with a >= 0, b >= 0 and a > b
 	auto result = vector<cell>(m_cell_amount);
@@ -352,15 +377,25 @@ Big Big::atomic_minus(const Big& r) const
 
 //////////////////////////////////////////////////////////////////////////////
 
+// everywhere below i use a dirty hack: i keep everything const by casting
+// refences off from const and modifying their sign
 
 Big Big::operator+ (const Big& r) const
 {
 	if (!m_positive && !r.m_positive)
-		return (this->abs() + r.abs()).neg();
+	{
+		auto&& t = this->atomic_plus(r);
+		t.negate_this();
+		return t;
+	}
 	if (!m_positive)
-		return r - this->abs();
+	{
+		return r.atomic_minus(*this);
+	}
 	if (!r.m_positive)
-		return *this - r.abs();
+	{
+		return this->atomic_minus(r);
+	}
 
 	return this->atomic_plus(r);
 }
@@ -369,11 +404,19 @@ Big Big::operator+ (const Big& r) const
 Big Big::operator- (const Big& r) const
 {
 	if (m_positive && !r.m_positive)
-		return *this + r.abs();
+	{
+		return this->atomic_plus(r);
+	}
 	if (!m_positive && r.m_positive)
-		return (this->abs() + r).neg();
+	{
+		auto&& t = this->atomic_plus(r);
+		t.negate_this();
+		return t;
+	}
 	if (!m_positive && !r.m_positive)
-		return r.abs() + *this;
+	{
+		return r.atomic_minus(*this);
+	}
 
 	return this->atomic_minus(r);
 }
