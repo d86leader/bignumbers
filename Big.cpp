@@ -26,7 +26,7 @@ namespace
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 
 //shifts left by amount
@@ -64,7 +64,7 @@ Big Big::generate(size_t size)
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 
 string Big::dump(bool print_sign) const
@@ -148,7 +148,7 @@ Big& Big::restore(const char* str)
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 
 bool Big::operator== (const Big& r) const
@@ -220,7 +220,7 @@ bool Big::operator<= (const Big& r) const
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 
 Big Big::operator+ (const cell& r) const
@@ -375,10 +375,33 @@ Big Big::atomic_minus(const Big& r) const
 }
 
 
+Big Big::atomic_product(const Big& r) const
+{
+	//both non-zero as ensured by operator
+
+	auto result = vector<d_cell>(r.m_cell_amount + m_cell_amount + 2);
+
+	for (size_t i = 0; i < m_cell_amount; ++i)
+	{
+		d_cell t = 0;
+		for (size_t j = 0; j < r.m_cell_amount; ++j)
+		{
+			t = static_cast<d_cell>(m_arr[i]) * static_cast<d_cell>(r.m_arr[j])
+			    + t / Big::bitmodule(Big::CELL_BITS) + result.at(i + j);
+			result.at(i + j) = t % Big::bitmodule(Big::CELL_BITS);
+		}
+		result.at(i + r.m_cell_amount) = t / Big::bitmodule(Big::CELL_BITS);
+	}
+
+	while(result.size() > 0 && result.back() == 0)
+		result.pop_back();
+	
+	return Big(result);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
-// everywhere below i use a dirty hack: i keep everything const by casting
-// refences off from const and modifying their sign
 
 Big Big::operator+ (const Big& r) const
 {
@@ -426,35 +449,21 @@ Big Big::operator* (const Big& r) const
 {
 	if (r.is_nil() || this->is_nil())
 		return Big(0);
-	if (!m_positive && r.m_positive)
-		return (this->abs() * r).neg();
-	if (m_positive && !r.m_positive)
-		return (*this * r.abs()).neg();
-	if (!m_positive && !r.m_positive) {}
-		//actions are the same actually
-	
-	auto result = vector<d_cell>(r.m_cell_amount + m_cell_amount + 2);
-
-	for (size_t i = 0; i < m_cell_amount; ++i)
+	if (   (!m_positive &&  r.m_positive)
+		|| ( m_positive && !r.m_positive))
 	{
-		d_cell t = 0;
-		for (size_t j = 0; j < r.m_cell_amount; ++j)
-		{
-			t = static_cast<d_cell>(m_arr[i]) * static_cast<d_cell>(r.m_arr[j])
-			    + t / Big::bitmodule(Big::CELL_BITS) + result.at(i + j);
-			result.at(i + j) = t % Big::bitmodule(Big::CELL_BITS);
-		}
-		result.at(i + r.m_cell_amount) = t / Big::bitmodule(Big::CELL_BITS);
+		auto&& t = this->atomic_product(r);
+		t.negate_this();
+		return t;
 	}
-
-	while(result.size() > 0 && result.back() == 0)
-		result.pop_back();
+	if (!m_positive && !r.m_positive) {}
+		//the same as if both positive
 	
-	return Big(result);
+	return this->atomic_product(r);
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 
 pair<Big, Big> Big::quot_rem_small(const Big& r) const
@@ -678,7 +687,7 @@ std::pair<Big, Big> Big::quot_rem (const Big& divider) const
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 
 namespace
