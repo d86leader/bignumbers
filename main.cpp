@@ -61,10 +61,10 @@ int main(int argc, char** _argv)
 		std::cout << '\t' << "b:"            << (b           ).dump() << std::endl;
 		std::cout << '\t' << "quot:"         << (quot        ).dump() << std::endl;
 		std::cout << '\t' << "rem:"          << (rem         ).dump() << std::endl;
-		std::cout << '\t' << "quot*b:"       << (quot*b      ).dump() << std::endl;
-		std::cout << '\t' << "quot*b + rem:" << (quot*b + rem).dump() << std::endl;
-		std::cout << '\t' << "a - rem:"      << (a - rem     ).dump() << std::endl;
-		std::cout << "\n\n\ntrying to divide with debug:\n\n";
+//		std::cout << '\t' << "quot*b:"       << (quot*b      ).dump() << std::endl;
+//		std::cout << '\t' << "quot*b + rem:" << (quot*b + rem).dump() << std::endl;
+//		std::cout << '\t' << "a - rem:"      << (a - rem     ).dump() << std::endl;
+//		std::cout << "\n\n\ntrying to divide with debug:\n\n";
 	}
 
 	return 0;
