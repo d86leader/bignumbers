@@ -509,9 +509,9 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	if (*this < divider)
 		return std::make_pair(Big(0), *this);
 	//normalization
-	auto d = Big::bitmodule(Big::CELL_BITS) / ( divider.m_arr[divider.m_cell_amount-1] + 1 );
-	auto u = *this * d;   //normalized divident
-	auto v = divider * d; //normalized divisor
+	d_cell d = Big::bitmodule(Big::CELL_BITS) / ( divider.m_arr[divider.m_cell_amount-1] + 1 );
+	Big u = *this * d;   //normalized divident
+	Big v = divider * d; //normalized divisor
 
 	if (debug)
 	{
@@ -519,13 +519,13 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	}
 
 	//initialization
-	auto quot = vector<cell>();       //result vector
-	auto b    = Big::bitmodule(Big::CELL_BITS); //oftenly used module
-	auto n    = v.m_cell_amount;
-	auto m    = u.m_cell_amount - n;
+	vector<cell> quot;       //result vector
+	d_cell b    = Big::bitmodule(Big::CELL_BITS); //oftenly used module
+	size_t n    = v.m_cell_amount;
+	size_t m    = u.m_cell_amount - n;
 	//get like in our written algorithm
-	auto u_ini_size = u.m_cell_amount;
-	auto get_u = [&u_ini_size, &u](const size_t& i)      -> d_cell{
+	const size_t u_ini_size = u.m_cell_amount;
+	auto get_u = [&u_ini_size, &u](const size_t& i) -> d_cell{
 		if (i == 0)
 			return 0;
 		else
@@ -537,6 +537,8 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		else
 			return a.m_arr[a.m_cell_amount - i];
 	};
+
+	assert(get_u(1) != 0);
 
 	//main cycle
 	for (size_t j = 0; j <= m; ++j)
@@ -572,15 +574,16 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 				          << get(v,2) * q << " > 0x" << ( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2) <<endl;
 			}
 			q -= 1;
-			assert(q >= 1 && q < b);
+			assert(q >= 1);
+			assert(q < b);
 		}
 		if (debug)
 		{
 			std::cout << "recalculated q = " << hex << q <<endl;
 		}
 
-		auto shiftam = m - j; // amount to shift by; inductibly proved to be correct
-		auto slice = (v*q).shift(shiftam);
+		size_t shiftam = m - j; // amount to shift by; inductibly proved to be correct
+		Big slice = (v*q).shift(shiftam);
 
 		//further improve accuracy of q
 		//if subtraction of v * q from u[j - v.m_cell_amount ... j]
@@ -647,43 +650,56 @@ std::pair<Big, Big> Big::quot_rem (const Big& divider) const
 		return std::make_pair(*this, *this);
 	assert(!divider.is_nil());
 
-	if (!divider.m_positive)
+	if (divider.m_cell_amount == 1) //dividing by small number
 	{
-		//let's do a trick. Cast away constness, set another sign for divider,
-		//and after all is done return the sign
-		auto mut_divider = const_cast<Big&>(divider);
-		mut_divider.m_positive = true;
-
-		auto t = quot_rem(mut_divider);
-		t.first.negate_this();
-
-		mut_divider.m_positive = false;
-		return t;
-	}
-	if (!m_positive)
-	{
-		//let's do a trick. Cast away constness, set another sign for divident,
-		//and after all is done return the sign
-		auto mut_this = const_cast<Big*>(this);
-		mut_this->m_positive = true;
-
-		auto t = mut_this->abs().quot_rem(divider);
-		t.first.negate_this();
-
-		if (!t.second.is_nil())
+		if (!divider.m_positive)
 		{
-			t.first = t.first - 1;
-			t.second = divider - t.second;
+			auto t = this->quot_rem_small(divider);
+			t.first.negate_this();
+			return t;
 		}
+		if (!m_positive)
+		{
+			auto t = this->quot_rem_small(divider);
+			t.first.negate_this();
 
-		mut_this->m_positive = false;
-		return t;
+			// make the remainder be positive and conforming to
+			// q * b + r = a
+			if (!t.second.is_nil())
+			{
+				t.first = t.first - 1;
+				t.second = divider - t.second;
+			}
+
+			return t;
+		}
+		return this->quot_rem_small(divider);
 	}
+	else //division of big numbers
+	{
+		if (!divider.m_positive)
+		{
+			auto t = this->quot_rem_big(divider);
+			t.first.negate_this();
+			return t;
+		}
+		if (!m_positive)
+		{
+			auto t = this->quot_rem_big(divider);
+			t.first.negate_this();
 
-	if (divider.m_cell_amount == 1)
-		return quot_rem_small(divider);
-	else
-		return quot_rem_big(divider);
+			// make the remainder be positive and conforming to
+			// q * b + r = a
+			if (!t.second.is_nil())
+			{
+				t.first = t.first - 1;
+				t.second = divider - t.second;
+			}
+
+			return t;
+		}
+		return this->quot_rem_big(divider);
+	}
 }
 
 

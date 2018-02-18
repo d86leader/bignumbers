@@ -42,7 +42,6 @@ private:
 	Big atomic_plus(const Big&) const;
 	Big atomic_minus(const Big&) const;
 	Big atomic_product(const Big&) const;
-	std::pair<Big,Big> atomic_division(const Big&) const;
 
 public:
 	static Big generate(size_t size);
