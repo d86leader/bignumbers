@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Big.h"
+#include "../Big.h"
 
 int main()
 {
@@ -28,6 +28,7 @@ int main()
 	if( quot*b + rem != a )
 	{
 		std::cout << "wrong division result!\n";
+		return 1;
 	}
 
 	return 0;

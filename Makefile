@@ -1,18 +1,27 @@
 CXXHEADERS = -std=c++1y -I. -Wall -Wextra -O3
 
-all: main specific mod-test
+lib: Big.o
 
-main: main.cpp Big.o
-	${CXX} -g $^ -o main $(CXXHEADERS)
+build-tests: main specific mod-test
+
+tests: build-tests
+	tests/main
+	tests/specific
+	tests/mod-test
+
+all: lib tests
 
 Big.o: Big.cpp Big.h Big-inline.inc
 	${CXX} -c $< -o $@ $(CXXHEADERS)
 
-specific: specific.cpp Big.o
-	${CXX} -g $^ -o specific $(CXXHEADERS)
+main: tests/main.cpp Big.o
+	${CXX} -g $^ -o tests/main $(CXXHEADERS)
 
-mod-test: mod-test.cpp Big.o
-	${CXX} -g $^ -o mod-test $(CXXHEADERS)
+specific: tests/specific.cpp Big.o
+	${CXX} -g $^ -o tests/specific $(CXXHEADERS)
+
+mod-test: tests/mod-test.cpp Big.o
+	${CXX} -g $^ -o tests/mod-test $(CXXHEADERS)
 
 clean:
-	rm *.o main
+	rm *.o tests/main tests/specific tests/mod-test
