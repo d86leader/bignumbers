@@ -1,0 +1,3 @@
+[submodule "custom_free_allocator"]
+	path = custom_free_allocator
+	url = https://github.com/d86leader/custom_free_allocator
