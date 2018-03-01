@@ -175,6 +175,18 @@ inline Big::d_cell Big::operator[] (const size_t& index) const
 	return static_cast<d_cell>(m_arr[index]);
 }
 
+inline Big::cell Big::bit_at (const size_t& index) const
+{
+	if (index > m_length*8)
+	{
+		throw std::runtime_error("Big: bit index out of range");
+	}
+	size_t cell_ind = index / Big::CELL_BITS;
+	size_t bit_ind = index % Big::CELL_BITS;
+	cell num = m_arr[cell_ind];
+	return (num >> bit_ind) & 1;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 

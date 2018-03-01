@@ -32,7 +32,9 @@ private:
 	Big(const std::vector<cell>&   v);
 
 	d_cell operator[] (const size_t& index) const;
+	cell   bit_at     (const size_t& index) const;
 
+	//those divisions disregard the sign
 	std::pair<Big, Big> quot_rem_big  (const Big& r) const;
 	std::pair<Big, Big> quot_rem_small(const Big& r) const;
 
@@ -42,6 +44,9 @@ private:
 	Big atomic_plus(const Big&) const;
 	Big atomic_minus(const Big&) const;
 	Big atomic_product(const Big&) const;
+
+	// disregards the sign. Right-to-left algorithm
+	Big exponentiate_rtl(const Big&) const;
 
 public:
 	static Big generate(size_t size);
@@ -88,6 +93,7 @@ public:
 	Big operator* (const Big& r) const;
 	Big operator/ (const Big& r) const;
 	Big operator% (const Big& r) const;
+	Big exp       (const Big& r) const;
 
 	template<typename T> Big operator+ (const T& r) const;
 	template<typename T> Big operator- (const T& r) const;

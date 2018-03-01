@@ -801,3 +801,33 @@ std::istream& operator >> (std::istream& in, Big& number)
 
 	return in;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+Big Big::exp (const Big& r) const
+{
+	if (r.is_nil())
+	{
+		return Big (1);
+	}
+	return this->exponentiate_rtl(r);
+}
+
+
+Big Big::exponentiate_rtl(const Big& r) const
+{
+	// r is nont-nil
+	Big this_power = *this;
+	Big result = 1;
+	for (size_t bit_index = 0; bit_index < r.m_length*8; ++bit_index)
+	{
+		if (r.bit_at(bit_index) == 1)
+		{
+			result *= this_power;
+		}
+		this_power *= this_power;
+	}
+	return result;
+}
