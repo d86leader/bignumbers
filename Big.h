@@ -44,6 +44,7 @@ private:
 	Big atomic_plus(const Big&) const;
 	Big atomic_minus(const Big&) const;
 	Big atomic_product(const Big&) const;
+	Big molecular_product(const Big&) const;
 
 	// disregards the sign. Right-to-left algorithm
 	Big exponentiate_rtl(const Big&) const;
@@ -66,7 +67,7 @@ public:
 	bool is_nil()    const;
 	bool is_positive() const {return m_positive;}
 
-	Big  shift(size_t) const;
+	Big  shift(int) const;
 
 	std::string dump(bool print_sign = true) const;
 	Big& restore(const std::string& str);

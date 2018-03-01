@@ -29,17 +29,37 @@ namespace
 //////////////////////////////////////////////////////////////////////////////
 
 
-//shifts left by amount
-Big Big::shift(size_t amount) const
+//shifts left by amount (right ig amount < 0)
+Big Big::shift(int amount) const
 {
 	if (amount == 0) return *this;
 
-	auto r = vector<cell>(0);
-	while (amount --> 0)
-		r.push_back(0);
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		r.push_back(m_arr[i]);
-	return Big(r);
+	if (amount > 0)
+	{
+		//shifting left (adding zeroes)
+		auto r = vector<cell>(0);
+		while (amount --> 0)
+			r.push_back(0);
+		for (size_t i = 0; i < m_cell_amount; ++i)
+			r.push_back(m_arr[i]);
+		return Big(r);
+	}
+	else
+	{
+		//shifting right (removing digits)
+		amount = -amount;
+		if (amount > m_cell_amount)
+		{
+			return Big(0);
+		}
+
+		vector<cell> r;
+		for (size_t index = amount; index < m_cell_amount; ++index)
+		{
+			r.push_back(m_arr[index]);
+		}
+		return Big(r);
+	}
 }
 
 
@@ -397,6 +417,14 @@ Big Big::atomic_product(const Big& r) const
 		result.pop_back();
 	
 	return Big(result);
+}
+
+
+Big Big::molecular_product(const Big& r) const
+{
+	//this = qN + w
+	//r    = aN + s
+	//N = 2 ^ (r.bits / 1)
 }
 
 
