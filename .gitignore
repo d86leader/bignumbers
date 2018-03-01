@@ -1,8 +1,9 @@
 sem2/
-main
 *.o
 .*.swp
 .tags
 test.sh
-specific
-mod-test
+tests/main
+tests/mod-test
+tests/power_test
+tests/specific
