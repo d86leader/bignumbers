@@ -117,29 +117,6 @@ inline Big& Big::operator= (const T& r)
 ////////////////////////////////////////////////////////////////////////////////
 
 
-inline Big::Big(const std::vector<Big::d_cell>& v)
-: m_length      (v.size() * CELL_LENGTH)
-, m_cell_amount (v.size())
-, m_arr         (new cell [v.size()])
-, m_positive    (true)
-{
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = static_cast<cell>(v[i]);
-}
-inline Big::Big(const std::vector<cell>& v)
-: m_length      (v.size() * CELL_LENGTH)
-, m_cell_amount (v.size())
-, m_arr         (new cell [v.size()])
-, m_positive    (true)
-{
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = v[i];
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-
 inline Big Big::operator/ (const Big& r) const
 {
 	return quot_rem(r).first;

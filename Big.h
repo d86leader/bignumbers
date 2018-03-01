@@ -5,6 +5,8 @@
 #include <vector>
 #include <cassert>
 #include <map>
+#include "custom_free_allocator/custom_free_allocator.h"
+
 
 class Big
 {
@@ -18,18 +20,23 @@ public:
 	static constexpr cell CELL_MAXVALUE = static_cast<cell>(0) - 1;
 	static inline constexpr d_cell bitmodule(size_t);
 
-private:
 	friend std::ostream& operator<< (std::ostream& out, const Big&);
 	friend std::istream& operator>> (std::istream& in, Big&);
 
-	size_t                  m_length; //amount of bytes
-	size_t                  m_cell_amount;
-	std::unique_ptr<cell[]> m_arr;
-	bool                    m_positive;
+private:
+	using init_vect = std::vector<cell, custom_free_allocator<cell>>;
+	using deleter_type = custom_free_allocator<cell>::cleanup_deleter;
+	using ptr_type = std::unique_ptr<cell[], deleter_type>;
+
+	size_t   m_length; //amount of bytes
+	size_t   m_cell_amount;
+	ptr_type m_arr;
+	bool     m_positive;
+
 
 	//this constructor assumes that (d_cell)(cell)v[i] == v[i] for each i
 	Big(const std::vector<d_cell>& v);
-	Big(const std::vector<cell>&   v);
+	Big(init_vect&& v);
 
 	d_cell operator[] (const size_t& index) const;
 
