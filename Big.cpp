@@ -839,7 +839,7 @@ std::istream& operator >> (std::istream& in, Big& number)
 //////////////////////////////////////////////////////////////////////////////
 
 
-Big Big::exp (const Big& r) const
+Big Big::exp (const Big& r, const Big& modulo) const
 {
 	if (this->is_nil())
 	{
@@ -849,11 +849,11 @@ Big Big::exp (const Big& r) const
 	{
 		return Big (1);
 	}
-	return this->exponentiate_rtl(r);
+	return this->exponentiate_rtl(r, modulo);
 }
 
 
-Big Big::exponentiate_rtl(const Big& r) const
+Big Big::exponentiate_rtl(const Big& r, const Big& modulo) const
 {
 	// r is nont-nil
 	Big this_power = *this;
@@ -862,9 +862,9 @@ Big Big::exponentiate_rtl(const Big& r) const
 	{
 		if (r.bit_at(bit_index) == 1)
 		{
-			result *= this_power;
+			result = (result * this_power) % modulo;
 		}
-		this_power *= this_power;
+		this_power = (this_power * this_power) % modulo;
 	}
 	return result;
 }
