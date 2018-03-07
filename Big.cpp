@@ -65,7 +65,6 @@ Big Big::shift(int amount) const
 
 Big Big::generate(size_t size)
 {
-	srand(time(NULL));
 	vector<cell> r;
 	// pushing tail digints, they can be zero
 	while (size --> 1)
