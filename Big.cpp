@@ -48,7 +48,7 @@ Big Big::shift(int amount) const
 	{
 		//shifting right (removing digits)
 		amount = -amount;
-		if (amount > m_cell_amount)
+		if (amount > (long long)m_cell_amount)
 		{
 			return Big(0);
 		}
@@ -424,11 +424,12 @@ Big Big::atomic_product(const Big& r) const
 }
 
 
-Big Big::molecular_product(const Big& r) const
+Big Big::molecular_product(const Big& ) const
 {
 	//this = qN + w
 	//r    = aN + s
 	//N = 2 ^ (r.bits / 1)
+	return Big(0);
 }
 
 
