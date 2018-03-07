@@ -1,5 +1,4 @@
 #include <iostream>
-#include <memory>
 #include <string>
 #include <cstdlib>
 #include <ctime>
@@ -14,18 +13,20 @@ int main(int argc, char** _argv)
 	std::vector<std::string> argv (_argv, _argv + argc);
 	srand(time(nullptr));
 
-	Big base = 17;
-	Big exp = 5;
-	Big r = base.exp(exp);
-	cout << r.dump() << endl;
+	const size_t base_size = rand()%4 + 1;
+	const size_t exp_size  = 1;
 
-	exp = 13;
-	r = base.exp(exp);
-	cout << r.dump() << endl;
+	Big base = Big::generate(base_size);
+	Big exp  = Big::generate(exp_size);
+	Big result = base.exp(exp);
 
-	exp = 127;
-	r = base.exp(exp);
-	cout << r.dump() << endl;
+	cout << base.dump(false) << "**" << exp.dump(false) << "==" << result.dump(false);
+
+	base = Big::generate(1);
+	exp  = Big::generate(2);
+	result = base.exp(exp);
+
+	cout << "&&" << base.dump(false) << "**" << exp.dump(false) << "==" << result.dump(false) << endl;
 
 	return 0;
 }
