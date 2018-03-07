@@ -841,6 +841,10 @@ std::istream& operator >> (std::istream& in, Big& number)
 
 Big Big::exp (const Big& r) const
 {
+	if (this->is_nil())
+	{
+		return *this;
+	}
 	if (r.is_nil())
 	{
 		return Big (1);
