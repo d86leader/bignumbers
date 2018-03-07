@@ -47,7 +47,7 @@ private:
 	Big molecular_product(const Big&) const;
 
 	// disregards the sign. Right-to-left algorithm
-	Big exponentiate_rtl(const Big&) const;
+	Big exponentiate_rtl(const Big&, const Big&) const;
 
 public:
 	static Big generate(size_t size);
@@ -94,7 +94,7 @@ public:
 	Big operator* (const Big& r) const;
 	Big operator/ (const Big& r) const;
 	Big operator% (const Big& r) const;
-	Big exp       (const Big& r) const;
+	Big exp       (const Big& r, const Big& m) const;
 
 	template<typename T> Big operator+ (const T& r) const;
 	template<typename T> Big operator- (const T& r) const;
