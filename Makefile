@@ -39,5 +39,11 @@ tests/power_test: tests/power_test.cpp Big.o
 run-power_test: tests/power_test
 	tests/power_test
 
+tests/mult_test: tests/mult_test.cpp Big.o
+	${CXX} -g $^ -o tests/mult_test $(CXXHEADERS)
+
+run-mult_test: tests/mult_test
+	tests/mult_test
+
 clean:
 	rm *.o tests/main tests/specific tests/mod-test
