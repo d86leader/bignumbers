@@ -108,9 +108,14 @@ string Big::dump(bool print_sign) const
 
 	for (size_t i = m_cell_amount - 1; i > 0; --i)
 	{
-		dumpstream << m_arr[i] <<'_' << std::setfill('0') << std::setw(CELL_LENGTH*2);;
+		// as digit may be a char type, we cast it to a d_cell which is
+		// certainly a number type
+		d_cell digit = static_cast<d_cell>(m_arr[i]);
+		dumpstream << digit <<'_'
+			<< std::setfill('0') << std::setw(CELL_LENGTH*2);;
 	}
-	dumpstream << m_arr[0] << std::dec;
+	d_cell digit = static_cast<d_cell>(m_arr[0]);
+	dumpstream << digit << std::dec;
 
 	string r {dumpstream.str()};
 	return r;
