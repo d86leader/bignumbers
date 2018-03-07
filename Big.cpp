@@ -48,6 +48,7 @@ Big Big::shift(int amount) const
 	{
 		//shifting right (removing digits)
 		amount = -amount;
+		// FIXME: what should be done here?
 		if (amount > (long long)m_cell_amount)
 		{
 			return Big(0);
