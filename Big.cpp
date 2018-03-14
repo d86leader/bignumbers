@@ -869,3 +869,14 @@ Big Big::exponentiate_rtl(const Big& r, const Big& modulo) const
 	}
 	return result;
 }
+
+
+Big Big::slice(size_t index, size_t length) const
+{
+	vector<cell> r;
+	for (size_t end = index + length; index < end; ++index)
+	{
+		r.push_back(m_arr[index]);
+	}
+	return Big(r);
+}

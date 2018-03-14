@@ -94,7 +94,9 @@ public:
 	Big operator* (const Big& r) const;
 	Big operator/ (const Big& r) const;
 	Big operator% (const Big& r) const;
-	Big exp       (const Big& r, const Big& m) const;
+
+	Big exp  (const Big& r, const Big& m) const;
+	Big slice(size_t start, size_t length) const;
 
 	template<typename T> Big operator+ (const T& r) const;
 	template<typename T> Big operator- (const T& r) const;
