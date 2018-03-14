@@ -387,12 +387,39 @@ Big Big::atomic_product(const Big& r) const
 }
 
 
-Big Big::molecular_product(const Big& ) const
+Big Big::molecular_product(const Big& r) const
 {
+	size_t all_length = m_cell_amount > r.m_cell_amount ?
+		m_cell_amount : r.m_cell_amount;
+
+	size_t slice_length = all_length / 2;
+
 	//this = qN + w
 	//r    = aN + s
-	//N = 2 ^ (r.bits / 1)
-	return Big(0);
+	//tr = qaNN + qsN + awN + sw
+	// C = (q+w)(a+s) = qa + wa + qs + ws
+	// A = qa, B = ws
+	// tr = ANN + (C - A - B)N + B
+
+	Big this_lower  = this->slice(0, slice_length);
+	Big this_higher = this->slice(slice_length, all_length);
+	Big r_lower     = r.slice(0, slice_length);
+	Big r_higher    = r.slice(slice_length, all_length);
+
+	Big quad_product =
+		(this_lower + this_higher) *
+		(r_lower + r_higher);
+
+	Big high_product = this_higher * r_higher;
+	Big low_product  = this_lower * r_lower;
+	Big middle = quad_product - high_product - low_product;
+
+	Big result =
+		high_product.shift(slice_length*2) +
+		middle.shift(slice_length) +
+		low_product;
+
+	return result;
 }
 
 
