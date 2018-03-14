@@ -313,43 +313,45 @@ Big Big::atomic_minus(const Big& r) const
 	{
 		return Big (0);
 	}
-	if (comparison == Comp::LeftGreater)
+	if (comparison == Comp::RightGreater)
 	{
 		auto&& t = r.atomic_minus(*this);
 		t.negate_this();
 		return t;
 	}
 
+	Big this_copy = *this;
+
 	//now it's just a subtraction a - b with a >= 0, b >= 0 and a > b
 	auto result = Big::init_vect(m_cell_amount);
 	size_t i;
 	for (i = 0; i < r.m_cell_amount; ++i)
 	{
-		if (m_arr[i] < r.m_arr[i])
+		if (this_copy.m_arr[i] < r.m_arr[i])
 		{
-			result.at(i) = Big::bitmodule(Big::CELL_BITS) + static_cast<d_cell>(m_arr[i]) - r.m_arr[i];
+			result.at(i) = Big::bitmodule(Big::CELL_BITS) + static_cast<d_cell>(this_copy.m_arr[i]) - r.m_arr[i];
 
 			//lend the 1
 			for (auto j = i + 1; ; ++j)
 			{
-				if (m_arr[j] != 0)
+				if (this_copy.m_arr[j] != 0)
 				{
-					m_arr[j] -= 1;
+					this_copy.m_arr[j] -= 1;
 					break;
 				}
 				else
 				{
-					m_arr[j] = CELL_MAXVALUE;
+					this_copy.m_arr[j] = CELL_MAXVALUE;
 				}
 			}
 		}
 		else
 		{
-			result.at(i) = m_arr[i] - r.m_arr[i];
+			result.at(i) = this_copy.m_arr[i] - r.m_arr[i];
 		}
 	}
 	for (; i < m_cell_amount; ++i)
-		result.at(i) = m_arr[i];
+		result.at(i) = this_copy.m_arr[i];
 
 	while (result.size() > 0 && result.back() == 0)
 		result.pop_back();
