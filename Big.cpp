@@ -176,6 +176,50 @@ Big& Big::restore(const char* str)
 //////////////////////////////////////////////////////////////////////////////
 
 
+Big::Comp Big::atomic_compare(const Big& r) const
+{
+	if (m_cell_amount > r.m_cell_amount)
+	{
+		return Comp::LeftGreater;
+	}
+	if (m_cell_amount < r.m_cell_amount)
+	{
+		return Comp::RightGreater;
+	}
+	for (size_t pre_i = m_cell_amount; pre_i > 0; --pre_i)
+	{
+		size_t i = pre_i - 1;
+		if (m_arr[i] > r.m_arr[i])
+		{
+			return Comp::LeftGreater;
+		}
+		if (m_arr[i] < r.m_arr[i])
+		{
+			return Comp::RightGreater;
+		}
+	}
+	return Comp::Equal;
+}
+
+
+Big::Comp Big::compare(const Big& r) const
+{
+	if (m_positive && !r.m_positive)
+	{
+		return Comp::LeftGreater;
+	}
+	if (!m_positive && r.m_positive)
+	{
+		return Comp::RightGreater;
+	}
+	if (!m_positive && !r.m_positive)
+	{
+		return r.atomic_compare(*this);
+	}
+	return this->atomic_compare(r);
+}
+
+
 bool Big::operator== (const Big& r) const
 {
 	if (m_cell_amount != r.m_cell_amount)
