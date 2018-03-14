@@ -40,6 +40,26 @@ inline Big::Big(Big&& r)
 {}
 
 
+inline Big::Big(const std::vector<Big::d_cell>& v)
+: m_length      (v.size() * CELL_LENGTH)
+, m_cell_amount (v.size())
+, m_arr         (new cell [v.size()])
+, m_positive    (true)
+{
+	for (size_t i = 0; i < m_cell_amount; ++i)
+		m_arr[i] = static_cast<cell>(v[i]);
+}
+
+
+inline Big::Big(init_vect&& v)
+: m_length      (v.size() * CELL_LENGTH)
+, m_cell_amount (v.size())
+, m_arr         (custom_free_allocator<cell>::own_memory(v))
+, m_positive    (true)
+{
+}
+
+
 template<typename T>
 inline Big::Big(const T& r)
 : Big()
