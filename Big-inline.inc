@@ -264,3 +264,41 @@ inline Big& Big::operator%= (const T& r)
 	Big t = r;
 	return *this = *this % t;
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+inline bool Big::operator== (const Big& r) const
+{
+	return this->compare(r) == Comp::Equal;
+}
+inline bool Big::operator!= (const Big& r) const
+{
+	return this->compare(r) != Comp::Equal;
+}
+
+
+inline bool Big::operator> (const Big& r) const
+{
+	return this->compare(r) == Comp::LeftGreater;
+}
+
+
+inline bool Big::operator>= (const Big& r) const
+{
+	auto res = this->compare(r);
+	return res == Comp::Equal or res == Comp::LeftGreater;
+}
+
+
+inline bool Big::operator< (const Big& r) const
+{
+	return r > *this;
+}
+
+
+inline bool Big::operator<= (const Big& r) const
+{
+	return r >= *this;
+}
