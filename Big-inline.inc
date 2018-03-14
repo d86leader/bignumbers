@@ -42,7 +42,8 @@ inline Big::Big(Big&& r)
 inline Big::Big(init_vect&& v)
 : m_length      (v.size() * CELL_LENGTH)
 , m_cell_amount (v.size())
-, m_arr         (custom_free_allocator<cell>::own_memory(v))
+, m_storage     (custom_free_allocator<cell>::own_shared(v))
+, m_arr         (m_storage.get())
 , m_positive    (true)
 {
 }
