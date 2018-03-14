@@ -22,10 +22,11 @@ private:
 	friend std::ostream& operator<< (std::ostream& out, const Big&);
 	friend std::istream& operator>> (std::istream& in, Big&);
 
-	size_t                  m_length; //amount of bytes
-	size_t                  m_cell_amount;
-	std::unique_ptr<cell[]> m_arr;
-	bool                    m_positive;
+	size_t                        m_length; //amount of bytes
+	size_t                        m_cell_amount;
+	std::shared_ptr<const cell>   m_storage;
+	const cell *                  m_arr;
+	bool                          m_positive;
 
 	//this constructor assumes that (d_cell)(cell)v[i] == v[i] for each i
 	Big(const std::vector<d_cell>& v);
