@@ -47,7 +47,12 @@ inline Big::Big(Big&& r)
 
 template<typename T>
 inline Big::Big(const T& r)
+: Big()
 {
+	if (r == 0)
+	{
+		return;
+	}
 	m_positive = r >= 0;
 	auto value = m_positive? r : -r;
 
@@ -104,23 +109,8 @@ inline Big& Big::operator= (Big&& r)
 template<typename T>
 inline Big& Big::operator= (const T& r)
 {
-	m_positive = r >= 0;
-	auto value = m_positive? r : -r;
-
-	std::vector<cell> result(0);
-	while (value > 0)
-	{
-		result.push_back(value % Big::bitmodule(CELL_BITS));
-		value /= Big::bitmodule(CELL_BITS);
-	}
-
-	m_cell_amount  = result.size();
-	m_length = m_cell_amount * CELL_LENGTH;
-	m_storage.reset( new cell [m_cell_amount], std::default_delete<cell[]>() );
-	m_arr = m_storage.get();
-	cell* nonconst_arr = const_cast<cell*>(m_arr);
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		nonconst_arr[i] = result[i];
+	Big temp (r);
+	*this = std::move(temp);
 	
 	return *this;
 }
@@ -283,4 +273,43 @@ inline Big& Big::operator%= (const T& r)
 {
 	Big t = r;
 	return *this = *this % t;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+inline bool Big::operator== (const Big& r) const
+{
+	return this->compare(r) == Comp::Equal;
+}
+inline bool Big::operator!= (const Big& r) const
+{
+	return this->compare(r) != Comp::Equal;
+}
+
+
+inline bool Big::operator> (const Big& r) const
+{
+	return this->compare(r) == Comp::LeftGreater;
+}
+
+
+inline bool Big::operator>= (const Big& r) const
+{
+	auto res = this->compare(r);
+	return res == Comp::Equal or res == Comp::LeftGreater;
+}
+
+
+inline bool Big::operator< (const Big& r) const
+{
+	return this->compare(r) == Comp::RightGreater;
+}
+
+
+inline bool Big::operator<= (const Big& r) const
+{
+	auto res = this->compare(r);
+	return res == Comp::Equal or res == Comp::RightGreater;
 }

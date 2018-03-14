@@ -139,72 +139,47 @@ namespace
 //////////////////////////////////////////////////////////////////////////////
 
 
-bool Big::operator== (const Big& r) const
+Big::Comp Big::atomic_compare(const Big& r) const
 {
-	if (m_cell_amount != r.m_cell_amount)
-		return false;
-	if (m_positive != r.m_positive && m_cell_amount != 0)
-		return false;
-	for (size_t i = 0; i < m_cell_amount; ++i)
+	if (m_cell_amount > r.m_cell_amount)
 	{
-		if (m_arr[i] != r.m_arr[i])
-			return false;
+		return Comp::LeftGreater;
 	}
-	return true;
-}
-bool Big::operator!= (const Big& r) const
-{
-	return ! (*this == r);
+	if (m_cell_amount < r.m_cell_amount)
+	{
+		return Comp::RightGreater;
+	}
+	for (size_t pre_i = m_cell_amount; pre_i > 0; --pre_i)
+	{
+		size_t i = pre_i - 1;
+		if (m_arr[i] > r.m_arr[i])
+		{
+			return Comp::LeftGreater;
+		}
+		if (m_arr[i] < r.m_arr[i])
+		{
+			return Comp::RightGreater;
+		}
+	}
+	return Comp::Equal;
 }
 
 
-bool Big::operator> (const Big& r) const
+Big::Comp Big::compare(const Big& r) const
 {
 	if (m_positive && !r.m_positive)
-		return true;
-	if (!m_positive && r.m_positive)
-		return false;
-	if (!m_positive && !r.m_positive)
-		return r.abs() > this->abs();
-	if (m_cell_amount > r.m_cell_amount) return true;
-	if (m_cell_amount < r.m_cell_amount) return false;
-	for (size_t i = m_cell_amount; i > 0; --i)
 	{
-		if (m_arr[i-1] > r.m_arr[i-1]) return true;
-		if (m_arr[i-1] < r.m_arr[i-1]) return false;
+		return Comp::LeftGreater;
 	}
-	return false;
-}
-
-
-bool Big::operator>= (const Big& r) const
-{
-	if (m_cell_amount > r.m_cell_amount) return true;
-	if (m_cell_amount < r.m_cell_amount) return false;
-	if (m_positive && !r.m_positive)
-		return true;
 	if (!m_positive && r.m_positive)
-		return false;
-	if (!m_positive && !r.m_positive)
-		return r.abs() >= this->abs();
-	for (size_t i = m_cell_amount; i > 0; --i)
 	{
-		if (m_arr[i-1] > r.m_arr[i-1]) return true;
-		if (m_arr[i-1] < r.m_arr[i-1]) return false;
+		return Comp::RightGreater;
 	}
-	return true;
-}
-
-
-bool Big::operator< (const Big& r) const
-{
-	return r > *this;
-}
-
-
-bool Big::operator<= (const Big& r) const
-{
-	return r >= *this;
+	if (!m_positive && !r.m_positive)
+	{
+		return r.atomic_compare(*this);
+	}
+	return this->atomic_compare(r);
 }
 
 
@@ -295,33 +270,18 @@ Big Big::atomic_plus(const Big& r) const
 
 Big Big::atomic_minus(const Big& r) const
 {
-	auto& mut_this = *const_cast<Big*>(this);
-	auto& mut_r    =  const_cast<Big&>(r);
+	auto comparison = this->atomic_compare(r);
 
-	// this is needed for comparison. TODO: write something better
-	bool save_this_sign = mut_this.m_positive;
-	mut_this.m_positive = true;
-	bool save_r_sign = mut_r.m_positive;
-	mut_r.m_positive = true;
-
-	if (*this == r)
+	if (comparison == Comp::Equal)
 	{
-		mut_this.m_positive = save_this_sign;
-		mut_r.m_positive = save_r_sign;
-
 		return Big (0);
 	}
-	if (*this < r)
+	if (comparison == Comp::LeftGreater)
 	{
-		mut_this.m_positive = save_this_sign;
-		mut_r.m_positive = save_r_sign;
-
 		auto&& t = r.atomic_minus(*this);
 		t.negate_this();
 		return t;
 	}
-	mut_this.m_positive = save_this_sign;
-	mut_r.m_positive = save_r_sign;
 
 	//now it's just a subtraction a - b with a >= 0, b >= 0 and a > b
 	auto result = vector<cell>(m_cell_amount);

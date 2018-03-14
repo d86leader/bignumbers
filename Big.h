@@ -18,6 +18,13 @@ public:
 	static constexpr cell CELL_MAXVALUE = static_cast<cell>(0) - 1;
 	static inline constexpr d_cell bitmodule(size_t);
 
+	enum struct Comp
+	{
+		LeftGreater,
+		Equal,
+		RightGreater
+	};
+
 private:
 	friend std::ostream& operator<< (std::ostream& out, const Big&);
 	friend std::istream& operator>> (std::istream& in, Big&);
@@ -40,6 +47,9 @@ private:
 	std::pair<Big, Big> quot_rem_small(const Big& r) const;
 
 	void negate_this() {m_positive = !m_positive;}
+
+	// comparison taht disregards the sign
+	Comp atomic_compare(const Big&) const;
 
 	// arithmetic operators that disregard the sign
 	Big atomic_plus(const Big&) const;
@@ -72,6 +82,7 @@ public:
 
 	std::string dump(bool print_sign = true) const;
 
+	Comp compare    (const Big& r) const;
 	bool operator== (const Big& r) const;
 	bool operator!= (const Big& r) const;
 	bool operator>  (const Big& r) const;
