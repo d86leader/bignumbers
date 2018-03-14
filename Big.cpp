@@ -307,33 +307,18 @@ Big Big::atomic_plus(const Big& r) const
 
 Big Big::atomic_minus(const Big& r) const
 {
-	auto& mut_this = *const_cast<Big*>(this);
-	auto& mut_r    =  const_cast<Big&>(r);
+	auto comparison = this->atomic_compare(r);
 
-	// this is needed for comparison. TODO: write something better
-	bool save_this_sign = mut_this.m_positive;
-	mut_this.m_positive = true;
-	bool save_r_sign = mut_r.m_positive;
-	mut_r.m_positive = true;
-
-	if (*this == r)
+	if (comparison == Comp::Equal)
 	{
-		mut_this.m_positive = save_this_sign;
-		mut_r.m_positive = save_r_sign;
-
 		return Big (0);
 	}
-	if (*this < r)
+	if (comparison == Comp::LeftGreater)
 	{
-		mut_this.m_positive = save_this_sign;
-		mut_r.m_positive = save_r_sign;
-
 		auto&& t = r.atomic_minus(*this);
 		t.negate_this();
 		return t;
 	}
-	mut_this.m_positive = save_this_sign;
-	mut_r.m_positive = save_r_sign;
 
 	//now it's just a subtraction a - b with a >= 0, b >= 0 and a > b
 	auto result = vector<cell>(m_cell_amount);
