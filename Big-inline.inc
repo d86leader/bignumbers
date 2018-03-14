@@ -42,7 +42,12 @@ inline Big::Big(Big&& r)
 
 template<typename T>
 inline Big::Big(const T& r)
+: Big()
 {
+	if (r == 0)
+	{
+		return;
+	}
 	m_positive = r >= 0;
 	auto value = m_positive? r : -r;
 
@@ -94,21 +99,8 @@ inline Big& Big::operator= (Big&& r)
 template<typename T>
 inline Big& Big::operator= (const T& r)
 {
-	m_positive = r >= 0;
-	auto value = m_positive? r : -r;
-
-	std::vector<cell> result(0);
-	while (value > 0)
-	{
-		result.push_back(value % Big::bitmodule(CELL_BITS));
-		value /= Big::bitmodule(CELL_BITS);
-	}
-
-	m_cell_amount  = result.size();
-	m_length = m_cell_amount * CELL_LENGTH;
-	m_arr.reset( new cell [m_cell_amount] );
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = result[i];
+	Big temp (r);
+	*this = std::move(temp);
 	
 	return *this;
 }
