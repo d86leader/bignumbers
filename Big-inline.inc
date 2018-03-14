@@ -24,16 +24,10 @@ inline Big::Big()
 inline Big::Big(const Big& r)
 : m_length      (r.m_length)
 , m_cell_amount (r.m_cell_amount)
-, m_storage     (new cell [m_cell_amount], std::default_delete<cell[]>())
-, m_arr         (m_storage.get())
+, m_storage     (r.m_storage)
+, m_arr         (r.m_arr)
 , m_positive    (r.m_positive)
 {
-	// a hack for constructors, the only place where the memory is changed
-	cell* nonconst_arr = const_cast<cell*>(m_arr);
-	for (size_t i = 0; i < m_cell_amount; ++i)
-	{
-		nonconst_arr[i] = r.m_arr[i];
-	}
 }
 
 inline Big::Big(Big&& r)
@@ -81,14 +75,8 @@ inline Big& Big::operator= (const Big& r)
 	m_length      = r.m_length;
 	m_cell_amount = r.m_cell_amount;
 	m_positive    = r.m_positive;
-	m_storage.reset( new cell [m_cell_amount], std::default_delete<cell[]>() );
-	m_arr = m_storage.get();
-	cell* nonconst_arr = const_cast<cell*>(m_arr);
-
-	for (size_t i = 0; i < m_cell_amount; ++i)
-	{
-		nonconst_arr[i] = r.m_arr[i];
-	}
+	m_storage     = r.m_storage;
+	m_arr         = r.m_arr;
 
 	return *this;
 }
@@ -126,6 +114,7 @@ inline Big::Big(const std::vector<Big::d_cell>& v)
 , m_arr         (m_storage.get())
 , m_positive    (true)
 {
+	// a hack for constructors, the only place arr is allowed to chage
 	cell* nonconst_arr = const_cast<cell*>(m_arr);
 	for (size_t i = 0; i < m_cell_amount; ++i)
 		nonconst_arr[i] = static_cast<cell>(v[i]);
@@ -137,6 +126,7 @@ inline Big::Big(const std::vector<cell>& v)
 , m_arr         (m_storage.get())
 , m_positive    (true)
 {
+	// a hack for constructors, the only place arr is allowed to chage
 	cell* nonconst_arr = const_cast<cell*>(m_arr);
 	for (size_t i = 0; i < m_cell_amount; ++i)
 		nonconst_arr[i] = v[i];
