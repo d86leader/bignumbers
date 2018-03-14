@@ -294,11 +294,12 @@ inline bool Big::operator>= (const Big& r) const
 
 inline bool Big::operator< (const Big& r) const
 {
-	return r > *this;
+	return this->compare(r) == Comp::RightGreater;
 }
 
 
 inline bool Big::operator<= (const Big& r) const
 {
-	return r >= *this;
+	auto res = this->compare(r);
+	return res == Comp::Equal or res == Comp::RightGreater;
 }
