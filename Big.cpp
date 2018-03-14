@@ -135,43 +135,6 @@ namespace
 	}
 }
 
-Big& Big::restore(const string& str) //aa ff b0 1c
-{
-	m_length = ( str.size() + 1 ) / 3; //each byte is two symbols && space save for the first one
-	m_cell_amount  = (m_length - 1 + CELL_LENGTH)/CELL_LENGTH;
-	m_positive   = true;
-	m_arr.reset( new cell [m_cell_amount] );
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = 0;
-
-	auto   j = str.size() - 1;
-	size_t i = 0;
-	size_t shifted = 0;
-
-	for(; j > 1; j -= 3)
-	{
-		auto byte = (digit(str.at(j-1)) * 16) + digit(str.at(j));
-		m_arr[i] <<= 8;
-		m_arr[i] += byte;
-		shifted += 8;
-		if (shifted == Big::CELL_BITS)
-		{
-			shifted = 0;
-			i += 1;
-		}
-	}
-	auto byte = (digit(str.at(j-1)) * 16) + digit(str.at(j));
-	m_arr[i] <<= 8;
-	m_arr[i] += byte;
-
-	return *this;
-}
-Big& Big::restore(const char* str)
-{
-	string s {str};
-	return this->restore(s);
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 

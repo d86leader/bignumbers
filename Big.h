@@ -71,8 +71,6 @@ public:
 	Big  shift(int) const;
 
 	std::string dump(bool print_sign = true) const;
-	Big& restore(const std::string& str);
-	Big& restore(const char*        str);
 
 	bool operator== (const Big& r) const;
 	bool operator!= (const Big& r) const;
