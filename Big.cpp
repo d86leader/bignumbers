@@ -284,6 +284,7 @@ Big Big::atomic_minus(const Big& r) const
 	}
 
 	Big this_copy = *this;
+	cell* arr = const_cast<cell*>(this_copy.m_arr);
 
 	//now it's just a subtraction a - b with a >= 0, b >= 0 and a > b
 	auto result = vector<cell>(m_cell_amount);
@@ -297,14 +298,14 @@ Big Big::atomic_minus(const Big& r) const
 			//lend the 1
 			for (auto j = i + 1; ; ++j)
 			{
-				if (this_copy.m_arr[j] != 0)
+				if (arr[j] != 0)
 				{
-					this_copy.m_arr[j] -= 1;
+					arr[j] -= 1;
 					break;
 				}
 				else
 				{
-					this_copy.m_arr[j] = CELL_MAXVALUE;
+					arr[j] = CELL_MAXVALUE;
 				}
 			}
 		}
