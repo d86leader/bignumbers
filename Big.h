@@ -33,13 +33,13 @@ private:
 
 	using init_vect = std::vector<cell, custom_free_allocator<cell>>;
 	using deleter_type = custom_free_allocator<cell>::cleanup_deleter;
-	using ptr_type = std::unique_ptr<cell[], deleter_type>;
+	using ptr_type = std::shared_ptr<cell>;
 
-	size_t   m_length; //amount of bytes
-	size_t   m_cell_amount;
-	ptr_type m_arr;
-	bool     m_positive;
-
+	size_t       m_length; //amount of bytes
+	size_t       m_cell_amount;
+	ptr_type     m_storage;
+	const cell * m_arr;
+	bool         m_positive;
 
 	//this constructor assumes that (d_cell)(cell)v[i] == v[i] for each i
 	Big(const std::vector<d_cell>& v);
@@ -49,6 +49,9 @@ private:
 	Big(const std::vector<cell>& v) = delete;
 	Big(std::vector<cell>&& v)      = delete;
 	Big(const init_vect& v)         = delete;
+
+	//make a deep copy of number, meaning copy the arr
+	Big copy() const;
 
 	d_cell operator[] (const size_t& index) const;
 	cell   bit_at     (const size_t& index) const;
@@ -92,8 +95,6 @@ public:
 	Big  shift(int) const;
 
 	std::string dump(bool print_sign = true) const;
-	Big& restore(const std::string& str);
-	Big& restore(const char*        str);
 
 	Comp compare    (const Big& r) const;
 	bool operator== (const Big& r) const;
