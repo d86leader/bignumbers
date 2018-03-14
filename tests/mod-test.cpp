@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Big.h"
+#include "../Big.h"
 
 int main()
 {

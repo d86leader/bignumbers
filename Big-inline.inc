@@ -42,7 +42,12 @@ inline Big::Big(Big&& r)
 
 template<typename T>
 inline Big::Big(const T& r)
+: Big()
 {
+	if (r == 0)
+	{
+		return;
+	}
 	m_positive = r >= 0;
 	auto value = m_positive? r : -r;
 
@@ -94,21 +99,8 @@ inline Big& Big::operator= (Big&& r)
 template<typename T>
 inline Big& Big::operator= (const T& r)
 {
-	m_positive = r >= 0;
-	auto value = m_positive? r : -r;
-
-	std::vector<cell> result(0);
-	while (value > 0)
-	{
-		result.push_back(value % Big::bitmodule(CELL_BITS));
-		value /= Big::bitmodule(CELL_BITS);
-	}
-
-	m_cell_amount  = result.size();
-	m_length = m_cell_amount * CELL_LENGTH;
-	m_arr.reset( new cell [m_cell_amount] );
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = result[i];
+	Big temp (r);
+	*this = std::move(temp);
 	
 	return *this;
 }
@@ -150,6 +142,18 @@ inline bool Big::is_nil() const
 inline Big::d_cell Big::operator[] (const size_t& index) const
 {
 	return static_cast<d_cell>(m_arr[index]);
+}
+
+inline Big::cell Big::bit_at (const size_t& index) const
+{
+	if (index > m_length*8)
+	{
+		throw std::runtime_error("Big: bit index out of range");
+	}
+	size_t cell_ind = index / Big::CELL_BITS;
+	size_t bit_ind = index % Big::CELL_BITS;
+	cell num = m_arr[cell_ind];
+	return (num >> bit_ind) & 1;
 }
 
 
@@ -228,4 +232,43 @@ inline Big& Big::operator%= (const T& r)
 {
 	Big t = r;
 	return *this = *this % t;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+inline bool Big::operator== (const Big& r) const
+{
+	return this->compare(r) == Comp::Equal;
+}
+inline bool Big::operator!= (const Big& r) const
+{
+	return this->compare(r) != Comp::Equal;
+}
+
+
+inline bool Big::operator> (const Big& r) const
+{
+	return this->compare(r) == Comp::LeftGreater;
+}
+
+
+inline bool Big::operator>= (const Big& r) const
+{
+	auto res = this->compare(r);
+	return res == Comp::Equal or res == Comp::LeftGreater;
+}
+
+
+inline bool Big::operator< (const Big& r) const
+{
+	return this->compare(r) == Comp::RightGreater;
+}
+
+
+inline bool Big::operator<= (const Big& r) const
+{
+	auto res = this->compare(r);
+	return res == Comp::Equal or res == Comp::RightGreater;
 }

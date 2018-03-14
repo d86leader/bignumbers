@@ -29,45 +29,43 @@ namespace
 //////////////////////////////////////////////////////////////////////////////
 
 
-inline Big::Big(const std::vector<Big::d_cell>& v)
-: m_length      (v.size() * CELL_LENGTH)
-, m_cell_amount (v.size())
-, m_arr         (new cell [v.size()])
-, m_positive    (true)
-{
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = static_cast<cell>(v[i]);
-}
-inline Big::Big(init_vect&& v)
-: m_length      (v.size() * CELL_LENGTH)
-, m_cell_amount (v.size())
-// this cryptic sequence gets a unique_ptr owning vector data from vector
-, m_arr         (v.get_allocator().own_memory(v.data()))
-, m_positive    (true)
-{
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-
-//shifts left by amount
-Big Big::shift(size_t amount) const
+//shifts left by amount (right ig amount < 0)
+Big Big::shift(int amount) const
 {
 	if (amount == 0) return *this;
 
-	Big::init_vect r;
-	while (amount --> 0)
-		r.push_back(0);
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		r.push_back(m_arr[i]);
-	return Big(std::move(r));
+	if (amount > 0)
+	{
+		//shifting left (adding zeroes)
+		auto r = Big::init_vect(0);
+		while (amount --> 0)
+			r.push_back(0);
+		for (size_t i = 0; i < m_cell_amount; ++i)
+			r.push_back(m_arr[i]);
+		return Big(std::move(r));
+	}
+	else
+	{
+		//shifting right (removing digits)
+		amount = -amount;
+		// FIXME: what should be done here?
+		if (amount > (long long)m_cell_amount)
+		{
+			return Big(0);
+		}
+
+		Big::init_vect r;
+		for (size_t index = amount; index < m_cell_amount; ++index)
+		{
+			r.push_back(m_arr[index]);
+		}
+		return Big(std::move(r));
+	}
 }
 
 
 Big Big::generate(size_t size)
 {
-	srand(time(NULL));
 	Big::init_vect r;
 	// pushing tail digints, they can be zero
 	while (size --> 1)
@@ -110,9 +108,14 @@ string Big::dump(bool print_sign) const
 
 	for (size_t i = m_cell_amount - 1; i > 0; --i)
 	{
-		dumpstream << m_arr[i] <<'_' << std::setfill('0') << std::setw(CELL_LENGTH*2);;
+		// as digit may be a char type, we cast it to a d_cell which is
+		// certainly a number type
+		d_cell digit = static_cast<d_cell>(m_arr[i]);
+		dumpstream << digit <<'_'
+			<< std::setfill('0') << std::setw(CELL_LENGTH*2);;
 	}
-	dumpstream << m_arr[0] << std::dec;
+	d_cell digit = static_cast<d_cell>(m_arr[0]);
+	dumpstream << digit << std::dec;
 
 	string r {dumpstream.str()};
 	return r;
@@ -173,72 +176,47 @@ Big& Big::restore(const char* str)
 //////////////////////////////////////////////////////////////////////////////
 
 
-bool Big::operator== (const Big& r) const
+Big::Comp Big::atomic_compare(const Big& r) const
 {
-	if (m_cell_amount != r.m_cell_amount)
-		return false;
-	if (m_positive != r.m_positive && m_cell_amount != 0)
-		return false;
-	for (size_t i = 0; i < m_cell_amount; ++i)
+	if (m_cell_amount > r.m_cell_amount)
 	{
-		if (m_arr[i] != r.m_arr[i])
-			return false;
+		return Comp::LeftGreater;
 	}
-	return true;
-}
-bool Big::operator!= (const Big& r) const
-{
-	return ! (*this == r);
+	if (m_cell_amount < r.m_cell_amount)
+	{
+		return Comp::RightGreater;
+	}
+	for (size_t pre_i = m_cell_amount; pre_i > 0; --pre_i)
+	{
+		size_t i = pre_i - 1;
+		if (m_arr[i] > r.m_arr[i])
+		{
+			return Comp::LeftGreater;
+		}
+		if (m_arr[i] < r.m_arr[i])
+		{
+			return Comp::RightGreater;
+		}
+	}
+	return Comp::Equal;
 }
 
 
-bool Big::operator> (const Big& r) const
+Big::Comp Big::compare(const Big& r) const
 {
 	if (m_positive && !r.m_positive)
-		return true;
-	if (!m_positive && r.m_positive)
-		return false;
-	if (!m_positive && !r.m_positive)
-		return r.abs() > this->abs();
-	if (m_cell_amount > r.m_cell_amount) return true;
-	if (m_cell_amount < r.m_cell_amount) return false;
-	for (size_t i = m_cell_amount; i > 0; --i)
 	{
-		if (m_arr[i-1] > r.m_arr[i-1]) return true;
-		if (m_arr[i-1] < r.m_arr[i-1]) return false;
+		return Comp::LeftGreater;
 	}
-	return false;
-}
-
-
-bool Big::operator>= (const Big& r) const
-{
-	if (m_cell_amount > r.m_cell_amount) return true;
-	if (m_cell_amount < r.m_cell_amount) return false;
-	if (m_positive && !r.m_positive)
-		return true;
 	if (!m_positive && r.m_positive)
-		return false;
-	if (!m_positive && !r.m_positive)
-		return r.abs() >= this->abs();
-	for (size_t i = m_cell_amount; i > 0; --i)
 	{
-		if (m_arr[i-1] > r.m_arr[i-1]) return true;
-		if (m_arr[i-1] < r.m_arr[i-1]) return false;
+		return Comp::RightGreater;
 	}
-	return true;
-}
-
-
-bool Big::operator< (const Big& r) const
-{
-	return r > *this;
-}
-
-
-bool Big::operator<= (const Big& r) const
-{
-	return r >= *this;
+	if (!m_positive && !r.m_positive)
+	{
+		return r.atomic_compare(*this);
+	}
+	return this->atomic_compare(r);
 }
 
 
@@ -329,33 +307,18 @@ Big Big::atomic_plus(const Big& r) const
 
 Big Big::atomic_minus(const Big& r) const
 {
-	auto& mut_this = *const_cast<Big*>(this);
-	auto& mut_r    =  const_cast<Big&>(r);
+	auto comparison = this->atomic_compare(r);
 
-	// this is needed for comparison. TODO: write something better
-	bool save_this_sign = mut_this.m_positive;
-	mut_this.m_positive = true;
-	bool save_r_sign = mut_r.m_positive;
-	mut_r.m_positive = true;
-
-	if (*this == r)
+	if (comparison == Comp::Equal)
 	{
-		mut_this.m_positive = save_this_sign;
-		mut_r.m_positive = save_r_sign;
-
 		return Big (0);
 	}
-	if (*this < r)
+	if (comparison == Comp::LeftGreater)
 	{
-		mut_this.m_positive = save_this_sign;
-		mut_r.m_positive = save_r_sign;
-
 		auto&& t = r.atomic_minus(*this);
 		t.negate_this();
 		return t;
 	}
-	mut_this.m_positive = save_this_sign;
-	mut_r.m_positive = save_r_sign;
 
 	//now it's just a subtraction a - b with a >= 0, b >= 0 and a > b
 	auto result = Big::init_vect(m_cell_amount);
@@ -419,6 +382,15 @@ Big Big::atomic_product(const Big& r) const
 		result.pop_back();
 	
 	return Big(result);
+}
+
+
+Big Big::molecular_product(const Big& ) const
+{
+	//this = qN + w
+	//r    = aN + s
+	//N = 2 ^ (r.bits / 1)
+	return Big(0);
 }
 
 
@@ -822,4 +794,49 @@ std::istream& operator >> (std::istream& in, Big& number)
 	number = Big(std::move(r));
 
 	return in;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+Big Big::exp (const Big& r, const Big& modulo) const
+{
+	if (this->is_nil())
+	{
+		return *this;
+	}
+	if (r.is_nil())
+	{
+		return Big (1);
+	}
+	return this->exponentiate_rtl(r, modulo);
+}
+
+
+Big Big::exponentiate_rtl(const Big& r, const Big& modulo) const
+{
+	// r is nont-nil
+	Big this_power = *this;
+	Big result = 1;
+	for (size_t bit_index = 0; bit_index < r.m_length*8; ++bit_index)
+	{
+		if (r.bit_at(bit_index) == 1)
+		{
+			result = (result * this_power) % modulo;
+		}
+		this_power = (this_power * this_power) % modulo;
+	}
+	return result;
+}
+
+
+Big Big::slice(size_t index, size_t length) const
+{
+	Big::init_vect r;
+	for (size_t end = index + length; index < end; ++index)
+	{
+		r.push_back(m_arr[index]);
+	}
+	return Big(std::move(r));
 }

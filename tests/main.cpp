@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <ctime>
 
-#include "Big.h"
+#include "../Big.h"
 
 using std::endl;
 
@@ -65,6 +65,7 @@ int main(int argc, char** _argv)
 //		std::cout << '\t' << "quot*b + rem:" << (quot*b + rem).dump() << std::endl;
 //		std::cout << '\t' << "a - rem:"      << (a - rem     ).dump() << std::endl;
 //		std::cout << "\n\n\ntrying to divide with debug:\n\n";
+		return 1;
 	}
 
 	return 0;
