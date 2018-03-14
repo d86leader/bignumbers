@@ -8,3 +8,4 @@ tests/mod-test
 tests/power_test
 tests/specific
 tests/mult_test
+tests/minus_test
