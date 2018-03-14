@@ -283,7 +283,8 @@ Big Big::atomic_minus(const Big& r) const
 		return t;
 	}
 
-	Big this_copy = *this;
+	// create a further deleted copy of this so we can modify its arr
+	Big this_copy = this->copy();
 	cell* arr = const_cast<cell*>(this_copy.m_arr);
 
 	//now it's just a subtraction a - b with a >= 0, b >= 0 and a > b

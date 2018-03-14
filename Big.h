@@ -39,6 +39,9 @@ private:
 	Big(const std::vector<d_cell>& v);
 	Big(const std::vector<cell>&   v);
 
+	//make a deep copy of number, meaning copy the arr
+	Big copy() const;
+
 	d_cell operator[] (const size_t& index) const;
 	cell   bit_at     (const size_t& index) const;
 

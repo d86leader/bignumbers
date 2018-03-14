@@ -132,6 +132,22 @@ inline Big::Big(const std::vector<cell>& v)
 		nonconst_arr[i] = v[i];
 }
 
+inline Big Big::copy() const
+{
+	Big r = *this;
+
+	r.m_storage.reset(new cell [m_cell_amount], std::default_delete<cell[]>());
+	r.m_arr = r.m_storage.get();
+
+	cell* nonconst_arr = const_cast<cell*>(r.m_arr);
+	for (size_t i = 0; i < m_cell_amount; ++i)
+	{
+		nonconst_arr[i] = m_arr[i];
+	}
+	
+	return r;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
