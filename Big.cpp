@@ -313,7 +313,7 @@ Big Big::atomic_minus(const Big& r) const
 	{
 		return Big (0);
 	}
-	if (comparison == Comp::LeftGreater)
+	if (comparison == Comp::RightGreater)
 	{
 		auto&& t = r.atomic_minus(*this);
 		t.negate_this();
