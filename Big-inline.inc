@@ -154,6 +154,37 @@ inline Big Big::copy() const
 ////////////////////////////////////////////////////////////////////////////////
 
 
+inline Big Big::slice(size_t index, size_t length) const
+{
+	if (index >= m_cell_amount)
+	{
+		return Big(0);
+	}
+
+	Big r;
+	r.m_storage = m_storage;
+	r.m_arr = m_arr + index; //start observing elements since index
+	r.m_positive = true; //no sense in negative slice
+
+	// determine the length of slice
+	if (index + length < m_cell_amount)
+	{
+		// all ok, use supplied length
+		r.m_cell_amount = length;
+	}
+	else
+	{
+		// example: length = m_cell_amount, index = 0
+		r.m_cell_amount = m_cell_amount - index;
+	}
+	r.m_length = m_cell_amount * 8;
+	return r;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
 inline Big Big::operator/ (const Big& r) const
 {
 	return quot_rem(r).first;

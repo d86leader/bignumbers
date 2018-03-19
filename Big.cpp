@@ -822,26 +822,3 @@ Big Big::exponentiate_rtl(const Big& r, const Big& modulo) const
 	}
 	return result;
 }
-
-
-Big Big::slice(size_t index, size_t length) const
-{
-	Big r;
-	r.m_storage = m_storage;
-	r.m_arr = m_arr + index; //start observing elements since index
-	r.m_positive = true; //no sense in negative slice
-
-	// determine the length of slice
-	if (index + length < m_cell_amount)
-	{
-		// all ok, use supplied length
-		r.m_cell_amount = length;
-	}
-	else
-	{
-		// example: length = m_cell_amount, index = 0
-		r.m_cell_amount = m_cell_amount - index;
-	}
-	r.m_length = m_cell_amount * 8;
-	return r;
-}
