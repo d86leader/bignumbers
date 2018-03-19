@@ -27,13 +27,13 @@ int main(int argc, char** _argv)
 			{
 				std::cout << "on test number "<<i<<std::endl;
 			}
-			const size_t asize = rand()%10 + 1;
-			const size_t bsize = rand()%10 + 1;
+			const size_t asize = rand()%1000 + 2;
+			const size_t bsize = rand()%1000 + 2;
 
 			a = Big::generate(asize);
 			b = Big::generate(bsize);
 
-			prod = a * b;
+			prod = a.atomic_product(b);
 			mol_prod = a.molecular_product(b);
 
 			if(prod != mol_prod)
