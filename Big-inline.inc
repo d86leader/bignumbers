@@ -15,6 +15,7 @@ inline constexpr Big::d_cell Big::bitmodule(size_t bits)
 inline Big::Big()
 : m_length      (0)
 , m_cell_amount (0) // clength/CELL_LENGTH rounded up
+, m_storage     (nullptr)
 , m_arr         (nullptr)
 , m_positive    (true)
 {}
@@ -23,42 +24,31 @@ inline Big::Big()
 inline Big::Big(const Big& r)
 : m_length      (r.m_length)
 , m_cell_amount (r.m_cell_amount)
-, m_arr         (new cell [m_cell_amount])
+, m_storage     (r.m_storage)
+, m_arr         (r.m_arr)
 , m_positive    (r.m_positive)
 {
-	for (size_t i = 0; i < m_cell_amount; ++i)
-	{
-		m_arr[i] = r.m_arr[i];
-	}
 }
 
 inline Big::Big(Big&& r)
 : m_length      (r.m_length)
 , m_cell_amount (r.m_cell_amount)
-, m_arr         (std::move(r.m_arr))
+, m_storage     (std::move(r.m_storage))
+, m_arr         (m_storage.get())
 , m_positive    (r.m_positive)
 {}
-
-
-inline Big::Big(const std::vector<Big::d_cell>& v)
-: m_length      (v.size() * CELL_LENGTH)
-, m_cell_amount (v.size())
-, m_arr         (new cell [v.size()])
-, m_positive    (true)
-{
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = static_cast<cell>(v[i]);
-}
 
 
 inline Big::Big(init_vect&& v)
 : m_length      (v.size() * CELL_LENGTH)
 , m_cell_amount (v.size())
-, m_arr         (new cell [v.size()])
+, m_storage     (new cell [v.size()])
+, m_arr         (m_storage.get())
 , m_positive    (true)
 {
+	cell* nonconst_arr = const_cast<cell*>(m_arr);
 	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = static_cast<cell>(v[i]);
+		nonconst_arr[i] = static_cast<cell>(v[i]);
 }
 
 
@@ -82,9 +72,11 @@ inline Big::Big(const T& r)
 
 	m_cell_amount  = result.size();
 	m_length = m_cell_amount * CELL_LENGTH;
-	m_arr.reset( new cell [m_cell_amount] );
+	m_storage.reset( new cell [m_cell_amount], std::default_delete<cell[]>() );
+	m_arr = m_storage.get();
+	cell* nonconst_arr = const_cast<cell*>(m_arr);
 	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = result[i];
+		nonconst_arr[i] = result[i];
 }
 
 
@@ -96,12 +88,8 @@ inline Big& Big::operator= (const Big& r)
 	m_length      = r.m_length;
 	m_cell_amount = r.m_cell_amount;
 	m_positive    = r.m_positive;
-	m_arr.reset( new cell [m_cell_amount] );
-
-	for (size_t i = 0; i < m_cell_amount; ++i)
-	{
-		m_arr[i] = r.m_arr[i];
-	}
+	m_storage     = r.m_storage;
+	m_arr         = r.m_arr;
 
 	return *this;
 }
@@ -112,7 +100,8 @@ inline Big& Big::operator= (Big&& r)
 	m_length      = r.m_length;
 	m_cell_amount = r.m_cell_amount;
 	m_positive    = r.m_positive;
-	m_arr = std::move(r.m_arr) ;
+	m_storage     = std::move(r.m_storage);
+	m_arr         = m_storage.get();
 
 	return *this;
 }
@@ -125,6 +114,40 @@ inline Big& Big::operator= (const T& r)
 	*this = std::move(temp);
 	
 	return *this;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+inline Big::Big(const std::vector<Big::d_cell>& v)
+: m_length      (v.size() * CELL_LENGTH)
+, m_cell_amount (v.size())
+, m_storage     (new cell [v.size()], std::default_delete<cell[]>())
+, m_arr         (m_storage.get())
+, m_positive    (true)
+{
+	// a hack for constructors, the only place arr is allowed to chage
+	cell* nonconst_arr = const_cast<cell*>(m_arr);
+	for (size_t i = 0; i < m_cell_amount; ++i)
+		nonconst_arr[i] = static_cast<cell>(v[i]);
+}
+
+
+inline Big Big::copy() const
+{
+	Big r = *this;
+
+	r.m_storage.reset(new cell [m_cell_amount], std::default_delete<cell[]>());
+	r.m_arr = r.m_storage.get();
+
+	cell* nonconst_arr = const_cast<cell*>(r.m_arr);
+	for (size_t i = 0; i < m_cell_amount; ++i)
+	{
+		nonconst_arr[i] = m_arr[i];
+	}
+	
+	return r;
 }
 
 
@@ -163,6 +186,10 @@ inline bool Big::is_nil() const
 }
 inline Big::d_cell Big::operator[] (const size_t& index) const
 {
+	if (index > m_cell_amount)
+	{
+		throw std::runtime_error("Big: number index out of range");
+	}
 	return static_cast<d_cell>(m_arr[index]);
 }
 

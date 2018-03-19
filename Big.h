@@ -31,23 +31,24 @@ private:
 	friend std::istream& operator>> (std::istream& in, Big&);
 
 	using init_vect = std::vector<cell>;
-	using deleter_type = std::default_delete;
-	using ptr_type = std::unique_ptr<cell[], deleter_type>;
+	using deleter_type = std::default_delete<cell>;
+	using ptr_type = std::shared_ptr<cell>;
 
-	size_t   m_length; //amount of bytes
-	size_t   m_cell_amount;
-	ptr_type m_arr;
-	bool     m_positive;
-
+	size_t       m_length; //amount of bytes
+	size_t       m_cell_amount;
+	ptr_type     m_storage;
+	const cell * m_arr;
+	bool         m_positive;
 
 	//this constructor assumes that (d_cell)(cell)v[i] == v[i] for each i
 	Big(const std::vector<d_cell>& v);
 	Big(init_vect&& v);
 	// deleted constructors as to suppress compilation garbage
-	Big(std::vector<cell> v)        = delete;
-	Big(const std::vector<cell>& v) = delete;
-	Big(std::vector<cell>&& v)      = delete;
-	Big(const init_vect& v)         = delete;
+	Big(init_vect& v) = delete;
+	Big(const init_vect&) = delete;
+
+	//make a deep copy of number, meaning copy the arr
+	Big copy() const;
 
 	d_cell operator[] (const size_t& index) const;
 	cell   bit_at     (const size_t& index) const;
@@ -91,8 +92,6 @@ public:
 	Big  shift(int) const;
 
 	std::string dump(bool print_sign = true) const;
-	Big& restore(const std::string& str);
-	Big& restore(const char*        str);
 
 	Comp compare    (const Big& r) const;
 	bool operator== (const Big& r) const;

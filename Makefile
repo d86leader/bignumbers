@@ -16,7 +16,7 @@ specific-tests: run-specific run-power_test run-mult_test run-mod-test
 
 all: lib tests
 
-Big.o: Big.cpp Big.h Big-inline.inc custom_free_allocator
+Big.o: Big.cpp Big.h Big-inline.inc
 	${CXX} -c $< -o $@ $(CXXHEADERS)
 
 tests/%: tests/%.cpp Big.o
@@ -24,10 +24,6 @@ tests/%: tests/%.cpp Big.o
 
 run-%: tests/%
 	$<
-
-.PHONY: custom_free_allocator
-custom_free_allocator:
-	${MAKE} -C custom_free_allocator
 
 .PHONY: clean-tests
 clean-tests:
