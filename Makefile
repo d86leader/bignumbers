@@ -20,7 +20,7 @@ Big.o: Big.cpp Big.h Big-inline.inc
 	${CXX} -c $< -o $@ $(CXXHEADERS)
 
 tests/%: tests/%.cpp Big.o
-	${CXX} -g $^ -o $@ $(CXXHEADERS)
+	${CXX} -D DEBUG -g $^ -o $@ $(CXXHEADERS)
 
 run-%: tests/%
 	$<
