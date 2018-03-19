@@ -444,14 +444,32 @@ Big Big::operator* (const Big& r) const
 	if (   (!m_positive &&  r.m_positive)
 		|| ( m_positive && !r.m_positive))
 	{
-		auto&& t = this->atomic_product(r);
-		t.negate_this();
-		return t;
+		// molecular is faster but doesn't work for length of 1
+		if (m_cell_amount == 1 or r.m_cell_amount == 1)
+		{
+			auto&& t = this->atomic_product(r);
+			t.negate_this();
+			return t;
+		}
+		else
+		{
+			auto&& t = this->molecular_product(r);
+			t.negate_this();
+			return t;
+		}
 	}
 	if (!m_positive && !r.m_positive) {}
 		//the same as if both positive
 	
-	return this->atomic_product(r);
+	// molecular is faster but doesn't work for length of 1
+	if (m_cell_amount == 1 or r.m_cell_amount == 1)
+	{
+		return this->atomic_product(r);
+	}
+	else
+	{
+		return this->molecular_product(r);
+	}
 }
 
 
