@@ -158,8 +158,6 @@ inline Big Big::copy() const
 
 inline Big Big::slice(size_t index, size_t length) const
 {
-	std::cout << "slice(" << index << ", " << length <<") : ";
-	std::cout << dump() << " -> ";
 	if (index >= m_cell_amount)
 	{
 		return Big(0);
