@@ -5,7 +5,6 @@
 #include <vector>
 #include <cassert>
 #include <map>
-#include "custom_free_allocator/custom_free_allocator.h"
 
 
 class Big
@@ -31,8 +30,8 @@ private:
 	friend std::ostream& operator<< (std::ostream& out, const Big&);
 	friend std::istream& operator>> (std::istream& in, Big&);
 
-	using init_vect = std::vector<cell, custom_free_allocator<cell>>;
-	using deleter_type = custom_free_allocator<cell>::cleanup_deleter;
+	using init_vect = std::vector<cell>;
+	using deleter_type = std::default_delete;
 	using ptr_type = std::unique_ptr<cell[], deleter_type>;
 
 	size_t   m_length; //amount of bytes
