@@ -37,12 +37,12 @@ Big Big::shift(int amount) const
 	if (amount > 0)
 	{
 		//shifting left (adding zeroes)
-		auto r = vector<cell>(0);
+		auto r = Big::init_vect(0);
 		while (amount --> 0)
 			r.push_back(0);
 		for (size_t i = 0; i < m_cell_amount; ++i)
 			r.push_back(m_arr[i]);
-		return Big(r);
+		return Big(std::move(r));
 	}
 	else
 	{
@@ -54,19 +54,19 @@ Big Big::shift(int amount) const
 			return Big(0);
 		}
 
-		vector<cell> r;
+		Big::init_vect r;
 		for (size_t index = amount; index < m_cell_amount; ++index)
 		{
 			r.push_back(m_arr[index]);
 		}
-		return Big(r);
+		return Big(std::move(r));
 	}
 }
 
 
 Big Big::generate(size_t size)
 {
-	vector<cell> r;
+	Big::init_vect r;
 	// pushing tail digints, they can be zero
 	while (size --> 1)
 	{
@@ -80,7 +80,7 @@ Big Big::generate(size_t size)
 	}
 	r.push_back(t);
 
-	return Big(r);
+	return Big(std::move(r));
 }
 
 
@@ -133,43 +133,6 @@ namespace
 			return c - 'A' + 10;
 		return -1;
 	}
-}
-
-Big& Big::restore(const string& str) //aa ff b0 1c
-{
-	m_length = ( str.size() + 1 ) / 3; //each byte is two symbols && space save for the first one
-	m_cell_amount  = (m_length - 1 + CELL_LENGTH)/CELL_LENGTH;
-	m_positive   = true;
-	m_arr.reset( new cell [m_cell_amount] );
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		m_arr[i] = 0;
-
-	auto   j = str.size() - 1;
-	size_t i = 0;
-	size_t shifted = 0;
-
-	for(; j > 1; j -= 3)
-	{
-		auto byte = (digit(str.at(j-1)) * 16) + digit(str.at(j));
-		m_arr[i] <<= 8;
-		m_arr[i] += byte;
-		shifted += 8;
-		if (shifted == Big::CELL_BITS)
-		{
-			shifted = 0;
-			i += 1;
-		}
-	}
-	auto byte = (digit(str.at(j-1)) * 16) + digit(str.at(j));
-	m_arr[i] <<= 8;
-	m_arr[i] += byte;
-
-	return *this;
-}
-Big& Big::restore(const char* str)
-{
-	string s {str};
-	return this->restore(s);
 }
 
 
@@ -271,7 +234,7 @@ Big Big::operator* (const d_cell& r) const
 Big Big::atomic_plus(const Big& r) const
 {
 	auto bigger_m_array =
-		(m_cell_amount > r.m_cell_amount) ? m_arr.get() : r.m_arr.get();
+		(m_cell_amount > r.m_cell_amount) ? m_arr : r.m_arr;
 	auto high_index = std::max(m_cell_amount, r.m_cell_amount);
 	auto low_index  = std::min(m_cell_amount, r.m_cell_amount);
 	auto result = vector<d_cell>(high_index+1, 0);
@@ -320,10 +283,12 @@ Big Big::atomic_minus(const Big& r) const
 		return t;
 	}
 
-	Big this_copy = *this;
+	// create a further deleted copy of this so we can modify its arr
+	Big this_copy = this->copy();
+	cell* arr = const_cast<cell*>(this_copy.m_arr);
 
 	//now it's just a subtraction a - b with a >= 0, b >= 0 and a > b
-	auto result = vector<cell>(m_cell_amount);
+	auto result = Big::init_vect(m_cell_amount);
 	size_t i;
 	for (i = 0; i < r.m_cell_amount; ++i)
 	{
@@ -334,14 +299,14 @@ Big Big::atomic_minus(const Big& r) const
 			//lend the 1
 			for (auto j = i + 1; ; ++j)
 			{
-				if (this_copy.m_arr[j] != 0)
+				if (arr[j] != 0)
 				{
-					this_copy.m_arr[j] -= 1;
+					arr[j] -= 1;
 					break;
 				}
 				else
 				{
-					this_copy.m_arr[j] = CELL_MAXVALUE;
+					arr[j] = CELL_MAXVALUE;
 				}
 			}
 		}
@@ -358,7 +323,7 @@ Big Big::atomic_minus(const Big& r) const
 	
 	if (result.size() == 0)
 		return Big ();
-	return Big {result};
+	return Big {std::move(result)};
 }
 
 
@@ -492,7 +457,7 @@ Big Big::operator* (const Big& r) const
 pair<Big, Big> Big::quot_rem_small(const Big& r) const
 {
 	d_cell d = r.m_arr[0];
-	vector<cell> quot_i;
+	Big::init_vect quot_i;
 	d_cell current = 0;
 
 	if (m_arr[m_cell_amount - 1] == 0)
@@ -518,10 +483,9 @@ pair<Big, Big> Big::quot_rem_small(const Big& r) const
 	++b;
 
 	//invert the quotient
-	auto q_vec = vector<cell>(quot_i.rbegin(), b);
-	auto quot  = Big(q_vec);
-	Big rem;
-	rem = current;
+	auto q_vec = Big::init_vect(quot_i.rbegin(), b);
+	Big quot (std::move(q_vec));
+	Big rem = current;
 	return std::make_pair( quot, rem );
 }
 
@@ -542,7 +506,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	}
 
 	//initialization
-	vector<cell> quot;       //result vector
+	Big::init_vect quot;       //result vector
 	d_cell b    = Big::bitmodule(Big::CELL_BITS); //oftenly used module
 	size_t n    = v.m_cell_amount;
 	size_t m    = u.m_cell_amount - n;
@@ -652,11 +616,11 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	++q_rend;
 
 	//invert the quotient
-	auto r_quot = vector<cell>(quot.rbegin(), q_rend);
+	auto r_quot = Big::init_vect(quot.rbegin(), q_rend);
 
 
 	//denormalization
-	auto quotient  = Big(r_quot);
+	auto quotient  = Big(std::move(r_quot));
 	if (debug)
 	{
 		std::cout <<"calling " << u << " / " << hex <<d <<endl;
@@ -815,12 +779,12 @@ std::istream& operator >> (std::istream& in, Big& number)
 
 	auto m_cell_amount = split_all(s, Big::CELL_LENGTH * 2);
 
-	vector<cell> r;
+	Big::init_vect r;
 	for (auto i = m_cell_amount.begin(); i != m_cell_amount.end(); ++i)
 	{
 		r.push_back(unhex(*i));
 	}
-	number = Big(r);
+	number = Big(std::move(r));
 
 	return in;
 }
@@ -862,14 +826,22 @@ Big Big::exponentiate_rtl(const Big& r, const Big& modulo) const
 
 Big Big::slice(size_t index, size_t length) const
 {
-	vector<cell> r;
+	Big r;
+	r.m_storage = m_storage;
+	r.m_arr = m_arr + index; //start observing elements since index
+	r.m_positive = true; //no sense in negative slice
 
-	size_t end = index + length < m_cell_amount ?
-		index + length : m_cell_amount - 1;
-
-	for (; index < end; ++index)
+	// determine the length of slice
+	if (index + length < m_cell_amount)
 	{
-		r.push_back(m_arr[index]);
+		// all ok, use supplied length
+		r.m_cell_amount = length;
 	}
-	return Big(r);
+	else
+	{
+		// example: length = m_cell_amount, index = 0
+		r.m_cell_amount = m_cell_amount - index;
+	}
+	r.m_length = m_cell_amount * 8;
+	return r;
 }

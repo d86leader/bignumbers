@@ -15,6 +15,7 @@ int main(int argc, char** _argv)
 
 	Big a;
 	Big b;
+	Big diff;
 
 	try
 	{
@@ -30,7 +31,7 @@ int main(int argc, char** _argv)
 			a = Big::generate(asize);
 			b = Big::generate(bsize);
 
-			auto diff = a - b;
+			diff = a - b;
 
 			if(diff + b != a)
 			{
@@ -43,8 +44,9 @@ int main(int argc, char** _argv)
 	catch (const char* errtype)
 	{
 		std::cout << "error when " << errtype <<". Values:\n";
-		std::cout << '\t' << "a:"            << a.dump() << std::endl;
-		std::cout << '\t' << "b:"            << b.dump() << std::endl;
+		std::cout << "a: "    << a.dump() << std::endl;
+		std::cout << "b: "    << b.dump() << std::endl;
+		std::cout << "diff: " << diff.dump() << std::endl;
 		return 1;
 	}
 
