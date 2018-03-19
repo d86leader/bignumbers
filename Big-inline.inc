@@ -34,7 +34,7 @@ inline Big::Big(Big&& r)
 : m_length      (r.m_length)
 , m_cell_amount (r.m_cell_amount)
 , m_storage     (std::move(r.m_storage))
-, m_arr         (m_storage.get())
+, m_arr         (r.m_arr)
 , m_positive    (r.m_positive)
 {}
 
@@ -101,7 +101,7 @@ inline Big& Big::operator= (Big&& r)
 	m_cell_amount = r.m_cell_amount;
 	m_positive    = r.m_positive;
 	m_storage     = std::move(r.m_storage);
-	m_arr         = m_storage.get();
+	m_arr         = r.m_arr;
 
 	return *this;
 }
@@ -138,8 +138,10 @@ inline Big Big::copy() const
 {
 	Big r = *this;
 
+	auto ptr_diff = m_arr - m_storage.get();
+
 	r.m_storage.reset(new cell [m_cell_amount], std::default_delete<cell[]>());
-	r.m_arr = r.m_storage.get();
+	r.m_arr = r.m_storage.get() + ptr_diff;
 
 	cell* nonconst_arr = const_cast<cell*>(r.m_arr);
 	for (size_t i = 0; i < m_cell_amount; ++i)
@@ -156,6 +158,8 @@ inline Big Big::copy() const
 
 inline Big Big::slice(size_t index, size_t length) const
 {
+	std::cout << "slice(" << index << ", " << length <<") : ";
+	std::cout << dump() << " -> ";
 	if (index >= m_cell_amount)
 	{
 		return Big(0);
