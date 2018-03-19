@@ -46,6 +46,9 @@ private:
 	// deleted constructors as to suppress compilation garbage
 	Big(init_vect& v) = delete;
 	Big(const init_vect&) = delete;
+	// WARNING: whenever init_vect is different form vector<cell>,
+	// constructors from vector<cell> should be deleted either
+	// i could not achieve this with metaprogramming
 
 	//make a deep copy of number, meaning copy the arr
 	Big copy() const;
