@@ -439,13 +439,14 @@ Big Big::operator- (const Big& r) const
 
 Big Big::operator* (const Big& r) const
 {
+	constexpr size_t atomic_threshold = 1;
 	if (r.is_nil() || this->is_nil())
 		return Big(0);
 	if (   (!m_positive &&  r.m_positive)
 		|| ( m_positive && !r.m_positive))
 	{
 		// molecular is faster but doesn't work for length of 1
-		if (m_cell_amount == 1 or r.m_cell_amount == 1)
+		if (m_cell_amount <= atomic_threshold or r.m_cell_amount <= atomic_threshold)
 		{
 			auto&& t = this->atomic_product(r);
 			t.negate_this();
@@ -462,7 +463,7 @@ Big Big::operator* (const Big& r) const
 		//the same as if both positive
 	
 	// molecular is faster but doesn't work for length of 1
-	if (m_cell_amount == 1 or r.m_cell_amount == 1)
+	if (m_cell_amount == atomic_threshold or r.m_cell_amount == atomic_threshold)
 	{
 		return this->atomic_product(r);
 	}
