@@ -370,20 +370,20 @@ Big Big::molecular_product(const Big& r) const
 	// A = qa, B = ws
 	// tr = ANN + (C - A - B)N + B
 
-	Big this_lower  = this->slice(0, slice_length);
-	Big this_higher = this->slice(slice_length, all_length);
-	Big r_lower     = r.slice(0, slice_length);
-	Big r_higher    = r.slice(slice_length, all_length);
+	Big&& this_lower  = this->slice(0, slice_length);
+	Big&& this_higher = this->slice(slice_length, all_length);
+	Big&& r_lower     = r.slice(0, slice_length);
+	Big&& r_higher    = r.slice(slice_length, all_length);
 
-	Big quad_product =
+	Big&& quad_product =
 		(this_lower + this_higher) *
 		(r_lower + r_higher);
 
-	Big high_product = this_higher * r_higher;
-	Big low_product  = this_lower * r_lower;
-	Big middle = quad_product - high_product - low_product;
+	Big&& high_product = this_higher * r_higher;
+	Big&& low_product  = this_lower * r_lower;
+	Big&& middle = quad_product - high_product - low_product;
 
-	Big result =
+	Big&& result =
 		high_product.shift(slice_length*2) +
 		middle.shift(slice_length) +
 		low_product;
