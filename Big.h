@@ -69,7 +69,9 @@ private:
 	Big atomic_plus(const Big&) const;
 	Big atomic_minus(const Big&) const;
 	Big atomic_product(const Big&) const;
+public:
 	Big molecular_product(const Big&) const;
+private:
 
 	// disregards the sign. Right-to-left algorithm
 	Big exponentiate_rtl(const Big&, const Big&) const;
