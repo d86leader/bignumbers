@@ -358,6 +358,10 @@ Big Big::molecular_product(const Big& r) const
 		m_cell_amount : r.m_cell_amount;
 
 	size_t slice_length = all_length / 2;
+	if (all_length % 2 != 0)
+	{
+		slice_length += 1;
+	}
 
 	//this = qN + w
 	//r    = aN + s
