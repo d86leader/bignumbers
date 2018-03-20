@@ -233,8 +233,9 @@ Big Big::operator* (const d_cell& r) const
 
 Big Big::atomic_plus(const Big& r) const
 {
-	auto bigger_m_array =
-		(m_cell_amount > r.m_cell_amount) ? m_arr : r.m_arr;
+	const Big& bigger_number =
+		(m_cell_amount > r.m_cell_amount) ? *this : r;
+
 	auto high_index = std::max(m_cell_amount, r.m_cell_amount);
 	auto low_index  = std::min(m_cell_amount, r.m_cell_amount);
 	auto result = vector<d_cell>(high_index+1, 0);
@@ -252,7 +253,7 @@ Big Big::atomic_plus(const Big& r) const
 	}
 	for (; i < high_index; ++i)
 	{
-		result[i] += static_cast<d_cell>(bigger_m_array[i]);
+		result[i] += static_cast<d_cell>(bigger_number.at(i));
 		if (overflown(result[i]))
 		{
 			result[i+1] += 1;
