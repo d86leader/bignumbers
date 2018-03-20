@@ -234,7 +234,7 @@ inline Big::cell Big::bit_at (const size_t& index) const
 	}
 	size_t cell_ind = index / Big::CELL_BITS;
 	size_t bit_ind = index % Big::CELL_BITS;
-	cell num = m_arr[cell_ind];
+	cell num = at(cell_ind);
 	return (num >> bit_ind) & 1;
 }
 
