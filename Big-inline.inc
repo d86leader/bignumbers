@@ -138,15 +138,13 @@ inline Big Big::copy() const
 {
 	Big r = *this;
 
-	auto ptr_diff = m_arr - m_storage.get();
-
 	r.m_storage.reset(new cell [m_cell_amount], std::default_delete<cell[]>());
-	r.m_arr = r.m_storage.get() + ptr_diff;
+	r.m_arr = r.m_storage.get();
 
 	cell* nonconst_arr = const_cast<cell*>(r.m_arr);
 	for (size_t i = 0; i < m_cell_amount; ++i)
 	{
-		nonconst_arr[i] = m_arr[i];
+		nonconst_arr[i] = at(i);
 	}
 	
 	return r;
