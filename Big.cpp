@@ -57,7 +57,7 @@ Big Big::shift(int amount) const
 		Big::init_vect r;
 		for (size_t index = amount; index < m_cell_amount; ++index)
 		{
-			r.push_back(m_arr[index]);
+			r.push_back(at(index));
 		}
 		return Big(std::move(r));
 	}
@@ -483,7 +483,7 @@ pair<Big, Big> Big::quot_rem_small(const Big& r) const
 	Big::init_vect quot_i;
 	d_cell current = 0;
 
-	if (m_arr[m_cell_amount - 1] == 0)
+	if (at(m_cell_amount - 1) == 0)
 	{
 		throw "checking for leading zero";
 	}
@@ -519,7 +519,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	if (*this < divider)
 		return std::make_pair(Big(0), *this);
 	//normalization
-	d_cell d = Big::bitmodule(Big::CELL_BITS) / ( divider.m_arr[divider.m_cell_amount-1] + 1 );
+	d_cell d = Big::bitmodule(Big::CELL_BITS) / ( divider.at(divider.m_cell_amount-1) + 1 );
 	Big u = *this * d;   //normalized divident
 	Big v = divider * d; //normalized divisor
 
@@ -539,13 +539,13 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		if (i == 0)
 			return 0;
 		else
-			return u.m_arr[ u_ini_size - i ];
+			return u.at( u_ini_size - i );
 	};
 	auto get   = [](const Big& a, const size_t& i) -> d_cell{
 		if(i == 0)
 			return 0;
 		else
-			return a.m_arr[a.m_cell_amount - i];
+			return a.at(a.m_cell_amount - i);
 	};
 
 	assert(get_u(1) != 0);
@@ -784,7 +784,7 @@ std::ostream& operator << (std::ostream& out, const Big& number)
 			out.width(Big::CELL_LENGTH * 2);
 
 		out.fill('0');
-		out << number.m_arr[i-1];
+		out << number.at(i-1);
 	}
 	out << dec;
 	return out;
