@@ -40,6 +40,7 @@ private:
 
 	size_t       m_length; //amount of bytes
 	size_t       m_cell_amount;
+	size_t       m_first_nonzero;
 	ptr_type     m_storage;
 	const cell * m_arr;
 	bool         m_positive;
