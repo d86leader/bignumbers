@@ -284,9 +284,8 @@ Big Big::atomic_minus(const Big& r) const
 		return t;
 	}
 
-	// create a further deleted copy of this so we can modify its arr
+	// create a further deleted copy of this so we can modify its digits
 	Big this_copy = this->copy();
-	cell* arr = const_cast<cell*>(this_copy.m_arr);
 
 	//now it's just a subtraction a - b with a >= 0, b >= 0 and a > b
 	auto result = Big::init_vect(m_cell_amount);
@@ -300,14 +299,14 @@ Big Big::atomic_minus(const Big& r) const
 			//lend the 1
 			for (auto j = i + 1; ; ++j)
 			{
-				if (arr[j] != 0)
+				if (this_copy.at(j) != 0)
 				{
-					arr[j] -= 1;
+					this_copy.mut_ref_at(j) -= 1;
 					break;
 				}
 				else
 				{
-					arr[j] = CELL_MAXVALUE;
+					this_copy.mut_ref_at(j) = CELL_MAXVALUE;
 				}
 			}
 		}
