@@ -57,7 +57,6 @@ private:
 	//make a deep copy of number, meaning copy the arr
 	Big copy() const;
 
-	d_cell      operator[] (const size_t& index) const;
 	cell        bit_at     (const size_t& index) const;
 	const cell& at         (const size_t& index) const;
 

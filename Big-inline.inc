@@ -217,14 +217,6 @@ inline bool Big::is_nil() const
 {
 	return m_cell_amount == 0;
 }
-inline Big::d_cell Big::operator[] (const size_t& index) const
-{
-	if (index > m_cell_amount)
-	{
-		throw std::runtime_error("Big: number index out of range");
-	}
-	return static_cast<d_cell>(m_arr[index]);
-}
 
 inline Big::cell Big::bit_at (const size_t& index) const
 {
