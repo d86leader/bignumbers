@@ -42,8 +42,8 @@ inline Big::Big(Big&& r)
 inline Big::Big(init_vect&& v)
 : m_length      (v.size() * CELL_LENGTH)
 , m_cell_amount (v.size())
-, m_storage     (new cell [v.size()])
-, m_arr         (m_storage.get())
+, m_storage     (nullptr)
+, m_arr         (nullptr)
 , m_positive    (true)
 {
 	// find out the last non-zero element
@@ -56,6 +56,10 @@ inline Big::Big(init_vect&& v)
 		*this = Big(0);
 		return;
 	}
+
+	m_storage.reset(new cell [last]);
+	m_arr = m_storage.get();
+
 	// a hack for constructors, the only place arr is allowed to chage
 	cell* nonconst_arr = const_cast<cell*>(m_arr);
 	for (size_t i = 0; i < last; ++i)
@@ -135,8 +139,8 @@ inline Big& Big::operator= (const T& r)
 inline Big::Big(const std::vector<Big::d_cell>& v)
 : m_length      (v.size() * CELL_LENGTH)
 , m_cell_amount (v.size())
-, m_storage     (new cell [v.size()], std::default_delete<cell[]>())
-, m_arr         (m_storage.get())
+, m_storage     (nullptr)
+, m_arr         (nullptr)
 , m_positive    (true)
 {
 	// find out the last non-zero element
@@ -149,6 +153,10 @@ inline Big::Big(const std::vector<Big::d_cell>& v)
 		*this = Big(0);
 		return;
 	}
+
+	m_storage.reset(new cell [last]);
+	m_arr = m_storage.get();
+
 	// a hack for constructors, the only place arr is allowed to chage
 	cell* nonconst_arr = const_cast<cell*>(m_arr);
 	for (size_t i = 0; i < last; ++i)
