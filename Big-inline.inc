@@ -237,6 +237,18 @@ inline const Big::cell& Big::at (const size_t& index) const
 	return m_arr[index];
 }
 
+inline Big::cell& Big::mut_ref_at (const size_t& index)
+{
+	if (index > m_cell_amount)
+	{
+		throw std::runtime_error("Big: number index out of range");
+	}
+	// as this method requires this to be nonconst,
+	// casting const away is ok
+	cell* nonconst_arr = const_cast<cell*>(m_arr);
+	return nonconst_arr[index];
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -59,6 +59,7 @@ private:
 
 	cell        bit_at     (const size_t& index) const;
 	const cell& at         (const size_t& index) const;
+	cell&       mut_ref_at (const size_t& index);
 
 	//those divisions disregard the sign
 	std::pair<Big, Big> quot_rem_big  (const Big& r) const;
