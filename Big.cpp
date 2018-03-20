@@ -41,7 +41,7 @@ Big Big::shift(int amount) const
 		while (amount --> 0)
 			r.push_back(0);
 		for (size_t i = 0; i < m_cell_amount; ++i)
-			r.push_back(m_arr[i]);
+			r.push_back(at(i));
 		return Big(std::move(r));
 	}
 	else
@@ -110,11 +110,11 @@ string Big::dump(bool print_sign) const
 	{
 		// as digit may be a char type, we cast it to a d_cell which is
 		// certainly a number type
-		d_cell digit = static_cast<d_cell>(m_arr[i]);
+		d_cell digit = static_cast<d_cell>(at(i));
 		dumpstream << digit <<'_'
 			<< std::setfill('0') << std::setw(CELL_LENGTH*2);;
 	}
-	d_cell digit = static_cast<d_cell>(m_arr[0]);
+	d_cell digit = static_cast<d_cell>(at(0));
 	dumpstream << digit << std::dec;
 
 	string r {dumpstream.str()};
@@ -152,11 +152,11 @@ Big::Comp Big::atomic_compare(const Big& r) const
 	for (size_t pre_i = m_cell_amount; pre_i > 0; --pre_i)
 	{
 		size_t i = pre_i - 1;
-		if (m_arr[i] > r.m_arr[i])
+		if (at(i) > r.at(i))
 		{
 			return Comp::LeftGreater;
 		}
-		if (m_arr[i] < r.m_arr[i])
+		if (at(i) < r.at(i))
 		{
 			return Comp::RightGreater;
 		}
@@ -242,8 +242,8 @@ Big Big::atomic_plus(const Big& r) const
 	size_t i;
 	for (i = 0; i < low_index; ++i)
 	{
-		result[i] += static_cast<d_cell>(m_arr[i])
-		           + static_cast<d_cell>(r.m_arr[i]);
+		result[i] += static_cast<d_cell>(at(i))
+		           + static_cast<d_cell>(r.at(i));
 		if (overflown(result[i]))
 		{
 			result[i+1] += 1;
@@ -292,9 +292,9 @@ Big Big::atomic_minus(const Big& r) const
 	size_t i;
 	for (i = 0; i < r.m_cell_amount; ++i)
 	{
-		if (this_copy.m_arr[i] < r.m_arr[i])
+		if (this_copy.at(i) < r.at(i))
 		{
-			result.at(i) = Big::bitmodule(Big::CELL_BITS) + static_cast<d_cell>(this_copy.m_arr[i]) - r.m_arr[i];
+			result.at(i) = Big::bitmodule(Big::CELL_BITS) + static_cast<d_cell>(this_copy.at(i)) - r.at(i);
 
 			//lend the 1
 			for (auto j = i + 1; ; ++j)
@@ -312,11 +312,11 @@ Big Big::atomic_minus(const Big& r) const
 		}
 		else
 		{
-			result.at(i) = this_copy.m_arr[i] - r.m_arr[i];
+			result.at(i) = this_copy.at(i) - r.at(i);
 		}
 	}
 	for (; i < m_cell_amount; ++i)
-		result.at(i) = this_copy.m_arr[i];
+		result.at(i) = this_copy.at(i);
 
 	while (result.size() > 0 && result.back() == 0)
 		result.pop_back();
@@ -338,7 +338,7 @@ Big Big::atomic_product(const Big& r) const
 		d_cell t = 0;
 		for (size_t j = 0; j < r.m_cell_amount; ++j)
 		{
-			t = static_cast<d_cell>(m_arr[i]) * static_cast<d_cell>(r.m_arr[j])
+			t = static_cast<d_cell>(at(i)) * static_cast<d_cell>(r.at(j))
 			    + t / Big::bitmodule(Big::CELL_BITS) + result.at(i + j);
 			result.at(i + j) = t % Big::bitmodule(Big::CELL_BITS);
 		}
@@ -479,7 +479,7 @@ Big Big::operator* (const Big& r) const
 
 pair<Big, Big> Big::quot_rem_small(const Big& r) const
 {
-	d_cell d = r.m_arr[0];
+	d_cell d = r.at(0);
 	Big::init_vect quot_i;
 	d_cell current = 0;
 
@@ -493,7 +493,7 @@ pair<Big, Big> Big::quot_rem_small(const Big& r) const
 		auto i = index - 1;
 
 		current *= Big::bitmodule(Big::CELL_BITS);
-		current += m_arr[i];
+		current += at(i);
 
 		quot_i.push_back(current / d);
 		current -= quot_i.back() * d;
