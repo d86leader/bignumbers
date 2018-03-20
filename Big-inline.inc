@@ -46,6 +46,7 @@ inline Big::Big(init_vect&& v)
 , m_arr         (m_storage.get())
 , m_positive    (true)
 {
+	// a hack for constructors, the only place arr is allowed to chage
 	cell* nonconst_arr = const_cast<cell*>(m_arr);
 	for (size_t i = 0; i < m_cell_amount; ++i)
 		nonconst_arr[i] = static_cast<cell>(v[i]);
@@ -74,6 +75,7 @@ inline Big::Big(const T& r)
 	m_length = m_cell_amount * CELL_LENGTH;
 	m_storage.reset( new cell [m_cell_amount], std::default_delete<cell[]>() );
 	m_arr = m_storage.get();
+	// a hack for constructors, the only place arr is allowed to chage
 	cell* nonconst_arr = const_cast<cell*>(m_arr);
 	for (size_t i = 0; i < m_cell_amount; ++i)
 		nonconst_arr[i] = result[i];
@@ -141,6 +143,7 @@ inline Big Big::copy() const
 	r.m_storage.reset(new cell [m_cell_amount], std::default_delete<cell[]>());
 	r.m_arr = r.m_storage.get();
 
+	// a hack for constructors, the only place arr is allowed to chage
 	cell* nonconst_arr = const_cast<cell*>(r.m_arr);
 	for (size_t i = 0; i < m_cell_amount; ++i)
 	{
