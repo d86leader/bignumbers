@@ -338,7 +338,7 @@ Big Big::atomic_product(const Big& r) const
 		d_cell t = 0;
 		for (size_t j = 0; j < r.m_cell_amount; ++j)
 		{
-			t = static_cast<d_cell>(m_arr[i]) * static_cast<d_cell>(r.m_arr[j])
+			t = (*this)[i] * r[j]
 			    + t / Big::bitmodule(Big::CELL_BITS) + result.at(i + j);
 			result.at(i + j) = t % Big::bitmodule(Big::CELL_BITS);
 		}
