@@ -40,11 +40,7 @@ inline Big::Big(Big&& r)
 
 
 inline Big::Big(init_vect&& v)
-: m_length      (v.size() * CELL_LENGTH)
-, m_cell_amount (v.size())
-, m_storage     (nullptr)
-, m_arr         (nullptr)
-, m_positive    (true)
+: Big()
 {
 	// find out the last non-zero element
 	size_t last = v.size();
@@ -53,10 +49,11 @@ inline Big::Big(init_vect&& v)
 	if (last == 0)
 	{
 		// create a new zero number
-		*this = Big(0);
 		return;
 	}
 
+	m_length = last * CELL_LENGTH;
+	m_cell_amount = last;
 	m_storage.reset(new cell [last]);
 	m_arr = m_storage.get();
 
@@ -68,30 +65,27 @@ inline Big::Big(init_vect&& v)
 
 
 inline Big::Big(const std::vector<Big::d_cell>& v)
-: m_length      (v.size() * CELL_LENGTH)
-, m_cell_amount (v.size())
-, m_storage     (nullptr)
-, m_arr         (nullptr)
-, m_positive    (true)
+: Big()
 {
 	// find out the last non-zero element
 	size_t last = v.size();
-	while (last > 0 and v[last-1] == 0) last -= 1;
+	while (last > 0 and v.at(last-1) == 0) last -= 1;
 	// this will rarely happen, but the case needs to be caught
 	if (last == 0)
 	{
 		// create a new zero number
-		*this = Big(0);
 		return;
 	}
 
+	m_length = last * CELL_LENGTH;
+	m_cell_amount = last;
 	m_storage.reset(new cell [last]);
 	m_arr = m_storage.get();
 
 	// a hack for constructors, the only place arr is allowed to chage
 	cell* nonconst_arr = const_cast<cell*>(m_arr);
 	for (size_t i = 0; i < last; ++i)
-		nonconst_arr[i] = static_cast<cell>(v[i]);
+		nonconst_arr[i] = static_cast<cell>(v.at(i));
 }
 
 
