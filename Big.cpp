@@ -260,12 +260,8 @@ Big Big::atomic_plus(const Big& r) const
 			result[i]   %= Big::bitmodule(Big::CELL_BITS);
 		}
 	}
-	if (result.back() == 0)
-	{
-		result.pop_back();
-	}
 
-	return Big {result};
+	return Big(std::move(result));
 }
 
 
@@ -345,10 +341,8 @@ Big Big::atomic_product(const Big& r) const
 		result.at(i + r.m_cell_amount) = t / Big::bitmodule(Big::CELL_BITS);
 	}
 
-	while(result.size() > 0 && result.back() == 0)
-		result.pop_back();
 	
-	return Big(result);
+	return Big(std::move(result));
 }
 
 
