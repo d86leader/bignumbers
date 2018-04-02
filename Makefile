@@ -3,7 +3,7 @@ CXXHEADERS = -std=c++1y -I. -Wall -Wextra -O3
 lib: Big.o
 
 .PHONY: tests
-tests: run-minus_test run-main run-molecular_product
+tests: run-minus_test run-molecular_product run-main
 
 .PHONY: latest-test
 latest-test: run-molecular_product
@@ -27,8 +27,8 @@ run-%: tests/%
 
 .PHONY: clean-tests
 clean-tests:
-	rm tests/main tests/specific tests/mod-test tests/power_test tests/minus_test
+	rm -f tests/main tests/specific tests/mod-test tests/power_test tests/minus_test
 
 .PHONY: clean
 clean: clean-tests
-	rm Big.o
+	rm -f Big.o

@@ -21,9 +21,9 @@ int main(int argc, char** _argv)
 
 	try
 	{
-		for (int i = 0; i < 10000; ++i)
+		for (int i = 0; i < 300; ++i)
 		{
-			if (i % 500 == 0)
+			if (i % 50 == 0)
 			{
 				std::cout << "on test number "<<i<<std::endl;
 			}
@@ -33,8 +33,8 @@ int main(int argc, char** _argv)
 			a = Big::generate(asize);
 			b = Big::generate(bsize);
 
-			prod = a.atomic_product(b);
 			mol_prod = a.molecular_product(b);
+			prod = a.atomic_product(b);
 
 			if(prod != mol_prod)
 			{

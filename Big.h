@@ -40,14 +40,17 @@ private:
 
 	size_t       m_length; //amount of bytes
 	size_t       m_cell_amount;
+	size_t       m_first_nonzero;
 	ptr_type     m_storage;
 	const cell * m_arr;
 	bool         m_positive;
 
 	//this constructor assumes that (d_cell)(cell)v[i] == v[i] for each i
-	Big(const std::vector<d_cell>& v);
 	Big(init_vect&& v);
+	template<typename Iter>
+	Big(Iter begin, Iter end);
 	// deleted constructors as to suppress compilation garbage
+	Big(const std::vector<d_cell>& v) = delete;
 	Big(init_vect& v) = delete;
 	Big(const init_vect&) = delete;
 	// WARNING: whenever init_vect is different form vector<cell>,
@@ -57,8 +60,9 @@ private:
 	//make a deep copy of number, meaning copy the arr
 	Big copy() const;
 
-	d_cell operator[] (const size_t& index) const;
 	cell   bit_at     (const size_t& index) const;
+	cell   at         (const size_t& index) const;
+	cell&  mut_ref_at (const size_t& index);
 
 	//those divisions disregard the sign
 	std::pair<Big, Big> quot_rem_big  (const Big& r) const;
@@ -77,6 +81,10 @@ private:
 
 	// disregards the sign. Right-to-left algorithm
 	Big exponentiate_rtl(const Big&, const Big&) const;
+
+	// efficient shifts
+	Big shift_l(int) const;
+	Big shift_r(int) const;
 
 public:
 	static Big generate(size_t size);

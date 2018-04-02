@@ -13,42 +13,86 @@ inline constexpr Big::d_cell Big::bitmodule(size_t bits)
 
 
 inline Big::Big()
-: m_length      (0)
-, m_cell_amount (0) // clength/CELL_LENGTH rounded up
-, m_storage     (nullptr)
-, m_arr         (nullptr)
-, m_positive    (true)
+: m_length        (0)
+, m_cell_amount   (0) // clength/CELL_LENGTH rounded up
+, m_first_nonzero (0)
+, m_storage       (nullptr)
+, m_arr           (nullptr)
+, m_positive      (true)
 {}
 
 
 inline Big::Big(const Big& r)
-: m_length      (r.m_length)
-, m_cell_amount (r.m_cell_amount)
-, m_storage     (r.m_storage)
-, m_arr         (r.m_arr)
-, m_positive    (r.m_positive)
+: m_length        (r.m_length)
+, m_cell_amount   (r.m_cell_amount)
+, m_first_nonzero (r.m_first_nonzero)
+, m_storage       (r.m_storage)
+, m_arr           (r.m_arr)
+, m_positive      (r.m_positive)
 {
 }
 
 inline Big::Big(Big&& r)
-: m_length      (r.m_length)
-, m_cell_amount (r.m_cell_amount)
-, m_storage     (std::move(r.m_storage))
-, m_arr         (r.m_arr)
-, m_positive    (r.m_positive)
+: m_length        (r.m_length)
+, m_cell_amount   (r.m_cell_amount)
+, m_first_nonzero (r.m_first_nonzero)
+, m_storage       (std::move(r.m_storage))
+, m_arr           (r.m_arr)
+, m_positive      (r.m_positive)
 {}
 
 
 inline Big::Big(init_vect&& v)
-: m_length      (v.size() * CELL_LENGTH)
-, m_cell_amount (v.size())
-, m_storage     (new cell [v.size()])
-, m_arr         (m_storage.get())
-, m_positive    (true)
+: Big()
 {
+	// find out the last non-zero element
+	size_t last = v.size();
+	while (last > 0 and v[last-1] == 0) last -= 1;
+	// this will rarely happen, but the case needs to be caught
+	if (last == 0)
+	{
+		// create a new zero number
+		return;
+	}
+
+	m_length = last * CELL_LENGTH;
+	m_cell_amount = last;
+	m_storage.reset(new cell [last]);
+	m_arr = m_storage.get();
+
+	// a hack for constructors, the only place arr is allowed to chage
 	cell* nonconst_arr = const_cast<cell*>(m_arr);
-	for (size_t i = 0; i < m_cell_amount; ++i)
+	for (size_t i = 0; i < last; ++i)
 		nonconst_arr[i] = static_cast<cell>(v[i]);
+}
+
+
+template<typename Iter>
+inline Big::Big(Iter begin, Iter end)
+: Big()
+{
+	Iter last = end - 1;
+	while (last != begin and *last == 0)
+	{
+		--last; --end;
+	}
+	if (last == begin and *last == 0)
+	{
+		// create a zero number
+		return;
+	}
+
+	m_cell_amount = end - begin;
+	m_length = m_cell_amount * CELL_LENGTH;
+	m_storage.reset( new cell [m_cell_amount]);
+	m_arr = m_storage.get();
+
+	// a hack for constructors, the only place arr is allowed to chage
+	cell* nonconst_arr = const_cast<cell*>(m_arr);
+	for (size_t i = 0; begin != end; ++begin, ++i)
+	{
+		nonconst_arr[i] = static_cast<cell>(*begin);
+	}
 }
 
 
@@ -74,6 +118,7 @@ inline Big::Big(const T& r)
 	m_length = m_cell_amount * CELL_LENGTH;
 	m_storage.reset( new cell [m_cell_amount], std::default_delete<cell[]>() );
 	m_arr = m_storage.get();
+	// a hack for constructors, the only place arr is allowed to chage
 	cell* nonconst_arr = const_cast<cell*>(m_arr);
 	for (size_t i = 0; i < m_cell_amount; ++i)
 		nonconst_arr[i] = result[i];
@@ -120,33 +165,20 @@ inline Big& Big::operator= (const T& r)
 ////////////////////////////////////////////////////////////////////////////////
 
 
-inline Big::Big(const std::vector<Big::d_cell>& v)
-: m_length      (v.size() * CELL_LENGTH)
-, m_cell_amount (v.size())
-, m_storage     (new cell [v.size()], std::default_delete<cell[]>())
-, m_arr         (m_storage.get())
-, m_positive    (true)
-{
-	// a hack for constructors, the only place arr is allowed to chage
-	cell* nonconst_arr = const_cast<cell*>(m_arr);
-	for (size_t i = 0; i < m_cell_amount; ++i)
-		nonconst_arr[i] = static_cast<cell>(v[i]);
-}
-
-
 inline Big Big::copy() const
 {
 	Big r = *this;
 
-	auto ptr_diff = m_arr - m_storage.get();
-
 	r.m_storage.reset(new cell [m_cell_amount], std::default_delete<cell[]>());
-	r.m_arr = r.m_storage.get() + ptr_diff;
+	r.m_arr = r.m_storage.get();
+	// don't forget to remove virtual zeroes
+	r.m_first_nonzero = 0;
 
+	// a hack for constructors, the only place arr is allowed to chage
 	cell* nonconst_arr = const_cast<cell*>(r.m_arr);
 	for (size_t i = 0; i < m_cell_amount; ++i)
 	{
-		nonconst_arr[i] = m_arr[i];
+		nonconst_arr[i] = at(i);
 	}
 	
 	return r;
@@ -217,14 +249,6 @@ inline bool Big::is_nil() const
 {
 	return m_cell_amount == 0;
 }
-inline Big::d_cell Big::operator[] (const size_t& index) const
-{
-	if (index > m_cell_amount)
-	{
-		throw std::runtime_error("Big: number index out of range");
-	}
-	return static_cast<d_cell>(m_arr[index]);
-}
 
 inline Big::cell Big::bit_at (const size_t& index) const
 {
@@ -234,8 +258,37 @@ inline Big::cell Big::bit_at (const size_t& index) const
 	}
 	size_t cell_ind = index / Big::CELL_BITS;
 	size_t bit_ind = index % Big::CELL_BITS;
-	cell num = m_arr[cell_ind];
+	cell num = at(cell_ind);
 	return (num >> bit_ind) & 1;
+}
+
+inline Big::cell Big::at (const size_t& index) const
+{
+	if (index > m_cell_amount)
+	{
+		throw std::runtime_error("Big: number index out of range");
+	}
+	if (index < m_first_nonzero)
+	{
+		return cell(0);
+	}
+	return m_arr[index - m_first_nonzero];
+}
+
+inline Big::cell& Big::mut_ref_at (const size_t& index)
+{
+	if (index > m_cell_amount)
+	{
+		throw std::runtime_error("Big: number index out of range");
+	}
+	if (index < m_first_nonzero)
+	{
+		throw std::runtime_error("Big: taking const reference of virtual zero. Try to copy() before you do");
+	}
+	// as this method requires this to be nonconst,
+	// casting const away is ok
+	cell* nonconst_arr = const_cast<cell*>(m_arr);
+	return nonconst_arr[index];
 }
 
 
@@ -353,4 +406,32 @@ inline bool Big::operator<= (const Big& r) const
 {
 	auto res = this->compare(r);
 	return res == Comp::Equal or res == Comp::RightGreater;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+inline Big Big::shift_l (int amount) const
+{
+	//shifting left (adding zeroes)
+	Big result = *this;
+	result.m_cell_amount += amount;
+	result.m_length = m_cell_amount * CELL_LENGTH;
+	result.m_first_nonzero = amount;
+
+	return result;
+}
+
+
+inline Big Big::shift_r (int amount) const
+{
+	//shifting right (removing digits)
+	// FIXME: what should be done here instead of cast?
+	if (amount > (long long)m_cell_amount)
+	{
+		return Big(0);
+	}
+
+	return this->slice(amount, m_cell_amount);
 }
