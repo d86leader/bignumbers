@@ -33,8 +33,8 @@ int main(int argc, char** _argv)
 			a = Big::generate(asize);
 			b = Big::generate(bsize);
 
-			prod = a.atomic_product(b);
 			mol_prod = a.molecular_product(b);
+			prod = a.atomic_product(b);
 
 			if(prod != mol_prod)
 			{
