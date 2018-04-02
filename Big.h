@@ -102,6 +102,8 @@ public:
 	Big  neg()       const;
 	bool is_nil()    const;
 	bool is_positive() const {return m_positive;}
+	size_t get_size() const; //size in bytes
+	size_t get_bit_amount() const;
 
 	Big  shift(int) const;
 

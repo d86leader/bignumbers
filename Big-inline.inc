@@ -240,10 +240,18 @@ inline bool Big::is_nil() const
 {
 	return m_cell_amount == 0;
 }
+inline size_t Big::get_size() const
+{
+	return m_cell_amount * CELL_LENGTH;
+}
+inline size_t Big::get_bit_amount() const
+{
+	return m_cell_amount * CELL_BITS;
+}
 
 inline Big::cell Big::bit_at (const size_t& index) const
 {
-	if (index > r.m_cell_amount * CELL_LENGTH * 8)
+	if (index > get_bit_amount())
 	{
 		throw std::runtime_error("Big: bit index out of range");
 	}
