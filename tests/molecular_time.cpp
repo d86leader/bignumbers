@@ -18,7 +18,7 @@ int main(int argc, char** _argv)
 	Big a;
 	Big b;
 
-	const size_t length = 10000;
+	const size_t length = 50000;
 
 	try
 	{
