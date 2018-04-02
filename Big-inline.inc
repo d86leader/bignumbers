@@ -93,31 +93,6 @@ inline Big::Big(Iter begin, Iter end)
 }
 
 
-inline Big::Big(const std::vector<Big::d_cell>& v)
-: Big()
-{
-	// find out the last non-zero element
-	size_t last = v.size();
-	while (last > 0 and v.at(last-1) == 0) last -= 1;
-	// this will rarely happen, but the case needs to be caught
-	if (last == 0)
-	{
-		// create a new zero number
-		return;
-	}
-
-	m_length = last * CELL_LENGTH;
-	m_cell_amount = last;
-	m_storage.reset(new cell [last]);
-	m_arr = m_storage.get();
-
-	// a hack for constructors, the only place arr is allowed to chage
-	cell* nonconst_arr = const_cast<cell*>(m_arr);
-	for (size_t i = 0; i < last; ++i)
-		nonconst_arr[i] = static_cast<cell>(v.at(i));
-}
-
-
 template<typename T>
 inline Big::Big(const T& r)
 : Big()
