@@ -405,3 +405,18 @@ inline bool Big::operator<= (const Big& r) const
 	auto res = this->compare(r);
 	return res == Comp::Equal or res == Comp::RightGreater;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+inline Big Big::shift_l (int amount) const
+{
+	//shifting left (adding zeroes)
+	Big result = *this;
+	result.m_cell_amount += amount;
+	result.m_length = m_cell_amount * CELL_LENGTH;
+	result.m_first_nonzero = amount;
+
+	return result;
+}
