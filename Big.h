@@ -17,11 +17,11 @@ public:
 	typedef uint16_t cell;
 	typedef uint64_t d_cell; //double cell
 
-	static constexpr size_t CELL_LENGTH = sizeof(cell);
-	static constexpr size_t CELL_BITS   = sizeof(cell) * 8;
+	static constexpr size_t CellLength = sizeof(cell);
+	static constexpr size_t CellBits   = sizeof(cell) * 8;
 
-	static constexpr cell CELL_MAXVALUE = static_cast<cell>(0) - 1;
-	static inline constexpr d_cell bitmodule(size_t);
+	static constexpr cell CellMaxValue = static_cast<cell>(0) - 1;
+	static constexpr d_cell CellModulo = static_cast<d_cell>(1) << CellBits;
 
 	enum struct Comp
 	{

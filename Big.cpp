@@ -22,7 +22,7 @@ namespace
 {
 	inline bool overflown(const d_cell& value)
 	{
-		return (value >> Big::CELL_BITS) != 0;
+		return (value >> Big::CellBits) != 0;
 	}
 }
 
@@ -51,7 +51,7 @@ Big Big::generate(size_t size)
 	// pushing tail digints, they can be zero
 	while (size --> 1)
 	{
-		r.push_back(rand() % Big::bitmodule(Big::CELL_BITS));
+		r.push_back(rand() % CellModulo);
 	}
 	// pushing the leading non-zero digit
 	cell t = rand();
@@ -85,7 +85,7 @@ string Big::dump(bool print_sign) const
 	else
 		dumpstream << "0x";
 
-	dumpstream << std::hex << std::setfill('0') << std::setw(CELL_LENGTH*2);
+	dumpstream << std::hex << std::setfill('0') << std::setw(CellLength*2);
 
 	for (size_t i = m_cell_amount - 1; i > 0; --i)
 	{
@@ -93,7 +93,7 @@ string Big::dump(bool print_sign) const
 		// certainly a number type
 		d_cell digit = static_cast<d_cell>(at(i));
 		dumpstream << digit <<'_'
-			<< std::setfill('0') << std::setw(CELL_LENGTH*2);;
+			<< std::setfill('0') << std::setw(CellLength*2);;
 	}
 	d_cell digit = static_cast<d_cell>(at(0));
 	dumpstream << digit << std::dec;
@@ -229,7 +229,7 @@ Big Big::atomic_plus(const Big& r) const
 		if (overflown(result[i]))
 		{
 			result[i+1] += 1;
-			result[i]   %= Big::bitmodule(Big::CELL_BITS);
+			result[i]   %= CellModulo;
 		}
 	}
 	for (; i < high_index; ++i)
@@ -238,7 +238,7 @@ Big Big::atomic_plus(const Big& r) const
 		if (overflown(result[i]))
 		{
 			result[i+1] += 1;
-			result[i]   %= Big::bitmodule(Big::CELL_BITS);
+			result[i]   %= CellModulo;
 		}
 	}
 
@@ -271,7 +271,7 @@ Big Big::atomic_minus(const Big& r) const
 	{
 		if (this_copy.at(i) < r.at(i))
 		{
-			result.at(i) = Big::bitmodule(Big::CELL_BITS) + static_cast<d_cell>(this_copy.at(i)) - r.at(i);
+			result.at(i) = CellModulo + static_cast<d_cell>(this_copy.at(i)) - r.at(i);
 
 			//lend the 1
 			for (auto j = i + 1; ; ++j)
@@ -283,7 +283,7 @@ Big Big::atomic_minus(const Big& r) const
 				}
 				else
 				{
-					this_copy.mut_ref_at(j) = CELL_MAXVALUE;
+					this_copy.mut_ref_at(j) = CellMaxValue;
 				}
 			}
 		}
@@ -316,10 +316,10 @@ Big Big::atomic_product(const Big& r) const
 		for (size_t j = 0; j < r.m_cell_amount; ++j)
 		{
 			t = static_cast<d_cell>(at(i)) * static_cast<d_cell>(r.at(j))
-			    + t / Big::bitmodule(Big::CELL_BITS) + result.at(i + j);
-			result.at(i + j) = t % Big::bitmodule(Big::CELL_BITS);
+			    + t / CellModulo + result.at(i + j);
+			result.at(i + j) = t % CellModulo;
 		}
-		result.at(i + r.m_cell_amount) = t / Big::bitmodule(Big::CELL_BITS);
+		result.at(i + r.m_cell_amount) = t / CellModulo;
 	}
 
 	return Big(result.begin(), result.end());
@@ -466,7 +466,7 @@ pair<Big, Big> Big::quot_rem_small(const Big& r) const
 	{
 		auto i = index - 1;
 
-		current *= Big::bitmodule(Big::CELL_BITS);
+		current *= CellModulo;
 		current += at(i);
 
 		quot_i.push_back(current / d);
@@ -493,7 +493,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	if (*this < divider)
 		return std::make_pair(Big(0), *this);
 	//normalization
-	d_cell d = Big::bitmodule(Big::CELL_BITS) / ( divider.at(divider.m_cell_amount-1) + 1 );
+	d_cell d = CellModulo / ( divider.at(divider.m_cell_amount-1) + 1 );
 	Big u = *this * d;   //normalized divident
 	Big v = divider * d; //normalized divisor
 
@@ -504,7 +504,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 
 	//initialization
 	Big::init_vect quot;       //result vector
-	d_cell b    = Big::bitmodule(Big::CELL_BITS); //oftenly used module
+	d_cell b    = CellModulo; //oftenly used module
 	size_t n    = v.m_cell_amount;
 	size_t m    = u.m_cell_amount - n;
 	//get like in our written algorithm
@@ -745,7 +745,7 @@ std::ostream& operator << (std::ostream& out, const Big& number)
 	{
 		//don't pad if it's the first symbol
 		if (i != number.m_cell_amount)
-			out.width(Big::CELL_LENGTH * 2);
+			out.width(Big::CellLength * 2);
 
 		out.fill('0');
 		out << number.at(i-1);
@@ -764,7 +764,7 @@ std::istream& operator >> (std::istream& in, Big& number)
 		return in;
 	}
 
-	auto m_cell_amount = split_all(s, Big::CELL_LENGTH * 2);
+	auto m_cell_amount = split_all(s, Big::CellLength * 2);
 
 	Big::init_vect r;
 	for (auto i = m_cell_amount.begin(); i != m_cell_amount.end(); ++i)

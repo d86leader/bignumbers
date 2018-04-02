@@ -3,17 +3,9 @@
 //won't ever be included, but is there for my checkers to work
 #include "Big.h"
 
-inline constexpr Big::d_cell Big::bitmodule(size_t bits)
-{
-	return static_cast<Big::d_cell>(1) << bits;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-
 
 inline Big::Big()
-: m_cell_amount   (0) // clength/CELL_LENGTH rounded up
+: m_cell_amount   (0) // clength/CellLength rounded up
 , m_first_nonzero (0)
 , m_storage       (nullptr)
 , m_arr           (nullptr)
@@ -105,8 +97,8 @@ inline Big::Big(const T& r)
 	std::vector<cell> result(0);
 	while (value > 0)
 	{
-		result.push_back(value % Big::bitmodule(CELL_BITS));
-		value /= Big::bitmodule(CELL_BITS);
+		result.push_back(value % CellModulo);
+		value /= CellModulo;
 	}
 
 	m_cell_amount  = result.size();
@@ -242,11 +234,11 @@ inline bool Big::is_nil() const
 }
 inline size_t Big::get_size() const
 {
-	return m_cell_amount * CELL_LENGTH;
+	return m_cell_amount * CellLength;
 }
 inline size_t Big::get_bit_amount() const
 {
-	return m_cell_amount * CELL_BITS;
+	return m_cell_amount * CellBits;
 }
 
 inline Big::cell Big::bit_at (const size_t& index) const
@@ -255,8 +247,8 @@ inline Big::cell Big::bit_at (const size_t& index) const
 	{
 		throw std::runtime_error("Big: bit index out of range");
 	}
-	size_t cell_ind = index / Big::CELL_BITS;
-	size_t bit_ind = index % Big::CELL_BITS;
+	size_t cell_ind = index / Big::CellBits;
+	size_t bit_ind = index % Big::CellBits;
 	cell num = at(cell_ind);
 	return (num >> bit_ind) & 1;
 }
