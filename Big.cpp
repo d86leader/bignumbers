@@ -799,7 +799,9 @@ Big Big::exponentiate_rtl(const Big& r, const Big& modulo) const
 	// r is nont-nil
 	Big this_power = *this;
 	Big result = 1;
-	for (size_t bit_index = 0; bit_index < r.m_length*8; ++bit_index)
+
+	size_t bit_amount = r.m_cell_amount * CELL_LENGTH * 8;
+	for (size_t bit_index = 0; bit_index < bit_amount; ++bit_index)
 	{
 		if (r.bit_at(bit_index) == 1)
 		{

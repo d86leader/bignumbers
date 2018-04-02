@@ -13,7 +13,6 @@ inline constexpr Big::d_cell Big::bitmodule(size_t bits)
 
 
 inline Big::Big()
-: m_length        (0)
 , m_cell_amount   (0) // clength/CELL_LENGTH rounded up
 , m_first_nonzero (0)
 , m_storage       (nullptr)
@@ -23,7 +22,6 @@ inline Big::Big()
 
 
 inline Big::Big(const Big& r)
-: m_length        (r.m_length)
 , m_cell_amount   (r.m_cell_amount)
 , m_first_nonzero (r.m_first_nonzero)
 , m_storage       (r.m_storage)
@@ -33,7 +31,6 @@ inline Big::Big(const Big& r)
 }
 
 inline Big::Big(Big&& r)
-: m_length        (r.m_length)
 , m_cell_amount   (r.m_cell_amount)
 , m_first_nonzero (r.m_first_nonzero)
 , m_storage       (std::move(r.m_storage))
@@ -55,7 +52,6 @@ inline Big::Big(init_vect&& v)
 		return;
 	}
 
-	m_length = last * CELL_LENGTH;
 	m_cell_amount = last;
 	m_storage.reset(new cell [last]);
 	m_arr = m_storage.get();
@@ -83,7 +79,6 @@ inline Big::Big(Iter begin, Iter end)
 	}
 
 	m_cell_amount = end - begin;
-	m_length = m_cell_amount * CELL_LENGTH;
 	m_storage.reset( new cell [m_cell_amount]);
 	m_arr = m_storage.get();
 
@@ -115,7 +110,6 @@ inline Big::Big(const T& r)
 	}
 
 	m_cell_amount  = result.size();
-	m_length = m_cell_amount * CELL_LENGTH;
 	m_storage.reset( new cell [m_cell_amount], std::default_delete<cell[]>() );
 	m_arr = m_storage.get();
 	// a hack for constructors, the only place arr is allowed to chage
@@ -130,7 +124,6 @@ inline Big::Big(const T& r)
 
 inline Big& Big::operator= (const Big& r)
 {
-	m_length      = r.m_length;
 	m_cell_amount = r.m_cell_amount;
 	m_positive    = r.m_positive;
 	m_storage     = r.m_storage;
@@ -142,7 +135,6 @@ inline Big& Big::operator= (const Big& r)
 
 inline Big& Big::operator= (Big&& r)
 {
-	m_length      = r.m_length;
 	m_cell_amount = r.m_cell_amount;
 	m_positive    = r.m_positive;
 	m_storage     = std::move(r.m_storage);
@@ -211,7 +203,6 @@ inline Big Big::slice(size_t index, size_t length) const
 		// example: length = m_cell_amount, index = 0
 		r.m_cell_amount = m_cell_amount - index;
 	}
-	r.m_length = m_cell_amount * 8;
 	return r;
 }
 
@@ -252,7 +243,7 @@ inline bool Big::is_nil() const
 
 inline Big::cell Big::bit_at (const size_t& index) const
 {
-	if (index > m_length*8)
+	if (index > r.m_cell_amount * CELL_LENGTH * 8)
 	{
 		throw std::runtime_error("Big: bit index out of range");
 	}
@@ -417,7 +408,6 @@ inline Big Big::shift_l (int amount) const
 	//shifting left (adding zeroes)
 	Big result = *this;
 	result.m_cell_amount += amount;
-	result.m_length = m_cell_amount * CELL_LENGTH;
 	result.m_first_nonzero = amount;
 
 	return result;

@@ -38,7 +38,6 @@ private:
 	using deleter_type = std::default_delete<cell>;
 	using ptr_type = std::shared_ptr<cell>;
 
-	size_t       m_length; //amount of bytes
 	size_t       m_cell_amount;
 	size_t       m_first_nonzero;
 	ptr_type     m_storage;
