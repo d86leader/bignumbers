@@ -13,29 +13,32 @@ inline constexpr Big::d_cell Big::bitmodule(size_t bits)
 
 
 inline Big::Big()
-: m_length      (0)
-, m_cell_amount (0) // clength/CELL_LENGTH rounded up
-, m_storage     (nullptr)
-, m_arr         (nullptr)
-, m_positive    (true)
+: m_length        (0)
+, m_cell_amount   (0) // clength/CELL_LENGTH rounded up
+, m_first_nonzero (0)
+, m_storage       (nullptr)
+, m_arr           (nullptr)
+, m_positive      (true)
 {}
 
 
 inline Big::Big(const Big& r)
-: m_length      (r.m_length)
-, m_cell_amount (r.m_cell_amount)
-, m_storage     (r.m_storage)
-, m_arr         (r.m_arr)
-, m_positive    (r.m_positive)
+: m_length        (r.m_length)
+, m_cell_amount   (r.m_cell_amount)
+, m_first_nonzero (r.m_first_nonzero)
+, m_storage       (r.m_storage)
+, m_arr           (r.m_arr)
+, m_positive      (r.m_positive)
 {
 }
 
 inline Big::Big(Big&& r)
-: m_length      (r.m_length)
-, m_cell_amount (r.m_cell_amount)
-, m_storage     (std::move(r.m_storage))
-, m_arr         (r.m_arr)
-, m_positive    (r.m_positive)
+: m_length        (r.m_length)
+, m_cell_amount   (r.m_cell_amount)
+, m_first_nonzero (r.m_first_nonzero)
+, m_storage       (std::move(r.m_storage))
+, m_arr           (r.m_arr)
+, m_positive      (r.m_positive)
 {}
 
 
