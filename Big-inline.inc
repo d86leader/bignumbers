@@ -420,3 +420,16 @@ inline Big Big::shift_l (int amount) const
 
 	return result;
 }
+
+
+inline Big Big::shift_r (int amount) const
+{
+	//shifting right (removing digits)
+	// FIXME: what should be done here instead of cast?
+	if (amount > (long long)m_cell_amount)
+	{
+		return Big(0);
+	}
+
+	return this->slice(amount, m_cell_amount);
+}

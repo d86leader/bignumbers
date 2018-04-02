@@ -82,8 +82,9 @@ private:
 	// disregards the sign. Right-to-left algorithm
 	Big exponentiate_rtl(const Big&, const Big&) const;
 
-	// efficient left shift
+	// efficient shifts
 	Big shift_l(int) const;
+	Big shift_r(int) const;
 
 public:
 	static Big generate(size_t size);

@@ -36,30 +36,11 @@ Big Big::shift(int amount) const
 
 	if (amount > 0)
 	{
-		//shifting left (adding zeroes)
-		auto r = Big::init_vect(0);
-		while (amount --> 0)
-			r.push_back(0);
-		for (size_t i = 0; i < m_cell_amount; ++i)
-			r.push_back(at(i));
-		return Big(std::move(r));
+		return this->shift_l(amount);
 	}
 	else
 	{
-		//shifting right (removing digits)
-		amount = -amount;
-		// FIXME: what should be done here?
-		if (amount > (long long)m_cell_amount)
-		{
-			return Big(0);
-		}
-
-		Big::init_vect r;
-		for (size_t index = amount; index < m_cell_amount; ++index)
-		{
-			r.push_back(at(index));
-		}
-		return Big(std::move(r));
+		return this->shift_r(-amount);
 	}
 }
 
