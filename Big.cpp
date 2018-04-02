@@ -437,7 +437,7 @@ Big Big::operator* (const Big& r) const
 		//the same as if both positive
 	
 	// molecular is faster but doesn't work for length of 1
-	if (m_cell_amount == atomic_threshold or r.m_cell_amount == atomic_threshold)
+	if (m_cell_amount <= atomic_threshold or r.m_cell_amount <= atomic_threshold)
 	{
 		return this->atomic_product(r);
 	}
