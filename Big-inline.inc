@@ -266,7 +266,11 @@ inline Big::cell Big::at (const size_t& index) const
 	{
 		throw std::runtime_error("Big: number index out of range");
 	}
-	return m_arr[index];
+	if (index < m_first_nonzero)
+	{
+		return cell(0);
+	}
+	return m_arr[index - m_first_nonzero];
 }
 
 inline Big::cell& Big::mut_ref_at (const size_t& index)
@@ -274,6 +278,10 @@ inline Big::cell& Big::mut_ref_at (const size_t& index)
 	if (index > m_cell_amount)
 	{
 		throw std::runtime_error("Big: number index out of range");
+	}
+	if (index < m_first_nonzero)
+	{
+		throw std::runtime_error("Big: taking const reference of virtual zero. Try to copy() before you do");
 	}
 	// as this method requires this to be nonconst,
 	// casting const away is ok
