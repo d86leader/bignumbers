@@ -46,11 +46,11 @@ private:
 	bool         m_positive;
 
 	//this constructor assumes that (d_cell)(cell)v[i] == v[i] for each i
-	Big(const std::vector<d_cell>& v);
+	Big(init_vect&& v);
 	template<typename Iter>
 	Big(Iter begin, Iter end);
-	Big(init_vect&& v);
 	// deleted constructors as to suppress compilation garbage
+	Big(const std::vector<d_cell>& v) = delete;
 	Big(init_vect& v) = delete;
 	Big(const init_vect&) = delete;
 	// WARNING: whenever init_vect is different form vector<cell>,
