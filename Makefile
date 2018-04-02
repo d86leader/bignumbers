@@ -1,18 +1,45 @@
 CXXHEADERS = -std=c++1y -I. -Wall -Wextra -O3
+GENERAL_TESTS :=
+CURRENT_TEST :=
+SPECIFIC_TESTS :=
+CURRENT_SPECIFIC :=
+
+# adding different tests
+CURRENT_TEST := run-minus_test
+GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
+CURRENT_TEST := run-molecular_product
+GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
+# as of now main still does not work most of the time,
+# it is added manually and at the end
+GENERAL_TESTS := $(GENERAL_TESTS) run-main
+
+
+#adding specific tests
+CURRENT_SPECIFIC := run-power_test
+SPECIFIC_TESTS := $(SPECIFIC_TESTS) $(CURRENT_SPECIFIC)
+CURRENT_SPECIFIC := run-mult_test
+SPECIFIC_TESTS := $(SPECIFIC_TESTS) $(CURRENT_SPECIFIC)
+CURRENT_SPECIFIC := run-mod-test
+SPECIFIC_TESTS := $(SPECIFIC_TESTS) $(CURRENT_SPECIFIC)
+CURRENT_SPECIFIC := run-molecular_time
+SPECIFIC_TESTS := $(SPECIFIC_TESTS) $(CURRENT_SPECIFIC)
+
+# main part
+
 
 lib: Big.o
 
 .PHONY: tests
-tests: run-minus_test run-molecular_product run-main
+tests: $(GENERAL_TESTS)
 
 .PHONY: latest-test
-latest-test: run-molecular_product
+latest-test: $(CURRENT_TEST)
 
 .PHONY: specific-test
-specific-test: run-molecular_time
+specific-test: $(CURRENT_SPECIFIC)
 
 .PHONY: specific-tests
-specific-tests: run-power_test run-mult_test run-mod-test run-molecular_time
+specific-tests: $(SPECIFIC_TESTS)
 
 all: lib tests
 
@@ -25,9 +52,12 @@ tests/%: tests/%.cpp Big.o
 run-%: tests/%
 	$<
 
+# read all test names into an array
+# remove each name with prefix "run-" replaced to "tests/"
 .PHONY: clean-tests
 clean-tests:
-	rm -f tests/main tests/mod-test tests/power_test tests/minus_test run-molecular_time run-mult_test
+	read -ra files <<< "$(GENERAL_TESTS)"; for file in "$${files[@]}"; do rm -f "$${file//run-/tests\/}"; done
+	read -ra files <<< "$(SPECIFIC_TESTS)"; for file in "$${files[@]}"; do rm -f "$${file//run-/tests\/}"; done
 
 .PHONY: clean
 clean: clean-tests
