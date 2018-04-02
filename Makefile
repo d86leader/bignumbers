@@ -27,8 +27,8 @@ run-%: tests/%
 
 .PHONY: clean-tests
 clean-tests:
-	rm tests/main tests/specific tests/mod-test tests/power_test tests/minus_test
+	rm -f tests/main tests/specific tests/mod-test tests/power_test tests/minus_test
 
 .PHONY: clean
 clean: clean-tests
-	rm Big.o
+	rm -f Big.o
