@@ -47,6 +47,8 @@ private:
 
 	//this constructor assumes that (d_cell)(cell)v[i] == v[i] for each i
 	Big(const std::vector<d_cell>& v);
+	template<typename Iter>
+	Big(Iter begin, Iter end);
 	Big(init_vect&& v);
 	// deleted constructors as to suppress compilation garbage
 	Big(init_vect& v) = delete;

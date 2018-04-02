@@ -64,6 +64,35 @@ inline Big::Big(init_vect&& v)
 }
 
 
+template<typename Iter>
+inline Big::Big(Iter begin, Iter end)
+: Big()
+{
+	Iter last = end - 1;
+	while (last != begin and *last == 0)
+	{
+		--last; --end;
+	}
+	if (last == begin and *last == 0)
+	{
+		// create a zero number
+		return;
+	}
+
+	m_cell_amount = end - begin;
+	m_length = m_cell_amount * CELL_LENGTH;
+	m_storage.reset( new cell [m_cell_amount]);
+	m_arr = m_storage.get();
+
+	// a hack for constructors, the only place arr is allowed to chage
+	cell* nonconst_arr = const_cast<cell*>(m_arr);
+	for (size_t i = 0; begin != end; ++begin, ++i)
+	{
+		nonconst_arr[i] = static_cast<cell>(*begin);
+	}
+}
+
+
 inline Big::Big(const std::vector<Big::d_cell>& v)
 : Big()
 {
