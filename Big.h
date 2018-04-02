@@ -61,7 +61,7 @@ private:
 	Big copy() const;
 
 	cell        bit_at     (const size_t& index) const;
-	const cell& at         (const size_t& index) const;
+	cell at         (const size_t& index) const;
 	cell&       mut_ref_at (const size_t& index);
 
 	//those divisions disregard the sign

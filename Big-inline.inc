@@ -260,7 +260,7 @@ inline Big::cell Big::bit_at (const size_t& index) const
 	return (num >> bit_ind) & 1;
 }
 
-inline const Big::cell& Big::at (const size_t& index) const
+inline Big::cell Big::at (const size_t& index) const
 {
 	if (index > m_cell_amount)
 	{
