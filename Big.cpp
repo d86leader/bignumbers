@@ -625,18 +625,8 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	}
 
 
-	//drop all zeroes in significant positions of quotient
-	auto q_rend = quot.rend();
-	while (q_rend != quot.rbegin() && *--q_rend == 0) {}
-	//b should point to right after what should be inside
-	++q_rend;
-
-	//invert the quotient
-	auto r_quot = Big::init_vect(quot.rbegin(), q_rend);
-
-
 	//denormalization
-	auto quotient  = Big(std::move(r_quot));
+	Big quotient (quot.rbegin(), quot.rend());
 	if (debug)
 	{
 		std::cout <<"calling " << u << " / " << hex <<d <<endl;
