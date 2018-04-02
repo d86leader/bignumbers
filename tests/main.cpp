@@ -35,9 +35,21 @@ int main(int argc, char** _argv)
 			quot = t.first;
 			rem = t.second;
 
-			if( quot*b + rem != a )
+			if( a != a )
 			{
-				throw "comparing division results";
+				throw "comparing with itself";
+			}
+			if( rem >= b )
+			{
+				throw "comparing remnant";
+			}
+			if( quot*b + rem > a )
+			{
+				throw "finding out result is bigger than expected";
+			}
+			if( quot*b + rem < a )
+			{
+				throw "finding out result is smaller than expected";
 			}
 			if( quot*b != a - rem )
 			{
