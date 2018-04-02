@@ -9,10 +9,10 @@ tests: run-minus_test run-molecular_product run-main
 latest-test: run-molecular_product
 
 .PHONY: specific-test
-specific-test: run-specific
+specific-test: run-molecular_time
 
 .PHONY: specific-tests
-specific-tests: run-specific run-power_test run-mult_test run-mod-test
+specific-tests: run-power_test run-mult_test run-mod-test run-molecular_time
 
 all: lib tests
 
@@ -27,7 +27,7 @@ run-%: tests/%
 
 .PHONY: clean-tests
 clean-tests:
-	rm -f tests/main tests/specific tests/mod-test tests/power_test tests/minus_test
+	rm -f tests/main tests/mod-test tests/power_test tests/minus_test run-molecular_time run-mult_test
 
 .PHONY: clean
 clean: clean-tests
