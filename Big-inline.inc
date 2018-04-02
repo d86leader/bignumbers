@@ -171,6 +171,8 @@ inline Big Big::copy() const
 
 	r.m_storage.reset(new cell [m_cell_amount], std::default_delete<cell[]>());
 	r.m_arr = r.m_storage.get();
+	// don't forget to remove virtual zeroes
+	r.m_first_nonzero = 0;
 
 	// a hack for constructors, the only place arr is allowed to chage
 	cell* nonconst_arr = const_cast<cell*>(r.m_arr);
