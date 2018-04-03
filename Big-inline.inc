@@ -246,7 +246,7 @@ inline Big Big::abs() const
 }
 inline Big Big::neg() const
 {
-	Big t {*this};
+	Big t (*this);
 	t.m_positive = false;
 	return t;
 }
@@ -311,35 +311,35 @@ inline Big::cell& Big::mut_ref_at (const size_t& index)
 template<typename T>
 inline Big Big::operator+ (const T& r) const
 {
-	Big t = r;
+	Big t (r);
 	return *this + t;
 }
 
 template<typename T>
 inline Big Big::operator- (const T& r) const
 {
-	Big t = r;
+	Big t (r);
 	return *this - t;
 }
 
 template<typename T>
 inline Big Big::operator* (const T& r) const
 {
-	Big t = r;
+	Big t (r);
 	return *this * t;
 }
 
 template<typename T>
 inline Big Big::operator/ (const T& r) const
 {
-	Big t = r;
+	Big t (r);
 	return *this / t;
 }
 
 template<typename T>
 inline Big Big::operator% (const T& r) const
 {
-	Big t = r;
+	Big t (r);
 	return *this % t;
 }
 
@@ -350,35 +350,35 @@ inline Big Big::operator% (const T& r) const
 template<typename T>
 inline Big& Big::operator+= (const T& r)
 {
-	Big t = r;
+	Big t (r);
 	return *this = *this + t;
 }
 
 template<typename T>
 inline Big& Big::operator-= (const T& r)
 {
-	Big t = r;
+	Big t (r);
 	return *this = *this - t;
 }
 
 template<typename T>
 inline Big& Big::operator*= (const T& r)
 {
-	Big t = r;
+	Big t (r);
 	return *this = *this * t;
 }
 
 template<typename T>
 inline Big& Big::operator/= (const T& r)
 {
-	Big t = r;
+	Big t (r);
 	return *this = *this / t;
 }
 
 template<typename T>
 inline Big& Big::operator%= (const T& r)
 {
-	Big t = r;
+	Big t (r);
 	return *this = *this % t;
 }
 

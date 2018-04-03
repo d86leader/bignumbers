@@ -117,15 +117,6 @@ public:
 	bool operator<= (const Big& r) const;
 	bool operator>= (const Big& r) const;
 
-	Big operator+ (const cell& r) const;
-	Big operator- (const cell& r) const;
-	Big operator* (const cell& r) const;
-	Big operator/ (const cell& r) const;
-	Big operator% (const cell& r) const;
-
-	Big operator* (const d_cell& r) const;
-	Big operator/ (const d_cell& r) const;
-
 	Big operator+ (const Big& r) const;
 	Big operator- (const Big& r) const;
 	Big operator* (const Big& r) const;

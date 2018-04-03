@@ -167,51 +167,6 @@ Big::Comp Big::compare(const Big& r) const
 //////////////////////////////////////////////////////////////////////////////
 
 
-Big Big::operator+ (const cell& r) const
-{
-	Big t = r;
-	return *this + t;
-}
-
-
-Big Big::operator- (const cell& r) const
-{
-	Big t = r;
-	return *this - t;
-}
-
-
-Big Big::operator/ (const cell& r) const
-{
-	Big t;
-	t = r;
-	return *this / t;
-}
-Big Big::operator/ (const d_cell& r) const
-{
-	Big t;
-	t = r;
-	return *this / t;
-}
-
-
-Big Big::operator* (const cell& r) const
-{
-	Big t;
-	t = r;
-	return *this * t;
-}
-Big Big::operator* (const d_cell& r) const
-{
-	Big t;
-	t = r;
-	return *this * t;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-
 Big Big::atomic_plus(const Big& r) const
 {
 	const Big& bigger_number =
@@ -262,7 +217,7 @@ Big Big::atomic_minus(const Big& r) const
 	}
 
 	// create a further deleted copy of this so we can modify its digits
-	Big this_copy = this->copy();
+	Big&& this_copy = this->copy();
 
 	//now it's just a subtraction a - b with a >= 0, b >= 0 and a > b
 	auto result = Big::init_vect(m_cell_amount);
@@ -300,7 +255,7 @@ Big Big::atomic_minus(const Big& r) const
 	
 	if (result.size() == 0)
 		return Big ();
-	return Big {std::move(result)};
+	return Big (std::move(result));
 }
 
 
@@ -482,7 +437,7 @@ pair<Big, Big> Big::quot_rem_small(const Big& r) const
 	//invert the quotient
 	auto q_vec = Big::init_vect(quot_i.rbegin(), b);
 	Big quot (std::move(q_vec));
-	Big rem = current;
+	Big&& rem = current;
 	return std::make_pair( quot, rem );
 }
 
@@ -494,8 +449,8 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		return std::make_pair(Big(0), *this);
 	//normalization
 	d_cell d = CellModulo / ( divider.at(divider.m_cell_amount-1) + 1 );
-	Big u = *this * d;   //normalized divident
-	Big v = divider * d; //normalized divisor
+	Big&& u = *this * d;   //normalized divident
+	Big&& v = divider * d; //normalized divisor
 
 	if (debug)
 	{
@@ -567,7 +522,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		}
 
 		size_t shiftam = m - j; // amount to shift by; inductibly proved to be correct
-		Big slice = (v*q).shift(shiftam);
+		Big&& slice = (v*q).shift(shiftam);
 
 		//further improve accuracy of q
 		//if subtraction of v * q from u[j - v.m_cell_amount ... j]
