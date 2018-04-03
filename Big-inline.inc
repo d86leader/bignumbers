@@ -116,10 +116,11 @@ inline Big::Big(const T& r)
 
 inline Big& Big::operator= (const Big& r)
 {
-	m_cell_amount = r.m_cell_amount;
-	m_positive    = r.m_positive;
-	m_storage     = r.m_storage;
-	m_arr         = r.m_arr;
+	m_cell_amount   = r.m_cell_amount;
+	m_first_nonzero = r.m_first_nonzero;
+	m_positive      = r.m_positive;
+	m_storage       = r.m_storage;
+	m_arr           = r.m_arr;
 
 	return *this;
 }
@@ -127,10 +128,11 @@ inline Big& Big::operator= (const Big& r)
 
 inline Big& Big::operator= (Big&& r)
 {
-	m_cell_amount = r.m_cell_amount;
-	m_positive    = r.m_positive;
-	m_storage     = std::move(r.m_storage);
-	m_arr         = r.m_arr;
+	m_cell_amount   = r.m_cell_amount;
+	m_first_nonzero = r.m_first_nonzero;
+	m_positive      = r.m_positive;
+	m_storage       = std::move(r.m_storage);
+	m_arr           = r.m_arr;
 
 	return *this;
 }
@@ -179,10 +181,20 @@ inline Big Big::slice(size_t index, size_t length) const
 		return Big(0);
 	}
 
-	Big r;
-	r.m_storage = m_storage;
-	r.m_arr = m_arr + index; //start observing elements since index
-	r.m_positive = true; //no sense in negative slice
+	Big r = *this;
+
+	if (index <= r.m_first_nonzero)
+	{
+		r.m_first_nonzero -= index;
+	}
+	else
+	{
+		// no zeroes left in slice
+		size_t arr_index = index - r.m_first_nonzero;
+		r.m_first_nonzero = 0;
+
+		r.m_arr = m_arr + arr_index; //start observing elements since index
+	}
 
 	// determine the length of slice
 	if (index + length < m_cell_amount)
@@ -195,6 +207,16 @@ inline Big Big::slice(size_t index, size_t length) const
 		// example: length = m_cell_amount, index = 0
 		r.m_cell_amount = m_cell_amount - index;
 	}
+
+	// remove zero digits from significant positions
+	size_t size;
+	for (size = r.m_cell_amount; size > 0; --size)
+	{
+		if (r.at(size - 1) != 0) break;
+	}
+	if (size == 0) return Big(0);
+	r.m_cell_amount = size;
+
 	return r;
 }
 
