@@ -45,7 +45,7 @@ specific-tests: $(SPECIFIC_TESTS)
 
 all: lib tests
 
-Big.o: Big.cpp Big.h Big-inline.inc
+Big.o: Big.cpp Big.h Big-inline.inc constructors.inc
 	${CXX} -c $< -o $@ $(CXXHEADERS)
 
 tests/%: tests/%.cpp Big.o
