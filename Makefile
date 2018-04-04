@@ -9,6 +9,8 @@ CURRENT_TEST := run-minus_test
 GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
 CURRENT_TEST := run-molecular_product
 GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
+CURRENT_TEST := run-bitshift
+GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
 # as of now main still does not work most of the time,
 # it is added manually and at the end
 GENERAL_TESTS := $(GENERAL_TESTS) run-main
@@ -24,8 +26,6 @@ SPECIFIC_TESTS := $(SPECIFIC_TESTS) $(CURRENT_SPECIFIC)
 CURRENT_SPECIFIC := run-slices
 SPECIFIC_TESTS := $(SPECIFIC_TESTS) $(CURRENT_SPECIFIC)
 CURRENT_SPECIFIC := run-molecular_time
-SPECIFIC_TESTS := $(SPECIFIC_TESTS) $(CURRENT_SPECIFIC)
-CURRENT_SPECIFIC := run-bitshift
 SPECIFIC_TESTS := $(SPECIFIC_TESTS) $(CURRENT_SPECIFIC)
 
 # main part
