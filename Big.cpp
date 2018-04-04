@@ -369,8 +369,10 @@ Big Big::operator- (const Big& r) const
 Big Big::operator* (const Big& r) const
 {
 	constexpr size_t atomic_threshold = 72;
+
 	if (r.is_nil() || this->is_nil())
 		return Big(0);
+
 	if (   (!m_positive &&  r.m_positive)
 		|| ( m_positive && !r.m_positive))
 	{
