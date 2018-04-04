@@ -16,6 +16,7 @@ int main(int argc, char** _argv)
 
 	Big a;
 	Big shr, shl;
+	Big shiftback;
 	size_t shiftam;
 
 	try
@@ -26,21 +27,16 @@ int main(int argc, char** _argv)
 			{
 				std::cout << "on test number "<<i<<std::endl;
 			}
-			const size_t asize = rand()%1000 + 2;
-			shiftam = rand();
+			const size_t max_length = 100000;
+			const size_t asize = rand()%max_length + 1;
+			shiftam = rand()%(max_length * Big::CellBits);
 
 			a = Big::generate(asize);
 
-			cout << "shifting left (fucking hell)\n";
-			shr = a << shiftam;
-			cout << "shifting right (fucking hell)\n";
-			shl = a >> shiftam;
+			shl = a << shiftam;
 
-			if (shr >> shiftam != a)
-			{
-				throw "comparing right shifts";
-			}
-			if (shl << shiftam != a)
+			shiftback = shl >> shiftam;
+			if (shiftback != a)
 			{
 				throw "comparing left shifts";
 			}
@@ -53,6 +49,7 @@ int main(int argc, char** _argv)
 		std::cout << "a: "    << a.dump() << std::endl;
 		std::cout << "shr "    << shr.dump() << std::endl;
 		std::cout << "shl "    << shl.dump() << std::endl;
+		std::cout << "shiftback:" << shiftback.dump() << std::endl;
 		return 1;
 	}
 	catch (const char* errtype)
@@ -61,6 +58,7 @@ int main(int argc, char** _argv)
 		std::cout << "a: "    << a.dump() << std::endl;
 		std::cout << "shr "    << shr.dump() << std::endl;
 		std::cout << "shl "    << shl.dump() << std::endl;
+		std::cout << "shiftback:" << shiftback.dump() << std::endl;
 		return 1;
 	}
 
