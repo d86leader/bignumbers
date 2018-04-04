@@ -105,7 +105,7 @@ public:
 	size_t get_size() const; //size in bytes
 	size_t get_bit_amount() const;
 
-	Big  shift(int) const;
+	Big  shift(int) const; //cellwise shift
 
 	std::string dump(bool print_sign = true) const;
 
@@ -125,6 +125,9 @@ public:
 
 	Big exp  (const Big& r, const Big& m) const;
 	Big slice(size_t start, size_t length) const;
+
+	Big operator>> (size_t) const;
+	Big operator<< (size_t) const;
 
 	template<typename T> Big operator+ (const T& r) const;
 	template<typename T> Big operator- (const T& r) const;

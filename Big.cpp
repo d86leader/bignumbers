@@ -768,3 +768,66 @@ Big Big::exponentiate_rtl(const Big& r, const Big& modulo) const
 	}
 	return result;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+Big Big::operator>> (size_t amount) const
+{
+	if (amount % CellBits == 0)
+	{
+		return this->shift_r(amount / CellBits);
+	}
+
+	// shift all cells so remaining shifts are only to neighbooring cells
+	Big&& temp = this->shift_r(amount / CellBits);
+	amount %= CellBits;
+
+	init_vect result;
+	for (size_t i = 0; i < temp.m_cell_amount - 1; ++i)
+	{
+		// put the highest bits of current to lower positions
+		cell lower = temp.at(i) >> amount;
+		// put the lower bits of next to higher positions
+		cell higher = temp.at(i+1) << (CellBits - amount);
+		// jamble them together
+		result.push_back(higher | lower);
+	}
+	// put the highest bits of last digit to lower positions
+	cell lower = temp.at(m_cell_amount - 1) >> amount;
+	result.push_back(lower);
+
+	return Big(std::move(result));
+}
+
+
+Big Big::operator<< (size_t amount) const
+{
+	if (amount % CellBits == 0)
+	{
+		return this->shift_l(amount / CellBits);
+	}
+
+	// shift all cells so remaining shifts are only to neighbooring cells
+	Big&& temp = this->shift_l(amount / CellBits);
+	amount %= CellBits;
+
+	// TODO: this can be optimized with virtual zeroes
+	// but requires writing a new constructor
+
+	init_vect result;
+	result.push_back(temp.at(0) << amount);
+
+	for (size_t i = 1; i < temp.m_cell_amount; ++i)
+	{
+		// put the highest bits of previous to lower positions
+		cell lower = temp.at(i - 1) >> (CellBits - amount);
+		// put the lowest bits of current to higher positions
+		cell higher = temp.at(i) << amount;
+		// jamble them together
+		result.push_back(higher | lower);
+	}
+
+	return Big(std::move(result));
+}
