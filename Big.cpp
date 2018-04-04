@@ -799,7 +799,7 @@ Big Big::operator>> (size_t amount) const
 		result.push_back(higher | lower);
 	}
 	// put the highest bits of last digit to lower positions
-	cell lower = temp.at(m_cell_amount - 1) >> amount;
+	cell lower = temp.at(temp.m_cell_amount - 1) >> amount;
 	result.push_back(lower);
 
 	return Big(std::move(result));
@@ -836,6 +836,8 @@ Big Big::operator<< (size_t amount) const
 		// jamble them together
 		result.push_back(higher | lower);
 	}
+	cell lower = temp.at(temp.m_cell_amount - 1) >> (CellBits - amount);
+	result.push_back(lower);
 
 	return Big(std::move(result));
 }
