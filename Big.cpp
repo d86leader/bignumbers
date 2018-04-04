@@ -775,6 +775,10 @@ Big Big::exponentiate_rtl(const Big& r, const Big& modulo) const
 
 Big Big::operator>> (size_t amount) const
 {
+	if (this->is_nil())
+	{
+		return Big(0);
+	}
 	if (amount % CellBits == 0)
 	{
 		return this->shift_r(amount / CellBits);
@@ -804,6 +808,10 @@ Big Big::operator>> (size_t amount) const
 
 Big Big::operator<< (size_t amount) const
 {
+	if (this->is_nil())
+	{
+		return Big(0);
+	}
 	if (amount % CellBits == 0)
 	{
 		return this->shift_l(amount / CellBits);

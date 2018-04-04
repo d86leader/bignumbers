@@ -223,6 +223,10 @@ inline Big Big::slice(size_t index, size_t length) const
 
 inline Big Big::shift_l (int amount) const
 {
+	if (this->is_nil())
+	{
+		return Big(0);
+	}
 	//shifting left (adding zeroes)
 	Big result = *this;
 	result.m_cell_amount += amount;
