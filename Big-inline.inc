@@ -65,6 +65,10 @@ inline Big::cell Big::at (const size_t& index) const
 	{
 		return cell(0);
 	}
+	if (m_arr == nullptr)
+	{
+		throw std::runtime_error("FATAL: Big: storage was deleted");
+	}
 	return m_arr[index - m_first_nonzero];
 }
 

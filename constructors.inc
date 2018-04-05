@@ -19,8 +19,7 @@ inline Big::Big(const Big& r)
 , m_storage       (r.m_storage)
 , m_arr           (r.m_arr)
 , m_positive      (r.m_positive)
-{
-}
+{}
 
 inline Big::Big(Big&& r)
 : m_cell_amount   (r.m_cell_amount)
@@ -180,9 +179,14 @@ inline Big Big::slice(size_t index, size_t length) const
 	{
 		return Big(0);
 	}
+	if (length == 0)
+	{
+		return Big(0);
+	}
 
 	Big r = *this;
 
+	// determine where to start the number
 	if (index <= r.m_first_nonzero)
 	{
 		r.m_first_nonzero -= index;

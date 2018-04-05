@@ -786,6 +786,11 @@ Big Big::operator>> (size_t amount) const
 
 	// shift all cells so remaining shifts are only to neighbooring cells
 	Big&& temp = this->shift_r(amount / CellBits);
+	if (temp.is_nil())
+	{
+		return temp;
+	}
+
 	amount %= CellBits;
 
 	init_vect result;
