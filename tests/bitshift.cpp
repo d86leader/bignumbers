@@ -16,7 +16,9 @@ int main(int argc, char** _argv)
 
 	Big a;
 	Big shr, shl;
+	Big mul, div;
 	Big shiftback;
+	Big multiplier;
 	size_t shiftam;
 
 	try
@@ -25,20 +27,33 @@ int main(int argc, char** _argv)
 		{
 			if (i % 50 == 0)
 			{
-				std::cout << "on test number "<<i<<std::endl;
+				std::cout << "on test number " << i << std::endl;
 			}
-			const size_t max_length = 100000;
+			const size_t max_length = 5000;
 			const size_t asize = rand()%max_length + 1;
 			shiftam = rand()%(max_length * Big::CellBits);
+			multiplier = Big(1) << shiftam;
 
 			a = Big::generate(asize);
 
 			shl = a << shiftam;
+			mul = a * multiplier;
 
 			shiftback = shl >> shiftam;
 			if (shiftback != a)
 			{
 				throw "comparing left shifts";
+			}
+			if (shl != mul)
+			{
+				throw "comparing with multiplication";
+			}
+
+			shr = a >> shiftam;
+			div = a / multiplier;
+			if (shr != div)
+			{
+				throw "comparing with division";
 			}
 		}
 		std::cout << "all tests passed successfully\n";
