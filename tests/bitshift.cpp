@@ -29,7 +29,7 @@ int main(int argc, char** _argv)
 			{
 				std::cout << "on test number " << i << std::endl;
 			}
-			const size_t max_length = 5000;
+			const size_t max_length = 1000;
 			const size_t asize = rand()%max_length + 1;
 			shiftam = rand()%(max_length * Big::CellBits);
 			multiplier = Big(1) << shiftam;
@@ -37,7 +37,7 @@ int main(int argc, char** _argv)
 			a = Big::generate(asize);
 
 			shl = a << shiftam;
-			mul = a * multiplier;
+			mul = a.atomic_product(multiplier);
 
 			shiftback = shl >> shiftam;
 			if (shiftback != a)
@@ -50,7 +50,14 @@ int main(int argc, char** _argv)
 			}
 
 			shr = a >> shiftam;
-			div = a / multiplier;
+			if (multiplier.m_cell_amount > 1)
+			{
+				div = a.quot_rem_big(multiplier).first;
+			}
+			else
+			{
+				div = a.quot_rem_small(multiplier).first;
+			}
 			if (shr != div)
 			{
 				throw "comparing with division";
@@ -61,19 +68,19 @@ int main(int argc, char** _argv)
 	catch (std::bad_alloc& e)
 	{
 		std::cout << "BAD_ALLOC CAUGHT\n";
-		std::cout << "a: "    << a.dump() << std::endl;
-		std::cout << "shr "    << shr.dump() << std::endl;
-		std::cout << "shl "    << shl.dump() << std::endl;
-		std::cout << "shiftback:" << shiftback.dump() << std::endl;
+		std::cerr << "a: "    << a.dump() << std::endl;
+		std::cerr << "shr "    << shr.dump() << std::endl;
+		std::cerr << "shl "    << shl.dump() << std::endl;
+		std::cerr << "shiftback:" << shiftback.dump() << std::endl;
 		return 1;
 	}
 	catch (const char* errtype)
 	{
 		std::cout << "error when " << errtype <<". Values:\n";
-		std::cout << "a: "    << a.dump() << std::endl;
-		std::cout << "shr "    << shr.dump() << std::endl;
-		std::cout << "shl "    << shl.dump() << std::endl;
-		std::cout << "shiftback:" << shiftback.dump() << std::endl;
+		std::cerr << "a: "    << a.dump() << std::endl;
+		std::cerr << "shr "    << shr.dump() << std::endl;
+		std::cerr << "shl "    << shl.dump() << std::endl;
+		std::cerr << "shiftback:" << shiftback.dump() << std::endl;
 		return 1;
 	}
 
