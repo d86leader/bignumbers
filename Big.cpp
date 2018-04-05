@@ -324,6 +324,29 @@ Big Big::molecular_product(const Big& r) const
 //////////////////////////////////////////////////////////////////////////////
 
 
+Big Big::operator& (const Big& r) const
+{
+	if (this->is_nil() or r.is_nil())
+	{
+		return Big(0);
+	}
+	init_vect result;
+
+	size_t min_length = m_cell_amount < r.m_cell_amount ?
+		m_cell_amount : r.m_cell_amount;
+
+	for (size_t i = 0; i < min_length; ++i)
+	{
+		result.push_back(at(i) & r.at(i));
+	}
+
+	return Big(std::move(result));
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
 Big Big::operator+ (const Big& r) const
 {
 	if (!m_positive && !r.m_positive)
