@@ -5,6 +5,7 @@
 #include <vector>
 #include <cassert>
 #include <map>
+#include <random>
 
 #ifdef DEBUG
 # define private public
@@ -14,14 +15,10 @@
 class Big
 {
 public:
+	/* PUBLIC MEMBER TYPES */
+
 	typedef uint16_t cell;
 	typedef uint64_t d_cell; //double cell
-
-	static constexpr size_t CellLength = sizeof(cell);
-	static constexpr size_t CellBits   = sizeof(cell) * 8;
-
-	static constexpr cell CellMaxValue = static_cast<cell>(0) - 1;
-	static constexpr d_cell CellModulo = static_cast<d_cell>(1) << CellBits;
 
 	enum struct Comp
 	{
@@ -30,19 +27,30 @@ public:
 		RightGreater
 	};
 
+	/* PUBLIC STATIC CONSTANTS */
+
+	static constexpr size_t CellLength = sizeof(cell);
+	static constexpr size_t CellBits   = sizeof(cell) * 8;
+
+	static constexpr cell CellMaxValue = static_cast<cell>(0) - 1;
+	static constexpr d_cell CellModulo = static_cast<d_cell>(1) << CellBits;
+
 private:
-	friend std::ostream& operator<< (std::ostream& out, const Big&);
-	friend std::istream& operator>> (std::istream& in, Big&);
+	/* INTERNAL MEMBER TYPES */
 
 	using init_vect = std::vector<cell>;
 	using deleter_type = std::default_delete<cell>;
 	using ptr_type = std::shared_ptr<cell>;
+
+	/* MEMBER DATA */
 
 	size_t       m_cell_amount;
 	size_t       m_first_nonzero;
 	ptr_type     m_storage;
 	const cell * m_arr;
 	bool         m_positive;
+
+	/* INTERNAL CONSTRUCTORS */
 
 	//this constructor assumes that (d_cell)(cell)v[i] == v[i] for each i
 	Big(init_vect&& v);
@@ -59,9 +67,13 @@ private:
 	//make a deep copy of number, meaning copy the arr
 	Big copy() const;
 
+	/* INTERNAL ACCESSORS */
+
 	cell   bit_at     (const size_t& index) const;
 	cell   at         (const size_t& index) const;
 	cell&  mut_ref_at (const size_t& index);
+
+	/* INTERNAL OPERATIONS */
 
 	//those divisions disregard the sign
 	std::pair<Big, Big> quot_rem_big  (const Big& r) const;
@@ -139,6 +151,9 @@ public:
 	template<typename T> Big& operator%= (const T& r);
 
 	std::pair<Big, Big> quot_rem(const Big& r) const;
+
+	friend std::ostream& operator<< (std::ostream& out, const Big&);
+	friend std::istream& operator>> (std::istream& in, Big&);
 };
 
 #include "Big-inline.inc"
