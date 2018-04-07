@@ -1,8 +1,5 @@
 #include <iostream>
-#include <memory>
-#include <string>
-#include <cstdlib>
-#include <ctime>
+#include <random>
 
 #include "../Big.h"
 
@@ -11,8 +8,15 @@ using std::cout;
 
 int main(int argc, char** _argv)
 {
-	std::vector<std::string> argv (_argv, _argv + argc);
-	srand(time(nullptr));
+	Big::generator_type gen;
+	Big::distribution_type dist;
+
+	constexpr size_t min_size = 1;
+	constexpr size_t max_size = 1000;
+	const size_t max_amount = max_size * Big::CellBits;
+	std::uniform_int_distribution<size_t> shift_distr (0, max_amount);
+	std::uniform_int_distribution<size_t> size_distr (min_size, max_size);
+
 
 	Big a;
 	Big shr, shl;
@@ -29,12 +33,12 @@ int main(int argc, char** _argv)
 			{
 				std::cout << "on test number " << i << std::endl;
 			}
-			const size_t max_length = 1000;
-			const size_t asize = rand()%max_length + 1;
-			shiftam = rand()%(max_length * Big::CellBits);
+			const size_t asize = size_distr(gen);
+
+			shiftam = shift_distr(gen);
 			multiplier = Big(1) << shiftam;
 
-			a = Big::generate(asize);
+			a = Big::generate(asize, dist, gen);
 
 			shl = a << shiftam;
 			mul = a.atomic_product(multiplier);
