@@ -39,7 +39,7 @@ private:
 	/* INTERNAL MEMBER TYPES */
 
 	using init_vect = std::vector<cell>;
-	using deleter_type = std::default_delete<cell>;
+	using deleter_type = std::default_delete<cell[]>;
 	using ptr_type = std::shared_ptr<cell>;
 
 	/* MEMBER DATA */
