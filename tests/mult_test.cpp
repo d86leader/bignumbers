@@ -1,7 +1,4 @@
 #include <iostream>
-#include <string>
-#include <cstdlib>
-#include <ctime>
 
 #include "../Big.h"
 
@@ -10,14 +7,19 @@ using std::endl;
 
 int main(int argc, char** _argv)
 {
-	std::vector<std::string> argv (_argv, _argv + argc);
-	srand(time(nullptr));
+	Big::generator_type gen;
+	Big::distribution_type dist;
 
-	const size_t a_size = rand()%1000 + 1;
-	const size_t b_size  = rand()%1000 + 1;
+	constexpr size_t min_size = 1;
+	constexpr size_t max_size = 1000;
+	std::uniform_int_distribution<size_t> size_distr (min_size, max_size);
 
-	Big a = Big::generate(a_size);
-	Big b = Big::generate(b_size);
+
+	const size_t asize = size_distr(gen);
+	const size_t bsize = size_distr(gen);
+
+	Big a = Big::generate(asize, dist, gen);
+	Big b = Big::generate(bsize, dist, gen);
 	Big result = a*b;
 
 	cout << a.dump(false) << "*" << b.dump(false) << "==" << result.dump(false) <<endl;
