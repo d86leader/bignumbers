@@ -3,7 +3,6 @@
 #include <memory>
 #include <iostream>
 #include <vector>
-#include <cassert>
 #include <map>
 #include <random>
 
@@ -26,6 +25,9 @@ public:
 		Equal,
 		RightGreater
 	};
+
+	using distribution_type = std::uniform_int_distribution<cell>;
+	using generator_type = std::random_device;
 
 	/* PUBLIC STATIC CONSTANTS */
 
@@ -98,7 +100,7 @@ private:
 	Big shift_r(int) const;
 
 public:
-	static Big generate(size_t size);
+	static Big generate(size_t size, distribution_type&, generator_type&);
 
 	Big();
 

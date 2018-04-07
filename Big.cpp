@@ -1,10 +1,8 @@
 #include "Big.h"
 
 #include <iomanip>
-#include <algorithm>
-#include <cinttypes>
 #include <sstream>
-#include <ctime>
+#include <cassert>
 
 using std::pair;
 using std::string;
@@ -45,19 +43,19 @@ Big Big::shift(int amount) const
 }
 
 
-Big Big::generate(size_t size)
+Big Big::generate(size_t size, distribution_type& d, generator_type& e)
 {
 	Big::init_vect r;
 	// pushing tail digints, they can be zero
 	while (size --> 1)
 	{
-		r.push_back(rand() % CellModulo);
+		r.push_back(d(e));
 	}
 	// pushing the leading non-zero digit
-	cell t = rand();
+	cell t = d(e);
 	while (t == 0)
 	{
-		t = rand();
+		t = d(e);
 	}
 	r.push_back(t);
 
