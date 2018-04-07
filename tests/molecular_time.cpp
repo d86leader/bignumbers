@@ -1,8 +1,4 @@
 #include <iostream>
-#include <memory>
-#include <string>
-#include <cstdlib>
-#include <ctime>
 #include <chrono>
 
 #include "../Big.h"
@@ -12,8 +8,8 @@ using std::cout;
 
 int main(int argc, char** _argv)
 {
-	std::vector<std::string> argv (_argv, _argv + argc);
-	srand(time(nullptr));
+	Big::generator_type gen;
+	Big::distribution_type dist;
 
 	Big a;
 	Big b;
@@ -22,8 +18,8 @@ int main(int argc, char** _argv)
 
 	try
 	{
-		a = Big::generate(length);
-		b = Big::generate(length);
+		a = Big::generate(length, dist, gen);
+		b = Big::generate(length, dist, gen);
 
 
 		cout << "kara start\n";

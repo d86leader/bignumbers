@@ -1,8 +1,4 @@
 #include <iostream>
-#include <memory>
-#include <string>
-#include <cstdlib>
-#include <ctime>
 #include <chrono>
 
 #include "../Big.h"
@@ -12,17 +8,21 @@ using std::cout;
 
 int main(int argc, char** _argv)
 {
-	std::vector<std::string> argv (_argv, _argv + argc);
-	srand(time(nullptr));
+	Big::generator_type gen;
+	Big::distribution_type dist;
+
+	constexpr size_t min_size = 2;
+	constexpr size_t max_size = 5;
+	std::uniform_int_distribution<size_t> size_distr (min_size, max_size);
 
 	Big a;
 	Big b;
 
-	const size_t length = rand()%5 + 2;
+	const size_t length = size_distr(gen);
 
 	try
 	{
-		a = Big::generate(length);
+		a = Big::generate(length, dist, gen);
 		cout << a.dump() << endl;
 
 		Big&& b = a.shift(3);

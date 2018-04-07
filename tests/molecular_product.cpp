@@ -1,8 +1,4 @@
 #include <iostream>
-#include <memory>
-#include <string>
-#include <cstdlib>
-#include <ctime>
 
 #include "../Big.h"
 
@@ -11,8 +7,12 @@ using std::cout;
 
 int main(int argc, char** _argv)
 {
-	std::vector<std::string> argv (_argv, _argv + argc);
-	srand(time(nullptr));
+	Big::generator_type gen;
+	Big::distribution_type dist;
+
+	constexpr size_t min_size = 1;
+	constexpr size_t max_size = 1000;
+	std::uniform_int_distribution<size_t> size_distr (min_size, max_size);
 
 	Big a;
 	Big b;
@@ -27,11 +27,11 @@ int main(int argc, char** _argv)
 			{
 				std::cout << "on test number "<<i<<std::endl;
 			}
-			const size_t asize = rand()%1000 + 2;
-			const size_t bsize = rand()%1000 + 2;
+			const size_t asize = size_distr(gen);
+			const size_t bsize = size_distr(gen);
 
-			a = Big::generate(asize);
-			b = Big::generate(bsize);
+			a = Big::generate(asize, dist, gen);
+			b = Big::generate(bsize, dist, gen);
 
 			mol_prod = a.molecular_product(b);
 			prod = a.atomic_product(b);
