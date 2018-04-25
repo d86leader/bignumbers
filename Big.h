@@ -166,5 +166,8 @@ public:
 	friend std::istream& operator>> (std::istream& in, Big&);
 };
 
+auto barrett_reduce (const Big& modulo)
+    -> std::function< Big(const Big& value) >;
+
 #include "Big-inline.inc"
 #include "constructors.inc"

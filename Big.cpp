@@ -937,3 +937,12 @@ Big Big::operator<< (size_t amount) const
 
 	return Big(std::move(result));
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+auto barrett_reduce (const Big& modulo)
+    -> std::function< Big(const Big& value) >
+{
+}
