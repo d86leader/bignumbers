@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <random>
+#include <functional>
 
 #ifdef DEBUG
 # define private public
