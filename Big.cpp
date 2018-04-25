@@ -984,4 +984,29 @@ Big Big::operator<< (size_t amount) const
 auto barrett_reduce (const Big& modulo)
     -> std::function< Big(const Big& value) >
 {
+	// the lowest number such that (1 << sa) > modulo
+	size_t shift_amount = modulo.last_bit_index() * 2;
+
+	// the number such that multipling by it and shifting by shift_amount
+	// is similar to dividing by n
+	Big&& multipiler = (Big(1) << shift_amount) / modulo;
+
+	auto f =
+		[modulo, shift_amount, multipiler]
+		(const Big& value) -> Big
+		{
+			// compute result representing value divided by modulo
+			Big&& nearly_v_div_m = (value * multipiler) >> shift_amount;
+
+			Big&& pre_result = value - nearly_v_div_m * modulo;
+
+			// if value was big enough, it's neccessary to subtract
+			// warning: if value >= n^2, there might be a lot of subtractions
+			while (pre_result > modulo)
+			{
+				pre_result -= modulo;
+			}
+			return pre_result;
+		};
+	return f;
 }
