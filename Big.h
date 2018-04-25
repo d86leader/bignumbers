@@ -152,6 +152,9 @@ public:
 	Big operator>> (size_t) const;
 	Big operator<< (size_t) const;
 
+	auto prepare_barrett_reduce () ->
+		std::function< Big(const Big& value) > const;
+
 	template<typename T> Big operator+ (const T& r) const;
 	template<typename T> Big operator- (const T& r) const;
 	template<typename T> Big operator* (const T& r) const;
@@ -169,9 +172,6 @@ public:
 	friend std::ostream& operator<< (std::ostream& out, const Big&);
 	friend std::istream& operator>> (std::istream& in, Big&);
 };
-
-auto barrett_reduce (const Big& modulo)
-    -> std::function< Big(const Big& value) >;
 
 #include "Big-inline.inc"
 #include "constructors.inc"

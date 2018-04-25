@@ -981,9 +981,12 @@ Big Big::operator<< (size_t amount) const
 //////////////////////////////////////////////////////////////////////////////
 
 
-auto barrett_reduce (const Big& modulo)
-    -> std::function< Big(const Big& value) >
+auto Big::prepare_barrett_reduce ()
+    -> std::function< Big(const Big& value) > const
 {
+	// need to create a copy as it is passed by value to lambda closure
+	Big modulo = *this;
+
 	// the lowest number such that (1 << sa) > modulo
 	size_t shift_amount = modulo.last_bit_index() * 2;
 

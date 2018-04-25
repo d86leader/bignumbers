@@ -35,7 +35,7 @@ int main(int argc, char** _argv)
 			a = Big::generate(size, dist, gen);
 			b = Big::generate(size, dist, gen);
 
-			auto moduler = barrett_reduce(b);
+			auto moduler = b.prepare_barrett_reduce();
 			reduced = moduler(a);
 			divided = a % b;
 
