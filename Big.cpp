@@ -342,6 +342,81 @@ Big Big::operator& (const Big& r) const
 }
 
 
+Big Big::operator| (const Big& r) const
+{
+	if (this->is_nil()) return r;
+	if (r.is_nil())     return *this;
+
+	// it's easier to work when you know which is bigger
+	if (r.m_cell_amount > m_cell_amount)
+	{
+		return r | *this;
+	}
+
+	init_vect result;
+	result.reserve(m_cell_amount);
+
+	for (size_t i = 0; i < r.m_cell_amount; ++i)
+	{
+		result.push_back(at(i) | r.at(i));
+	}
+	for (size_t i = r.m_cell_amount; i < m_cell_amount; ++i)
+	{
+		result.push_back(at(i));
+	}
+
+	return Big(std::move(result));
+}
+
+
+Big Big::operator^ (const Big& r) const
+{
+	if (this->is_nil()) return r;
+	if (r.is_nil())     return *this;
+
+	// it's easier to work when you know which is bigger
+	if (r.m_cell_amount > m_cell_amount)
+	{
+		return r ^ *this;
+	}
+
+	init_vect result;
+	result.reserve(m_cell_amount);
+
+	for (size_t i = 0; i < r.m_cell_amount; ++i)
+	{
+		result.push_back(at(i) ^ r.at(i));
+	}
+	for (size_t i = r.m_cell_amount; i < m_cell_amount; ++i)
+	{
+		result.push_back(at(i));
+	}
+
+	return Big(std::move(result));
+}
+
+
+Big Big::operator~ () const
+{
+	if (this->is_nil())
+	{
+		// in the spirit of the last cell being negated as a whole,
+		// we negate the cell with the sole zero as if it existed
+		return Big(CellMaxValue);
+	}
+
+	init_vect result;
+	result.reserve(m_cell_amount);
+
+	for (size_t i = 0; i < m_cell_amount; ++i)
+	{
+		result.push_back(~at(i));
+	}
+
+	return Big(std::move(result));
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 
