@@ -27,6 +27,45 @@ namespace
 //////////////////////////////////////////////////////////////////////////////
 
 
+bool Big::is_power_of_2() const
+{
+	// famous algorith: x & (x-1) == 0 if and only if x is a power 2,
+	// given positive x
+	return (*this & (*this - 1)) == 0;
+}
+
+
+size_t Big::last_bit_index() const
+{
+	if (is_nil()) return 0;
+
+	size_t pre_answer = (m_cell_amount - 1) * CellBits;
+	cell last = at(m_cell_amount - 1);
+
+	// a simple algorithm as i can't be bothered now
+
+	cell current_mask = CellMaxValue;
+	// + 1 as it only stops decrementing after reaching zero
+	size_t last_index = CellBits + 1;
+	while ((last & current_mask) != 0)
+	{
+		current_mask >>= 1;
+		last_index -= 1;
+		if (last_index > CellBits)
+		{
+			throw std::runtime_error(
+				"Big: encountered a number with leading zero");
+		}
+	}
+
+	size_t answer = pre_answer + last_index;
+	return answer;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
 //shifts left by amount (right ig amount < 0)
 Big Big::shift(int amount) const
 {
