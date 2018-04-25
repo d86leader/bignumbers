@@ -984,10 +984,12 @@ Big Big::operator<< (size_t amount) const
 auto Big::prepare_barrett_reduce ()
     -> std::function< Big(const Big& value) > const
 {
-	// need to create a copy as it is passed by value to lambda closure
-	Big modulo = *this;
+	// need to rename as it is passed by value to lambda closure
+	Big& modulo = *this;
 
-	// the lowest number such that (1 << sa) > modulo
+	// last_bit_index is the lowest number x such that (1 << x) > modulo
+	// we multiply it by two because wiki said so :P
+	// probably for the division to be more precise
 	size_t shift_amount = modulo.last_bit_index() * 2;
 
 	// the number such that multipling by it and shifting by shift_amount
