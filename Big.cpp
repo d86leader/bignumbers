@@ -527,15 +527,7 @@ pair<Big, Big> Big::quot_rem_small(const Big& r) const
 		current -= quot_i.back() * d;
 	}
 
-	auto b = quot_i.rend();
-	//drop all zeroes in significant positions
-	while (b != quot_i.rbegin() && *--b == 0) {}
-	//b should point to right after what should be inside
-	++b;
-
-	//invert the quotient FIXME
-	auto q_vec = Big::init_vect(quot_i.rbegin(), b);
-	Big quot (std::move(q_vec));
+	Big quot (quot_i.rbegin(), quot_i.rend());
 	Big&& rem = current;
 	return std::make_pair( quot, rem );
 }
