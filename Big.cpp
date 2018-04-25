@@ -46,6 +46,7 @@ Big Big::shift(int amount) const
 Big Big::generate(size_t size, distribution_type& d, generator_type& e)
 {
 	Big::init_vect r;
+	r.reserve(size);
 	// pushing tail digints, they can be zero
 	while (size --> 1)
 	{
@@ -330,9 +331,8 @@ Big Big::operator& (const Big& r) const
 	}
 	init_vect result;
 
-	size_t min_length = m_cell_amount < r.m_cell_amount ?
-		m_cell_amount : r.m_cell_amount;
-
+	size_t min_length = std::min(m_cell_amount, r.m_cell_amount);
+	result.reserve(min_length);
 	for (size_t i = 0; i < min_length; ++i)
 	{
 		result.push_back(at(i) & r.at(i));
@@ -508,6 +508,7 @@ pair<Big, Big> Big::quot_rem_small(const Big& r) const
 {
 	d_cell d = r.at(0);
 	Big::init_vect quot_i;
+	quot_i.reserve(m_cell_amount);
 	d_cell current = 0;
 
 	if (at(m_cell_amount - 1) == 0)
@@ -532,7 +533,7 @@ pair<Big, Big> Big::quot_rem_small(const Big& r) const
 	//b should point to right after what should be inside
 	++b;
 
-	//invert the quotient
+	//invert the quotient FIXME
 	auto q_vec = Big::init_vect(quot_i.rbegin(), b);
 	Big quot (std::move(q_vec));
 	Big&& rem = current;
@@ -890,6 +891,7 @@ Big Big::operator>> (size_t amount) const
 	amount %= CellBits;
 
 	init_vect result;
+	result.reserve(temp.m_cell_amount);
 	for (size_t i = 0; i < temp.m_cell_amount - 1; ++i)
 	{
 		// put the highest bits of current to lower positions
@@ -926,6 +928,7 @@ Big Big::operator<< (size_t amount) const
 	// but requires writing a new constructor
 
 	init_vect result;
+	result.reserve(temp.m_cell_amount);
 	result.push_back(temp.at(0) << amount);
 
 	for (size_t i = 1; i < temp.m_cell_amount; ++i)
