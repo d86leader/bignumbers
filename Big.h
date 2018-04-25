@@ -119,6 +119,9 @@ public:
 	size_t get_size() const; //size in bytes
 	size_t get_bit_amount() const;
 
+	bool is_power_of_2() const;
+	size_t last_bit_index() const; // indicies start from 1; 0 for no bit present
+
 	Big  shift(int) const; //cellwise shift
 
 	std::string dump(bool print_sign = true) const;
