@@ -578,7 +578,8 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	if (*this < divider)
 		return std::make_pair(Big(0), *this);
 	//normalization
-	d_cell d = CellModulo / ( divider.at(divider.m_cell_amount-1) + 1 );
+	d_cell last_digit = divider.at(divider.m_cell_amount-1);
+	d_cell d = CellModulo / ( last_digit + 1 );
 	Big&& u = *this * d;   //normalized divident
 	Big&& v = divider * d; //normalized divisor
 
@@ -644,6 +645,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 			}
 			q -= 1;
 			assert(q >= 1);
+			if (debug) if (q >= b) throw "comparing with b";
 			assert(q < b);
 		}
 		if (debug)
