@@ -2,7 +2,6 @@
 
 #include <iomanip>
 #include <sstream>
-#include <cassert>
 
 using std::pair;
 using std::string;
@@ -10,8 +9,6 @@ using std::vector;
 using std::hex;
 using std::endl;
 using std::dec;
-
-const bool debug = false;
 
 using cell = Big::cell;
 using d_cell = Big::d_cell;
@@ -121,7 +118,12 @@ string Big::dump(bool print_sign) const
 			dumpstream << "neg 0x";
 	}
 	else
-		dumpstream << "0x";
+	{
+		if (m_positive)
+			dumpstream << "0x";
+		else
+			dumpstream << "-0x";
+	}
 
 	dumpstream << std::hex << std::setfill('0') << std::setw(CellLength*2);
 
@@ -136,7 +138,7 @@ string Big::dump(bool print_sign) const
 	d_cell digit = static_cast<d_cell>(at(0));
 	dumpstream << digit << std::dec;
 
-	string r {dumpstream.str()};
+	string r (dumpstream.str());
 	return r;
 }
 
@@ -578,14 +580,10 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	if (*this < divider)
 		return std::make_pair(Big(0), *this);
 	//normalization
-	d_cell d = CellModulo / ( divider.at(divider.m_cell_amount-1) + 1 );
+	d_cell last_digit = divider.at(divider.m_cell_amount-1);
+	d_cell d = CellModulo / ( last_digit + 1 );
 	Big&& u = *this * d;   //normalized divident
 	Big&& v = divider * d; //normalized divisor
-
-	if (debug)
-	{
-		std::cout << "normalized by " << hex << d << " resulting in " << u.dump(false) << " / " << v.dump(false) <<endl;
-	}
 
 	//initialization
 	Big::init_vect quot;       //result vector
@@ -594,109 +592,78 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	size_t m    = u.m_cell_amount - n;
 	//get like in our written algorithm
 	const size_t u_ini_size = u.m_cell_amount;
-	auto get_u = [&u_ini_size, &u](const size_t& i) -> d_cell{
+	auto get_u = [&u_ini_size, &u](size_t i) -> d_cell{
 		if (i == 0)
 			return 0;
-		else
-			return u.at( u_ini_size - i );
+		// some fuckery: sometimes we must access elements beyond u's cells;
+		// those we suppose are zero as they were subtracted from
+		size_t index = u_ini_size - i;
+		if (index >= u.m_cell_amount)
+			return 0;
+		return u.at(index);
 	};
-	auto get   = [](const Big& a, const size_t& i) -> d_cell{
+	auto get = [](const Big& a, size_t i) -> d_cell{
 		if(i == 0)
 			return 0;
 		else
 			return a.at(a.m_cell_amount - i);
 	};
 
-	assert(get_u(1) != 0);
+	if (get_u(1) == 0)
+	{
+		throw std::runtime_error("Big: division got a number with leading zero");
+	}
 
 	//main cycle
 	for (size_t j = 0; j <= m; ++j)
 	{
-		if (debug)
-		{
-			std::cout << "iteration corresponding to " << j <<endl;
-			std::cout << "\tcurrent u =\t" << u.dump(false) <<endl;
-		}
-
 		d_cell q;
 		if (get_u(j) == get(v, 1))
-			q = b - 1;
-		else
-			q = (get_u(j)*b + get_u(j+1)) / get(v, 1);
-		if (debug)
 		{
-			std::cout << "calculated q = " << hex << q <<endl;
+			q = b - 1;
+		}
+		else
+		{
+			q = (get_u(j)*b + get_u(j+1)) / get(v, 1);
 		}
 
-		//improving accuracy of q (fucking Knuth)
+		//improving accuracy of q
 		while ( get(v,2) * q > ( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2) )
 		{
-			if (debug)
-			{
-				std::cout << "\tjust for ruby:\n\t\t0x"
-				          <<hex<<get(v,2)<<" * 0x"<<hex<<q<<" > "
-				          <<"( 0x"<<hex<<get_u(j)<<"*0x"<<hex<<b
-				          <<" + 0x"<<hex<<get_u(j+1)<<" - 0x"<<hex<<q<<"*0x"<<hex<<get(v, 1)<<" )*0x"
-				          <<hex<<b<<" + 0x"<<hex<<get_u(j+2)
-				          <<endl;
-				std::cout << "\trecalculated q as 0x"
-				          << get(v,2) * q << " > 0x" << ( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2) <<endl;
-			}
+			if (q == 0) throw "inside division: trying to decrement q = 0";
 			q -= 1;
-			assert(q >= 1);
-			assert(q < b);
-		}
-		if (debug)
-		{
-			std::cout << "recalculated q = " << hex << q <<endl;
+			if (not (q < b)) throw "inside division: comparing with b";
 		}
 
+		// maybe sometimes this shiftam is wrong?
 		size_t shiftam = m - j; // amount to shift by; inductibly proved to be correct
 		Big&& slice = (v*q).shift(shiftam);
+		// check for shiftam correctness
+		if (slice.m_cell_amount > u.m_cell_amount)
+		{
+			throw "in division: it appears that shiftam was calculated wrongly";
+		}
 
 		//further improve accuracy of q
 		//if subtraction of v * q from u[j - v.m_cell_amount ... j]
 		//would require borrowing
-		if (q != 0 && u < slice)
+		if (q != 0 and u < slice)
 		{
-			if (debug)
-			{
-				std::cout << "further reduced q as\t" << (v*q).dump(false) << " GT slice\n";
-			}
 			q -= 1;
 			slice = (v*q).shift(shiftam);
 		}
 
 		//subtraction
-		if (debug)
-		{
-			std::cout << "about to subtract " <<v.dump(false) << " * " << hex << q
-				<< " =\n\t\t\t" << (v*q).dump(false) <<endl;
-			std::cout << "subtracting from\t" << u.dump(false) << " a slice shifted by " << shiftam <<endl;
-		}
 		u = u - slice;
-		if (debug)
-		{
-			std::cout << "subtracted to become\t" << u.dump(false) <<endl;
-		}
 
 		//pushing the quotient
 		//q :: d_cell, but can fit into cell
 		quot.push_back( static_cast<cell>(q) );
-		if (debug)
-		{
-			std::cout << "pushed " << hex << quot.back() << " to result\n";
-			std::cout <<endl;
-		}
 	}
 
 
 	//denormalization
 	Big quotient (quot.rbegin(), quot.rend());
-	if (debug)
-	{
-		std::cout <<"calling " << u << " / " << hex <<d <<endl;
-	}
 	auto remainder = u / d;
 
 	return std::make_pair(quotient, remainder);
@@ -707,7 +674,10 @@ std::pair<Big, Big> Big::quot_rem (const Big& divider) const
 {
 	if (this->is_nil())
 		return std::make_pair(*this, *this);
-	assert(!divider.is_nil());
+	if (divider.is_nil())
+	{
+		throw std::runtime_error("Big: dividing by zero");
+	}
 
 	if (divider.m_cell_amount == 1) //dividing by small number
 	{
@@ -802,7 +772,7 @@ namespace
 			return 10 + c - 'A';
 		if (c >= '0' && c <= '9')
 			return c - '0';
-		assert(false);
+		throw std::runtime_error("Big: error parsing a digit (perhaps your string contains non-hexadecimal symbols)");
 	}
 
 	cell unhex(const string& s)
@@ -825,6 +795,7 @@ std::ostream& operator << (std::ostream& out, const Big& number)
 		out << 0;
 		return out;
 	}
+	out << "0x";
 	out << hex;
 	for (size_t i = number.m_cell_amount; i > 0; --i)
 	{

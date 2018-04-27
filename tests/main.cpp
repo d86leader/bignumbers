@@ -10,8 +10,10 @@ int main(int argc, char** _argv)
 	Big::generator_type gen;
 	Big::distribution_type dist;
 
-	constexpr size_t min_size = 1;
+	constexpr size_t min_size = 2;
 	constexpr size_t max_size = 1000;
+	constexpr size_t tries = 1000;
+	constexpr size_t print_each = tries / 10;
 	std::uniform_int_distribution<size_t> size_distr (min_size, max_size);
 
 	Big a;
@@ -20,9 +22,9 @@ int main(int argc, char** _argv)
 
 	try
 	{
-		for (int i = 0; i < 1000; ++i)
+		for (int i = 0; i < tries; ++i)
 		{
-			if (i % 50 == 0)
+			if (i % print_each == 0)
 			{
 				std::cout << "on test number "<<i<<std::endl;
 			}
@@ -70,10 +72,10 @@ int main(int argc, char** _argv)
 	catch (const char* errtype)
 	{
 		std::cout << "error when " << errtype <<". Values:\n";
-		std::cout << '\t' << "a:"            << (a           ).dump() << std::endl;
-		std::cout << '\t' << "b:"            << (b           ).dump() << std::endl;
-		std::cout << '\t' << "quot:"         << (quot        ).dump() << std::endl;
-		std::cout << '\t' << "rem:"          << (rem         ).dump() << std::endl;
+		std::cerr << '\t' << "a:"            << (a           ).dump() << std::endl;
+		std::cerr << '\t' << "b:"            << (b           ).dump() << std::endl;
+		std::cerr << '\t' << "quot:"         << (quot        ).dump() << std::endl;
+		std::cerr << '\t' << "rem:"          << (rem         ).dump() << std::endl;
 //		std::cout << '\t' << "quot*b:"       << (quot*b      ).dump() << std::endl;
 //		std::cout << '\t' << "quot*b + rem:" << (quot*b + rem).dump() << std::endl;
 //		std::cout << '\t' << "a - rem:"      << (a - rem     ).dump() << std::endl;

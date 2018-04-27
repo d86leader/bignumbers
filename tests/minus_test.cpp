@@ -19,9 +19,9 @@ int main(int argc, char** _argv)
 
 	try
 	{
-		for (int i = 0; i < 10000; ++i)
+		for (int i = 0; i < 1000; ++i)
 		{
-			if (i % 500 == 0)
+			if (i % 100 == 0)
 			{
 				std::cout << "on test number "<<i<<std::endl;
 			}
