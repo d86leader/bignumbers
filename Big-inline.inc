@@ -57,7 +57,7 @@ inline Big::cell Big::bit_at (const size_t& index) const
 
 inline Big::cell Big::at (const size_t& index) const
 {
-	if (index > m_cell_amount)
+	if (index >= m_cell_amount)
 	{
 		throw std::runtime_error("Big: number index out of range");
 	}
