@@ -12,7 +12,7 @@ using std::hex;
 using std::endl;
 using std::dec;
 
-const bool debug = true;
+const bool debug = false;
 
 using cell = Big::cell;
 using d_cell = Big::d_cell;
@@ -669,36 +669,26 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 
 		// maybe sometimes this shiftam is wrong?
 		size_t shiftam = m - j; // amount to shift by; inductibly proved to be correct
-		Big&& to_compare = v * q;
+		Big&& slice = (v*q).shift(shiftam);
 		// check for shiftam correctness
-		if (shiftam + to_compare.m_cell_amount > u.m_cell_amount)
+		if (slice.m_cell_amount > u.m_cell_amount)
 		{
 			throw "in division: it appears that shiftam was calculated wrongly";
 		}
 
-		// they are negative?!
-		if (not u.m_positive)
-		{
-			throw "ALARM! u is negative!";
-		}
-		Big&& u_slice = u.shift(-shiftam).slice(0, to_compare.m_cell_amount);
-
 		//further improve accuracy of q
 		//if subtraction of v * q from u[j - v.m_cell_amount ... j]
 		//would require borrowing
-		if (q != 0 && u_slice < to_compare)
+		if (q != 0 and u < slice)
 		{
 			if (debug)
 			{
-				err(u_slice.dump(false), " < ", to_compare.dump(false));
-				err("# this might be false and it's ok:");
-				err(u.dump(false), " < ", to_compare.shift(shiftam).dump(false));
+				err(u.dump(false), " < ", slice.dump(false));
 				err("#further reduced q as\t", (v*q).dump(false), " GT slice");
 			}
 			q -= 1;
-			to_compare -= v;
+			slice = (v*q).shift(shiftam);
 		}
-		Big&& slice = to_compare.shift(shiftam);
 
 		//subtraction
 		if (debug) // THIS SHIT FIXES SOME
