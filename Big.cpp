@@ -2,7 +2,6 @@
 
 #include <iomanip>
 #include <sstream>
-#include <cassert>
 
 using std::pair;
 using std::string;
@@ -610,7 +609,10 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 			return a.at(a.m_cell_amount - i);
 	};
 
-	assert(get_u(1) != 0);
+	if (get_u(1) == 0)
+	{
+		throw std::runtime_error("Big: division got a number with leading zero");
+	}
 
 	//main cycle
 	for (size_t j = 0; j <= m; ++j)
@@ -672,7 +674,10 @@ std::pair<Big, Big> Big::quot_rem (const Big& divider) const
 {
 	if (this->is_nil())
 		return std::make_pair(*this, *this);
-	assert(!divider.is_nil());
+	if (divider.is_nil())
+	{
+		throw std::runtime_error("Big: dividing by zero");
+	}
 
 	if (divider.m_cell_amount == 1) //dividing by small number
 	{
@@ -767,7 +772,7 @@ namespace
 			return 10 + c - 'A';
 		if (c >= '0' && c <= '9')
 			return c - '0';
-		assert(false);
+		throw std::runtime_error("Big: error parsing a digit (perhaps your string contains non-hexadecimal symbols)");
 	}
 
 	cell unhex(const string& s)
