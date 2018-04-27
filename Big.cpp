@@ -691,10 +691,9 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 			if (debug)
 			{
 				err(u_slice.dump(false), " < ", to_compare.dump(false));
-				err("# on the other hand:\n");
-				err(u_slice.dump(), " < ", to_compare.dump());
+				err("# this might be false and it's ok:");
 				err(u.dump(false), " < ", to_compare.shift(shiftam).dump(false));
-				err("#further reduced q as\t", (v*q).dump(false), " GT slice\n");
+				err("#further reduced q as\t", (v*q).dump(false), " GT slice");
 			}
 			q -= 1;
 			to_compare -= v;
