@@ -70,10 +70,10 @@ int main(int argc, char** _argv)
 	catch (const char* errtype)
 	{
 		std::cout << "error when " << errtype <<". Values:\n";
-		std::cout << '\t' << "a:"            << (a           ).dump() << std::endl;
-		std::cout << '\t' << "b:"            << (b           ).dump() << std::endl;
-		std::cout << '\t' << "quot:"         << (quot        ).dump() << std::endl;
-		std::cout << '\t' << "rem:"          << (rem         ).dump() << std::endl;
+		std::cerr << '\t' << "a:"            << (a           ).dump() << std::endl;
+		std::cerr << '\t' << "b:"            << (b           ).dump() << std::endl;
+		std::cerr << '\t' << "quot:"         << (quot        ).dump() << std::endl;
+		std::cerr << '\t' << "rem:"          << (rem         ).dump() << std::endl;
 //		std::cout << '\t' << "quot*b:"       << (quot*b      ).dump() << std::endl;
 //		std::cout << '\t' << "quot*b + rem:" << (quot*b + rem).dump() << std::endl;
 //		std::cout << '\t' << "a - rem:"      << (a - rem     ).dump() << std::endl;

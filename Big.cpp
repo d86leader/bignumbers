@@ -645,8 +645,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 			}
 			q -= 1;
 			assert(q >= 1);
-			if (debug) if (q >= b) throw "comparing with b";
-			assert(q < b);
+			if (not (q < b)) throw "inside division: comparing with b";
 		}
 		if (debug)
 		{
@@ -670,11 +669,11 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		}
 
 		//subtraction
-		if (debug)
+		if (!debug) // THIS SHIT FIXES SOME
 		{
-			std::cout << "about to subtract " <<v.dump(false) << " * " << hex << q
+			std::cerr << "about to subtract " <<v.dump(false) << " * " << hex << q
 				<< " =\n\t\t\t" << (v*q).dump(false) <<endl;
-			std::cout << "subtracting from\t" << u.dump(false) << " a slice shifted by " << shiftam <<endl;
+			std::cerr << "subtracting from\t" << u.dump(false) << " a slice shifted by " << shiftam <<endl;
 		}
 		u = u - slice;
 		if (debug)

@@ -21,8 +21,16 @@ int main(int argc, char** _argv)
 		Big& quot = t.first;
 		Big& rem = t.second;
 
-		cout << a.dump(false) << "/" << b.dump(false) << "==" << quot << endl;
-		cout << a.dump(false) << "%" << b.dump(false) << "==" << rem << endl;
+		if (b * quot + rem != a)
+		{
+			cout << "it was all wrong!\n";
+		}
+		else
+		{
+			cout << "nice!\n";
+			cout << a.dump(false) << "/" << b.dump(false) << "==" << quot.dump(false) << endl;
+			cout << a.dump(false) << "%" << b.dump(false) << "==" << rem.dump(false) << endl;
+		}
 	}
 	catch (const char* err)
 	{
