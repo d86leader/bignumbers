@@ -122,7 +122,12 @@ string Big::dump(bool print_sign) const
 			dumpstream << "neg 0x";
 	}
 	else
-		dumpstream << "0x";
+	{
+		if (m_positive)
+			dumpstream << "0x";
+		else
+			dumpstream << "-0x";
+	}
 
 	dumpstream << std::hex << std::setfill('0') << std::setw(CellLength*2);
 
