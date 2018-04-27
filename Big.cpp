@@ -651,6 +651,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		//improving accuracy of q
 		while ( get(v,2) * q > ( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2) )
 		{
+			if (q == 0) throw "inside division: trying to decrement q = 0";
 			if (debug)
 			{
 				err( hex, "0x", get(v,2), " * 0x", hex, q, " > "
@@ -659,7 +660,6 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 				   , hex, b, " + 0x", hex, get_u(j+2) );
 			}
 			q -= 1;
-			assert(q >= 1);
 			if (not (q < b)) throw "inside division: comparing with b";
 		}
 		if (debug)
