@@ -596,13 +596,17 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	size_t m    = u.m_cell_amount - n;
 	//get like in our written algorithm
 	const size_t u_ini_size = u.m_cell_amount;
-	auto get_u = [&u_ini_size, &u](const size_t& i) -> d_cell{
+	auto get_u = [&u_ini_size, &u](size_t i) -> d_cell{
 		if (i == 0)
 			return 0;
-		else
-			return u.at( u_ini_size - i );
+		// some fuckery: sometimes we must access elements beyond u's cells;
+		// those we suppose are zero as they were subtracted from
+		size_t index = u_ini_size - i;
+		if (index >= u.m_cell_amount)
+			return 0;
+		return u.at(index);
 	};
-	auto get   = [](const Big& a, const size_t& i) -> d_cell{
+	auto get = [](const Big& a, size_t i) -> d_cell{
 		if(i == 0)
 			return 0;
 		else
@@ -659,12 +663,24 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		}
 
 		size_t shiftam = m - j; // amount to shift by; inductibly proved to be correct
-		Big&& slice = (v*q).shift(shiftam);
+		Big&& to_compare = v * q;
+		// check for shiftam correctness
+		if (shiftam + to_compare.m_cell_amount > u.m_cell_amount)
+		{
+			throw "in division: it appears that shiftam was calculated wrongly";
+		}
+
+		// they are negative?!
+		if (not u.m_positive)
+		{
+			throw "ALARM! u is negative!";
+		}
+		Big&& u_slice = u.shift(-shiftam).slice(0, to_compare.m_cell_amount);
 
 		//further improve accuracy of q
 		//if subtraction of v * q from u[j - v.m_cell_amount ... j]
 		//would require borrowing
-		if (q != 0 && u < slice)
+		if (q != 0 && u_slice < to_compare)
 		{
 			if (debug)
 			{
