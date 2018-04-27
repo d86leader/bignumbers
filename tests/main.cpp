@@ -12,7 +12,7 @@ int main(int argc, char** _argv)
 
 	constexpr size_t min_size = 2;
 	constexpr size_t max_size = 1000;
-	constexpr size_t tries = 10000;
+	constexpr size_t tries = 1000;
 	constexpr size_t print_each = tries / 10;
 	std::uniform_int_distribution<size_t> size_distr (min_size, max_size);
 
