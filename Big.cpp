@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <sstream>
 #include <cassert>
+#include "logging.cpp"
 
 using std::pair;
 using std::string;
@@ -11,7 +12,7 @@ using std::hex;
 using std::endl;
 using std::dec;
 
-const bool debug = false;
+const bool debug = true;
 
 using cell = Big::cell;
 using d_cell = Big::d_cell;
@@ -615,33 +616,38 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	{
 		if (debug)
 		{
-			std::cout << "iteration corresponding to " << j <<endl;
-			std::cout << "\tcurrent u =\t" << u.dump(false) <<endl;
+			std::cout << "#iteration corresponding to " << j <<endl;
+			std::cout << "#\tcurrent u =\t" << u.dump(false) <<endl;
 		}
 
 		d_cell q;
 		if (get_u(j) == get(v, 1))
+		{
 			q = b - 1;
+		}
 		else
+		{
 			q = (get_u(j)*b + get_u(j+1)) / get(v, 1);
+			if (debug)
+			{
+				err( q, " == ",
+				     get_u(j), '*', b, " + ", get_u(j+1), " / ", get(v, 1) );
+			}
+		}
 		if (debug)
 		{
-			std::cout << "calculated q = " << hex << q <<endl;
+			err("#calculated q = ", hex, q);
 		}
 
-		//improving accuracy of q (fucking Knuth)
+		//improving accuracy of q
 		while ( get(v,2) * q > ( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2) )
 		{
 			if (debug)
 			{
-				std::cout << "\tjust for ruby:\n\t\t0x"
-				          <<hex<<get(v,2)<<" * 0x"<<hex<<q<<" > "
-				          <<"( 0x"<<hex<<get_u(j)<<"*0x"<<hex<<b
-				          <<" + 0x"<<hex<<get_u(j+1)<<" - 0x"<<hex<<q<<"*0x"<<hex<<get(v, 1)<<" )*0x"
-				          <<hex<<b<<" + 0x"<<hex<<get_u(j+2)
-				          <<endl;
-				std::cout << "\trecalculated q as 0x"
-				          << get(v,2) * q << " > 0x" << ( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2) <<endl;
+				err( hex, "0x", get(v,2), " * 0x", hex, q, " > "
+				   , "( 0x", hex, get_u(j), "*0x", hex, b
+				   , " + 0x", hex, get_u(j+1), " - 0x", hex, q, "*0x", hex, get(v, 1), " )*0x"
+				   , hex, b, " + 0x", hex, get_u(j+2) );
 			}
 			q -= 1;
 			assert(q >= 1);
@@ -649,7 +655,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		}
 		if (debug)
 		{
-			std::cout << "recalculated q = " << hex << q <<endl;
+			std::cout << "#recalculated q = " << hex << q <<endl;
 		}
 
 		size_t shiftam = m - j; // amount to shift by; inductibly proved to be correct
@@ -662,24 +668,24 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		{
 			if (debug)
 			{
-				std::cout << "further reduced q as\t" << (v*q).dump(false) << " GT slice\n";
+				err(u.dump(false), " < ", slice.dump(false));
+				std::cout << "#further reduced q as\t" << (v*q).dump(false) << " GT slice\n";
 			}
 			q -= 1;
 			slice = (v*q).shift(shiftam);
 		}
 
 		//subtraction
-		if (!debug) // THIS SHIT FIXES SOME
+		if (true) // THIS SHIT FIXES SOME
 		{
-			std::cerr << "what? " << v.dump(false) << std::endl;
-			std::cerr << "about to subtract " <<v.dump(false) << " * " << hex << q;
-			std::cerr << " =\n\t\t\t" << (v*q).dump(false) <<endl;
-			std::cerr << "subtracting from\t" << u.dump(false) << " a slice shifted by " << shiftam <<endl;
+			std::cerr << "#about to subtract:\n" <<v.dump(false) << " * " << hex << "0x" << q;
+			std::cerr << " == " << (v*q).dump(false) <<endl;
+			std::cerr << "#subtracting from\t" << u.dump(false) << " a slice shifted by " << dec << shiftam <<endl;
 		}
 		u = u - slice;
 		if (debug)
 		{
-			std::cout << "subtracted to become\t" << u.dump(false) <<endl;
+			std::cout << "#subtracted to become\t" << u.dump(false) <<endl;
 		}
 
 		//pushing the quotient
@@ -687,7 +693,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		quot.push_back( static_cast<cell>(q) );
 		if (debug)
 		{
-			std::cout << "pushed " << hex << quot.back() << " to result\n";
+			std::cout << "#pushed " << hex << "0x" << quot.back() << " to result\n";
 			std::cout <<endl;
 		}
 	}
@@ -695,10 +701,6 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 
 	//denormalization
 	Big quotient (quot.rbegin(), quot.rend());
-	if (debug)
-	{
-		std::cout <<"calling " << u << " / " << hex <<d <<endl;
-	}
 	auto remainder = u / d;
 
 	return std::make_pair(quotient, remainder);
