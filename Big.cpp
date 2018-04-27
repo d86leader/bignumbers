@@ -671,8 +671,9 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		//subtraction
 		if (!debug) // THIS SHIT FIXES SOME
 		{
-			std::cerr << "about to subtract " <<v.dump(false) << " * " << hex << q
-				<< " =\n\t\t\t" << (v*q).dump(false) <<endl;
+			std::cerr << "what? " << v.dump(false) << std::endl;
+			std::cerr << "about to subtract " <<v.dump(false) << " * " << hex << q;
+			std::cerr << " =\n\t\t\t" << (v*q).dump(false) <<endl;
 			std::cerr << "subtracting from\t" << u.dump(false) << " a slice shifted by " << shiftam <<endl;
 		}
 		u = u - slice;
