@@ -142,7 +142,7 @@ string Big::dump(bool print_sign) const
 	d_cell digit = static_cast<d_cell>(at(0));
 	dumpstream << digit << std::dec;
 
-	string r {dumpstream.str()};
+	string r (dumpstream.str());
 	return r;
 }
 
@@ -591,7 +591,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 
 	if (debug)
 	{
-		std::cout << "normalized by " << hex << d << " resulting in " << u.dump(false) << " / " << v.dump(false) <<endl;
+		err("normalized by ", hex, d, " resulting in ", u.dump(false), " / ", v.dump(false));
 	}
 
 	//initialization
@@ -625,8 +625,8 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	{
 		if (debug)
 		{
-			std::cout << "#iteration corresponding to " << j <<endl;
-			std::cout << "#\tcurrent u =\t" << u.dump(false) <<endl;
+			err("#iteration corresponding to ", j);
+			err("#\tcurrent u =\t", u.dump());
 		}
 
 		d_cell q;
@@ -639,8 +639,8 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 			q = (get_u(j)*b + get_u(j+1)) / get(v, 1);
 			if (debug)
 			{
-				err( q, " == ",
-				     get_u(j), '*', b, " + ", get_u(j+1), " / ", get(v, 1) );
+				err( q, " == (0x", hex,
+				     get_u(j), "*0x", hex, b, " + 0x", hex, get_u(j+1), ") / 0x", hex, get(v, 1) );
 			}
 		}
 		if (debug)
@@ -664,9 +664,10 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		}
 		if (debug)
 		{
-			std::cout << "#recalculated q = " << hex << q <<endl;
+			err("#recalculated q = ", hex, q);
 		}
 
+		// maybe sometimes this shiftam is wrong?
 		size_t shiftam = m - j; // amount to shift by; inductibly proved to be correct
 		Big&& to_compare = v * q;
 		// check for shiftam correctness
@@ -689,24 +690,29 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		{
 			if (debug)
 			{
-				err(u.dump(false), " < ", slice.dump(false));
-				std::cout << "#further reduced q as\t" << (v*q).dump(false) << " GT slice\n";
+				err(u_slice.dump(false), " < ", to_compare.dump(false));
+				err("# on the other hand:\n");
+				err(u_slice.dump(), " < ", to_compare.dump());
+				err(u.dump(false), " < ", to_compare.shift(shiftam).dump(false));
+				err("#further reduced q as\t", (v*q).dump(false), " GT slice\n");
 			}
 			q -= 1;
-			slice = (v*q).shift(shiftam);
+			to_compare -= v;
 		}
+		Big&& slice = to_compare.shift(shiftam);
 
 		//subtraction
-		if (true) // THIS SHIT FIXES SOME
+		if (debug) // THIS SHIT FIXES SOME
 		{
-			std::cerr << "#about to subtract:\n" <<v.dump(false) << " * " << hex << "0x" << q;
-			std::cerr << " == " << (v*q).dump(false) <<endl;
-			std::cerr << "#subtracting from\t" << u.dump(false) << " a slice shifted by " << dec << shiftam <<endl;
+			err("#about to subtract:\n",v.dump(false), " * ", hex, "0x", q,
+				" == ", (v*q).dump(false));
+			err("#subtracting from\t", u.dump(false), " a slice shifted by ", dec, shiftam);
+			err("# which is       \t", slice.dump(false));
 		}
 		u = u - slice;
 		if (debug)
 		{
-			std::cout << "#subtracted to become\t" << u.dump(false) <<endl;
+			err("#subtracted to become\t", u.dump(false));
 		}
 
 		//pushing the quotient
@@ -714,8 +720,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		quot.push_back( static_cast<cell>(q) );
 		if (debug)
 		{
-			std::cout << "#pushed " << hex << "0x" << quot.back() << " to result\n";
-			std::cout <<endl;
+			err("#pushed ", hex, "0x", quot.back(), " to result\n");
 		}
 	}
 
@@ -850,6 +855,7 @@ std::ostream& operator << (std::ostream& out, const Big& number)
 		out << 0;
 		return out;
 	}
+	out << "0x";
 	out << hex;
 	for (size_t i = number.m_cell_amount; i > 0; --i)
 	{
