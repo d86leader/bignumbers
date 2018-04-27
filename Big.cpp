@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <sstream>
 #include <cassert>
-#include "logging.cpp"
 
 using std::pair;
 using std::string;
@@ -11,8 +10,6 @@ using std::vector;
 using std::hex;
 using std::endl;
 using std::dec;
-
-const bool debug = false;
 
 using cell = Big::cell;
 using d_cell = Big::d_cell;
@@ -589,11 +586,6 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	Big&& u = *this * d;   //normalized divident
 	Big&& v = divider * d; //normalized divisor
 
-	if (debug)
-	{
-		err("normalized by ", hex, d, " resulting in ", u.dump(false), " / ", v.dump(false));
-	}
-
 	//initialization
 	Big::init_vect quot;       //result vector
 	d_cell b    = CellModulo; //oftenly used module
@@ -623,12 +615,6 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	//main cycle
 	for (size_t j = 0; j <= m; ++j)
 	{
-		if (debug)
-		{
-			err("#iteration corresponding to ", j);
-			err("#\tcurrent u =\t", u.dump());
-		}
-
 		d_cell q;
 		if (get_u(j) == get(v, 1))
 		{
@@ -637,34 +623,14 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		else
 		{
 			q = (get_u(j)*b + get_u(j+1)) / get(v, 1);
-			if (debug)
-			{
-				err( q, " == (0x", hex,
-				     get_u(j), "*0x", hex, b, " + 0x", hex, get_u(j+1), ") / 0x", hex, get(v, 1) );
-			}
-		}
-		if (debug)
-		{
-			err("#calculated q = ", hex, q);
 		}
 
 		//improving accuracy of q
 		while ( get(v,2) * q > ( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2) )
 		{
 			if (q == 0) throw "inside division: trying to decrement q = 0";
-			if (debug)
-			{
-				err( hex, "0x", get(v,2), " * 0x", hex, q, " > "
-				   , "( 0x", hex, get_u(j), "*0x", hex, b
-				   , " + 0x", hex, get_u(j+1), " - 0x", hex, q, "*0x", hex, get(v, 1), " )*0x"
-				   , hex, b, " + 0x", hex, get_u(j+2) );
-			}
 			q -= 1;
 			if (not (q < b)) throw "inside division: comparing with b";
-		}
-		if (debug)
-		{
-			err("#recalculated q = ", hex, q);
 		}
 
 		// maybe sometimes this shiftam is wrong?
@@ -681,36 +647,16 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		//would require borrowing
 		if (q != 0 and u < slice)
 		{
-			if (debug)
-			{
-				err(u.dump(false), " < ", slice.dump(false));
-				err("#further reduced q as\t", (v*q).dump(false), " GT slice");
-			}
 			q -= 1;
 			slice = (v*q).shift(shiftam);
 		}
 
 		//subtraction
-		if (debug) // THIS SHIT FIXES SOME
-		{
-			err("#about to subtract:\n",v.dump(false), " * ", hex, "0x", q,
-				" == ", (v*q).dump(false));
-			err("#subtracting from\t", u.dump(false), " a slice shifted by ", dec, shiftam);
-			err("# which is       \t", slice.dump(false));
-		}
 		u = u - slice;
-		if (debug)
-		{
-			err("#subtracted to become\t", u.dump(false));
-		}
 
 		//pushing the quotient
 		//q :: d_cell, but can fit into cell
 		quot.push_back( static_cast<cell>(q) );
-		if (debug)
-		{
-			err("#pushed ", hex, "0x", quot.back(), " to result\n");
-		}
 	}
 
 
