@@ -25,7 +25,7 @@ int main()
 
 	try
 	{
-		for (int i = 0; i < tries; ++i)
+		for (size_t i = 0; i < tries; ++i)
 		{
 			if (i % print_each == 0)
 			{
