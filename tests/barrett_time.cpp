@@ -1,12 +1,14 @@
 #include <iostream>
 #include <random>
 #include <chrono>
+#include <vector>
 
 #include "../Big.h"
 
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::vector;
 
 int main()
 {
@@ -17,46 +19,47 @@ int main()
 	constexpr size_t max_size = 500;
 	constexpr size_t tries = 1000;
 	constexpr size_t print_each = tries / 10;
-	std::uniform_int_distribution<size_t> size_distr (min_size, max_size);
+	std::uniform_int_distribution<size_t> b_size_distr (min_size, max_size);
+
+	// generate b once, a manifold
+	const size_t bsize = b_size_distr(gen);
+	std::uniform_int_distribution<size_t> a_size_distr (bsize, bsize*2 - 1);
+	Big b = Big::generate(bsize, dist, gen);
+	auto mod = b.prepare_barrett_reduce();
 
 	Big a;
-	Big b;
+	vector<Big> as;
+	vector<Big> bs;
 
 	Big basic_mod, barrett_mod;
+	std::chrono::duration<double> basic_length;
+	std::chrono::duration<double> barrett_length;
 
 	try
 	{
-		size_t bsize = size_distr(gen);
-		size_t temp  = size_distr(gen);
-		if (temp > bsize) std::swap(bsize, temp);
-		const size_t asize = (bsize + temp) / 2;
+		for (size_t i = 0; i < tries; ++i)
+		{
+			if (i % print_each == 0)
+			{
+				cout << "on test number " << i << endl;
+			}
+			const size_t asize = a_size_distr(gen);
 
-		a = Big::generate(asize, dist, gen);
-		b = Big::generate(bsize, dist, gen);
+			a = Big::generate(asize, dist, gen);
 
-		cout << "basic start\n";
-		auto basic_start = std::chrono::high_resolution_clock::now();
-		basic_mod = a % b;
-		auto basic_end = std::chrono::high_resolution_clock::now();
-		cout << "basic end\n";
+			auto basic_start = std::chrono::high_resolution_clock::now();
+			basic_mod = a % b;
+			auto basic_end = std::chrono::high_resolution_clock::now();
 
-		cout << "barrett start\n";
-		auto barrett_start = std::chrono::high_resolution_clock::now();
-		cout << "created timer\n";
-		auto mod = b.prepare_barrett_reduce();
-		cout << "created moduler\n";
-		barrett_mod = mod(a);
-		cout << "finished modulling\n";
-		auto barrett_end = std::chrono::high_resolution_clock::now();
-		cout << "barrett end\n";
+			auto barrett_start = std::chrono::high_resolution_clock::now();
+			barrett_mod = mod(a);
+			auto barrett_end = std::chrono::high_resolution_clock::now();
 
-		std::chrono::duration<double> basic_length =
-			basic_end - basic_start;
+			basic_length += basic_end - basic_start;
+			barrett_length += barrett_end - barrett_start;
 
-		std::chrono::duration<double> barrett_length =
-			barrett_end - barrett_start;
-
-		if (basic_mod != barrett_mod) throw "mods not equal!";
+			if (basic_mod != barrett_mod) throw "mods not equal!";
+		}
 
 		if (basic_length < barrett_length)
 		{
