@@ -152,8 +152,8 @@ public:
 	Big operator>> (size_t) const;
 	Big operator<< (size_t) const;
 
-	auto prepare_barrett_reduce () ->
-		std::function< Big(const Big& value) > const;
+	auto prepare_barrett_reduce () const ->
+		std::function< Big(const Big& value) >;
 
 	template<typename T> Big operator+ (const T& r) const;
 	template<typename T> Big operator- (const T& r) const;

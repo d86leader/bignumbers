@@ -952,11 +952,11 @@ Big Big::operator<< (size_t amount) const
 //////////////////////////////////////////////////////////////////////////////
 
 
-auto Big::prepare_barrett_reduce ()
-    -> std::function< Big(const Big& value) > const
+auto Big::prepare_barrett_reduce () const
+    -> std::function< Big(const Big& value) >
 {
 	// need to rename as it is passed by value to lambda closure
-	Big& modulo = *this;
+	const Big& modulo = *this;
 
 	// last_bit_index is the lowest number x such that (1 << x) > modulo
 	// we multiply it by two because wiki said so :P
