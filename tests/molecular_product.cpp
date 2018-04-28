@@ -5,7 +5,7 @@
 using std::endl;
 using std::cout;
 
-int main(int argc, char** _argv)
+int main()
 {
 	Big::generator_type gen;
 	Big::distribution_type dist;

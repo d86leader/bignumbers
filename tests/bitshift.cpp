@@ -6,7 +6,7 @@
 using std::endl;
 using std::cout;
 
-int main(int argc, char** _argv)
+int main()
 {
 	Big::generator_type gen;
 	Big::distribution_type dist;
@@ -41,6 +41,7 @@ int main(int argc, char** _argv)
 			a = Big::generate(asize, dist, gen);
 
 			shl = a << shiftam;
+			// use atomic operations as i'm going to make division shift
 			mul = a.atomic_product(multiplier);
 
 			shiftback = shl >> shiftam;
@@ -54,6 +55,7 @@ int main(int argc, char** _argv)
 			}
 
 			shr = a >> shiftam;
+			// use atomic operations as i'm going to make division shift
 			if (multiplier.m_cell_amount > 1)
 			{
 				div = a.quot_rem_big(multiplier).first;
