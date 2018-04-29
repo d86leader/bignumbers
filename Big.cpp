@@ -514,7 +514,8 @@ Big Big::operator* (const Big& r) const
 		|| ( m_positive && !r.m_positive))
 	{
 		// molecular is faster but doesn't work for length of 1
-		if (m_cell_amount <= atomic_threshold or r.m_cell_amount <= atomic_threshold)
+		if (m_cell_amount <= atomic_threshold
+			or r.m_cell_amount <= atomic_threshold)
 		{
 			auto&& t = this->atomic_product(r);
 			t.negate_this();
@@ -628,15 +629,16 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		}
 
 		//improving accuracy of q
-		while ( get(v,2) * q > ( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2) )
+		while (get(v,2) * q >
+			( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2))
 		{
 			if (q == 0) throw "inside division: trying to decrement q = 0";
 			q -= 1;
 			if (not (q < b)) throw "inside division: comparing with b";
 		}
 
-		// maybe sometimes this shiftam is wrong?
-		size_t shiftam = m - j; // amount to shift by; inductibly proved to be correct
+		// amount to shift by; inductibly proved to be correct
+		size_t shiftam = m - j;
 		Big&& slice = (v*q).shift(shiftam);
 		// check for shiftam correctness
 		if (slice.m_cell_amount > u.m_cell_amount)
@@ -772,7 +774,8 @@ namespace
 			return 10 + c - 'A';
 		if (c >= '0' && c <= '9')
 			return c - '0';
-		throw std::runtime_error("Big: error parsing a digit (perhaps your string contains non-hexadecimal symbols)");
+		throw std::runtime_error("Big: error parsing a digit"
+			" (perhaps your string contains non-hexadecimal symbols)");
 	}
 
 	cell unhex(const string& s)
