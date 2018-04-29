@@ -855,15 +855,17 @@ Big Big::exponentiate_rtl(const Big& r, const Big& modulo) const
 	// r is nont-nil
 	Big this_power = *this;
 	Big result = 1;
+	auto mod = modulo.prepare_barrett_reduce();
+	size_t critical_size = modulo.m_cell_amount;
 
 	size_t bit_amount = r.get_bit_amount();
 	for (size_t bit_index = 0; bit_index < bit_amount; ++bit_index)
 	{
 		if (r.bit_at(bit_index) == 1)
 		{
-			result = (result * this_power) % modulo;
+			result = mod(result * this_power);
 		}
-		this_power = (this_power * this_power) % modulo;
+		this_power = mod(this_power * this_power);
 	}
 	return result;
 }
@@ -971,13 +973,18 @@ auto Big::prepare_barrett_reduce () const
 		[modulo, shift_amount, multipiler]
 		(const Big& value) -> Big
 		{
+			// first of all, if value too big, we perform standart modulation
+			if (value.m_cell_amount >= modulo.m_cell_amount * 2)
+			{
+				return value % modulo;
+			}
 			// compute result representing value divided by modulo
 			Big&& nearly_v_div_m = (value * multipiler) >> shift_amount;
 
 			Big&& pre_result = value - nearly_v_div_m * modulo;
 
-			// if value was big enough, it's neccessary to subtract
-			// warning: if value >= n^2, there might be a lot of subtractions
+			// if value was big enough, it's neccessary to subtract;
+			// this is where it would hang if the value was too big
 			while (pre_result > modulo)
 			{
 				pre_result -= modulo;
