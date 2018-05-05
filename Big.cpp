@@ -859,7 +859,6 @@ Big Big::exponentiate_rtl(const Big& r, const Big& modulo) const
 	Big this_power = *this;
 	Big result = 1;
 	auto mod = modulo.prepare_barrett_reduce();
-	size_t critical_size = modulo.m_cell_amount;
 
 	size_t bit_amount = r.get_bit_amount();
 	for (size_t bit_index = 0; bit_index < bit_amount; ++bit_index)
