@@ -374,6 +374,13 @@ Big Big::product_choose_size(const Big& r) const
 {
 	constexpr size_t atomic_threshold = 72;
 
+	if (r.is_power_of_2())
+	{
+		// -1 as indicies are counted from 1
+		// check: r = 2, lbi = 2, should shift by 1
+		size_t shiftam = r.last_bit_index() - 1;
+		return *this << shiftam;
+	}
 	// molecular is faster but doesn't work for length of 1
 	if (m_cell_amount <= atomic_threshold or r.m_cell_amount <= atomic_threshold)
 	{
