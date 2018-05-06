@@ -932,28 +932,29 @@ Big Big::operator<< (size_t amount) const
 		return this->shift_l(amount / CellBits);
 	}
 
-	// shift all cells so remaining shifts are only to neighbooring cells
-	Big&& temp = this->shift_l(amount / CellBits);
-	amount %= CellBits;
+	// first shift this by mini amount, then add leading zeroes
 
-	// TODO: this can be optimized with virtual zeroes
-	// but requires writing a new constructor
+	size_t mini_amount = amount % CellBits;
+	size_t big_amount  = amount / CellBits;
 
-	init_vect result;
-	result.reserve(temp.m_cell_amount);
-	result.push_back(temp.at(0) << amount);
+	init_vect pre_result;
+	pre_result.reserve(m_cell_amount + 1);
+	pre_result.push_back(at(0) << mini_amount);
 
-	for (size_t i = 1; i < temp.m_cell_amount; ++i)
+	for (size_t i = 1; i < m_cell_amount; ++i)
 	{
 		// put the highest bits of previous to lower positions
-		cell lower = temp.at(i - 1) >> (CellBits - amount);
+		cell lower = at(i - 1) >> (CellBits - mini_amount);
 		// put the lowest bits of current to higher positions
-		cell higher = temp.at(i) << amount;
+		cell higher = at(i) << mini_amount;
 		// jamble them together
-		result.push_back(higher | lower);
+		pre_result.push_back(higher | lower);
 	}
-	cell lower = temp.last() >> (CellBits - amount);
-	result.push_back(lower);
+	cell lower = last() >> (CellBits - mini_amount);
+	pre_result.push_back(lower);
 
-	return Big(std::move(result));
+	Big temp (std::move(pre_result));
+	Big&& result = temp.shift_l(big_amount);
+
+	return result;
 }
