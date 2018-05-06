@@ -12,6 +12,8 @@ CURRENT_TEST := run-molecular_product
 GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
 CURRENT_TEST := run-bitshift
 GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
+CURRENT_TEST := run-div_shifts
+GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
 # i fixed main so now it should work if everything's fine but still
 # it is added manually and at the end
 GENERAL_TESTS := $(GENERAL_TESTS) run-main

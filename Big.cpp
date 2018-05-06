@@ -681,6 +681,18 @@ std::pair<Big, Big> Big::qr_choose_size (const Big& divider) const
 	{
 		return quot_rem_small(divider);
 	}
+	else if (divider.is_power_of_2())
+	{
+		// it is checked beforehand if divider is zero
+		// use bit operations
+		Big&& rem = *this & (divider - 1);
+
+		// -1 as indicies are counted from 1
+		// check: divider = 2, lbi = 2, should shift by 1
+		size_t shiftam = divider.last_bit_index() - 1;
+		Big&& quot = *this >> shiftam;
+		return std::make_pair(quot, rem);
+	}
 	else
 	{
 		return quot_rem_big(divider);
@@ -718,6 +730,7 @@ std::pair<Big, Big> Big::quot_rem (const Big& divider) const
 
 		return t;
 	}
+	// if both are positive, return regular results
 	return this->qr_choose_size(divider);
 }
 
