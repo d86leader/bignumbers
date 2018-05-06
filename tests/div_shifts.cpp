@@ -2,7 +2,7 @@
 #include <random>
 
 #define DEBUG
-#include "../Big.h"
+#include "Big.h"
 
 using std::cout;
 using std::cerr;
@@ -15,7 +15,7 @@ int main()
 
 	constexpr size_t min_size = 2;
 	constexpr size_t max_size = 1000;
-	constexpr size_t max_divis_size = 16000; //bits
+	constexpr size_t max_divis_size = max_size * Big::CellBits; //bits
 	constexpr size_t tries = 1000;
 	constexpr size_t print_each = tries / 10;
 	std::uniform_int_distribution<size_t> size_distr (min_size, max_size);
@@ -43,14 +43,15 @@ int main()
 			a = Big::generate(asize, dist, gen);
 			b = Big(1) << bsize;
 
-			std::tie(quot_normal, rem_normal) = a.quot_rem(b);
+			std::tie(quot_bit, rem_bit) = a.quot_rem(b);
+
 			if (b.m_cell_amount == 1)
 			{
-				std::tie(quot_bit, rem_bit) = a.quot_rem_small(b);
+				std::tie(quot_normal, rem_normal) = a.quot_rem_small(b);
 			}
 			else
 			{
-				std::tie(quot_bit, rem_bit) = a.quot_rem_big(b);
+				std::tie(quot_normal, rem_normal) = a.quot_rem_big(b);
 			}
 
 			if (not b.is_power_of_2())
