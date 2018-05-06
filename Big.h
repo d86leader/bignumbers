@@ -81,6 +81,7 @@ private:
 	//those divisions disregard the sign
 	std::pair<Big, Big> quot_rem_big  (const Big& r) const;
 	std::pair<Big, Big> quot_rem_small(const Big& r) const;
+	std::pair<Big, Big> qr_choose_size(const Big& r) const;
 
 	void negate_this() {m_positive = !m_positive;}
 
@@ -90,6 +91,7 @@ private:
 	// arithmetic operators that disregard the sign
 	Big atomic_plus(const Big&) const;
 	Big atomic_minus(const Big&) const;
+	Big product_choose_size(const Big&) const;
 	Big atomic_product(const Big&) const;
 	Big molecular_product(const Big&) const;
 

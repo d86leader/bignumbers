@@ -368,6 +368,22 @@ Big Big::molecular_product(const Big& r) const
 }
 
 
+Big Big::product_choose_size(const Big& r) const
+{
+	constexpr size_t atomic_threshold = 72;
+
+	// molecular is faster but doesn't work for length of 1
+	if (m_cell_amount <= atomic_threshold or r.m_cell_amount <= atomic_threshold)
+	{
+		return this->atomic_product(r);
+	}
+	else
+	{
+		return this->molecular_product(r);
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -512,40 +528,20 @@ Big Big::operator- (const Big& r) const
 
 Big Big::operator* (const Big& r) const
 {
-	constexpr size_t atomic_threshold = 72;
-
 	if (r.is_nil() || this->is_nil())
 		return Big(0);
 
-	if (   (!m_positive &&  r.m_positive)
-		|| ( m_positive && !r.m_positive))
+	if ((!m_positive and  r.m_positive)
+		or ( m_positive and !r.m_positive))
 	{
-		// molecular is faster but doesn't work for length of 1
-		if (m_cell_amount <= atomic_threshold or r.m_cell_amount <= atomic_threshold)
-		{
-			auto&& t = this->atomic_product(r);
-			t.negate_this();
-			return t;
-		}
-		else
-		{
-			auto&& t = this->molecular_product(r);
-			t.negate_this();
-			return t;
-		}
+		auto&& t = this->product_choose_size(r);
+		t.negate_this();
+		return t;
 	}
 	if (!m_positive && !r.m_positive) {}
-		//the same as if both positive
+		//the same as if both were positive
 	
-	// molecular is faster but doesn't work for length of 1
-	if (m_cell_amount <= atomic_threshold or r.m_cell_amount <= atomic_threshold)
-	{
-		return this->atomic_product(r);
-	}
-	else
-	{
-		return this->molecular_product(r);
-	}
+	return this->product_choose_size(r);
 }
 
 
@@ -677,6 +673,19 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 }
 
 
+std::pair<Big, Big> Big::qr_choose_size (const Big& divider) const
+{
+	if (divider.m_cell_amount == 1)
+	{
+		return quot_rem_small(divider);
+	}
+	else
+	{
+		return quot_rem_big(divider);
+	}
+}
+
+
 std::pair<Big, Big> Big::quot_rem (const Big& divider) const
 {
 	if (this->is_nil())
@@ -686,56 +695,28 @@ std::pair<Big, Big> Big::quot_rem (const Big& divider) const
 		throw std::runtime_error("Big: dividing by zero");
 	}
 
-	if (divider.m_cell_amount == 1) //dividing by small number
+	if (!divider.m_positive)
 	{
-		if (!divider.m_positive)
-		{
-			auto t = this->quot_rem_small(divider);
-			t.first.negate_this();
-			return t;
-		}
-		if (!m_positive)
-		{
-			auto t = this->quot_rem_small(divider);
-			t.first.negate_this();
-
-			// make the remainder be positive and conforming to
-			// q * b + r = a
-			if (!t.second.is_nil())
-			{
-				t.first = t.first - 1;
-				t.second = divider - t.second;
-			}
-
-			return t;
-		}
-		return this->quot_rem_small(divider);
+		auto t = this->qr_choose_size(divider);
+		t.first.negate_this();
+		return t;
 	}
-	else //division of big numbers
+	if (!m_positive)
 	{
-		if (!divider.m_positive)
-		{
-			auto t = this->quot_rem_big(divider);
-			t.first.negate_this();
-			return t;
-		}
-		if (!m_positive)
-		{
-			auto t = this->quot_rem_big(divider);
-			t.first.negate_this();
+		auto t = this->qr_choose_size(divider);
+		t.first.negate_this();
 
-			// make the remainder be positive and conforming to
-			// q * b + r = a
-			if (!t.second.is_nil())
-			{
-				t.first = t.first - 1;
-				t.second = divider - t.second;
-			}
-
-			return t;
+		// make the remainder be positive and conforming to
+		// q * b + r = a
+		if (!t.second.is_nil())
+		{
+			t.first = t.first - 1;
+			t.second = divider - t.second;
 		}
-		return this->quot_rem_big(divider);
+
+		return t;
 	}
+	return this->qr_choose_size(divider);
 }
 
 
