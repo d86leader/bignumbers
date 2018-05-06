@@ -26,9 +26,17 @@ namespace
 
 bool Big::is_power_of_2() const
 {
+	if (this->is_nil()) return true;
 	// famous algorith: x & (x-1) == 0 if and only if x is a power 2,
-	// given positive x
-	return (*this & (*this - 1)) == 0;
+	// given positive x. Apply it to the last digit
+	if ( (last() & (last() - 1)) != 0 ) return false;
+	// if it was true, check if all other digits are zero
+	if (m_cell_amount == 1) return true;
+	for (size_t i = m_cell_amount - 2; i >= m_first_nonzero; --i)
+	{
+		if (at(i) != 0) return false;
+	}
+	return true;
 }
 
 
