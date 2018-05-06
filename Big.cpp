@@ -26,9 +26,19 @@ namespace
 
 bool Big::is_power_of_2() const
 {
+	if (this->is_nil()) return true;
 	// famous algorith: x & (x-1) == 0 if and only if x is a power 2,
-	// given positive x
-	return (*this & (*this - 1)) == 0;
+	// given positive x. Apply it to the last digit
+	if ( (last() & (last() - 1)) != 0 ) return false;
+	// if it was true, check if all other digits are zero
+	if (m_cell_amount == 1) return true;
+	for (size_t i = m_cell_amount - 1; i > m_first_nonzero; --i)
+	{
+		// m_first_nonzero coult be 0, so comparing with >= is dangerous
+		size_t index = i - 1;
+		if (at(index) != 0) return false;
+	}
+	return true;
 }
 
 
@@ -37,14 +47,13 @@ size_t Big::last_bit_index() const
 	if (is_nil()) return 0;
 
 	size_t pre_answer = (m_cell_amount - 1) * CellBits;
-	cell last = at(m_cell_amount - 1);
 
 	// a simple algorithm as i can't be bothered now
 
 	cell current_mask = CellMaxValue;
 	// + 1 as it only stops decrementing after reaching zero
 	size_t last_index = CellBits + 1;
-	while ((last & current_mask) != 0)
+	while ((last() & current_mask) != 0)
 	{
 		current_mask >>= 1;
 		last_index -= 1;
@@ -361,6 +370,29 @@ Big Big::molecular_product(const Big& r) const
 }
 
 
+Big Big::product_choose_size(const Big& r) const
+{
+	constexpr size_t atomic_threshold = 72;
+
+	if (r.is_power_of_2())
+	{
+		// -1 as indicies are counted from 1
+		// check: r = 2, lbi = 2, should shift by 1
+		size_t shiftam = r.last_bit_index() - 1;
+		return *this << shiftam;
+	}
+	// molecular is faster but doesn't work for length of 1
+	if (m_cell_amount <= atomic_threshold or r.m_cell_amount <= atomic_threshold)
+	{
+		return this->atomic_product(r);
+	}
+	else
+	{
+		return this->molecular_product(r);
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -505,41 +537,20 @@ Big Big::operator- (const Big& r) const
 
 Big Big::operator* (const Big& r) const
 {
-	constexpr size_t atomic_threshold = 72;
-
 	if (r.is_nil() || this->is_nil())
 		return Big(0);
 
-	if (   (!m_positive &&  r.m_positive)
-		|| ( m_positive && !r.m_positive))
+	if ((!m_positive and  r.m_positive)
+		or ( m_positive and !r.m_positive))
 	{
-		// molecular is faster but doesn't work for length of 1
-		if (m_cell_amount <= atomic_threshold
-			or r.m_cell_amount <= atomic_threshold)
-		{
-			auto&& t = this->atomic_product(r);
-			t.negate_this();
-			return t;
-		}
-		else
-		{
-			auto&& t = this->molecular_product(r);
-			t.negate_this();
-			return t;
-		}
+		auto&& t = this->product_choose_size(r);
+		t.negate_this();
+		return t;
 	}
 	if (!m_positive && !r.m_positive) {}
-		//the same as if both positive
+		//the same as if both were positive
 	
-	// molecular is faster but doesn't work for length of 1
-	if (m_cell_amount <= atomic_threshold or r.m_cell_amount <= atomic_threshold)
-	{
-		return this->atomic_product(r);
-	}
-	else
-	{
-		return this->molecular_product(r);
-	}
+	return this->product_choose_size(r);
 }
 
 
@@ -553,7 +564,7 @@ pair<Big, Big> Big::quot_rem_small(const Big& r) const
 	quot_i.reserve(m_cell_amount);
 	d_cell current = 0;
 
-	if (at(m_cell_amount - 1) == 0)
+	if (last() == 0)
 	{
 		throw "checking for leading zero";
 	}
@@ -581,10 +592,10 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	if (*this < divider)
 		return std::make_pair(Big(0), *this);
 	//normalization
-	d_cell last_digit = divider.at(divider.m_cell_amount-1);
-	d_cell d = CellModulo / ( last_digit + 1 );
+	d_cell last_cell = last(); // cast to d_cell
+	d_cell d = CellModulo / ( last_cell + 1 );
 	Big&& u = *this * d;   //normalized divident
-	Big&& v = divider * d; //normalized divisor
+	Big&& v = divider.atomic_product(d); //normalized divisor
 
 	//initialization
 	Big::init_vect quot;       //result vector
@@ -672,6 +683,31 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 }
 
 
+std::pair<Big, Big> Big::qr_choose_size (const Big& divider) const
+{
+	if (divider.m_cell_amount == 1)
+	{
+		return quot_rem_small(divider);
+	}
+	else if (divider.is_power_of_2())
+	{
+		// it is checked beforehand if divider is zero
+		// use bit operations
+		Big&& rem = *this & (divider - 1);
+
+		// -1 as indicies are counted from 1
+		// check: divider = 2, lbi = 2, should shift by 1
+		size_t shiftam = divider.last_bit_index() - 1;
+		Big&& quot = *this >> shiftam;
+		return std::make_pair(quot, rem);
+	}
+	else
+	{
+		return quot_rem_big(divider);
+	}
+}
+
+
 std::pair<Big, Big> Big::quot_rem (const Big& divider) const
 {
 	if (this->is_nil())
@@ -681,56 +717,29 @@ std::pair<Big, Big> Big::quot_rem (const Big& divider) const
 		throw std::runtime_error("Big: dividing by zero");
 	}
 
-	if (divider.m_cell_amount == 1) //dividing by small number
+	if (!divider.m_positive)
 	{
-		if (!divider.m_positive)
-		{
-			auto t = this->quot_rem_small(divider);
-			t.first.negate_this();
-			return t;
-		}
-		if (!m_positive)
-		{
-			auto t = this->quot_rem_small(divider);
-			t.first.negate_this();
-
-			// make the remainder be positive and conforming to
-			// q * b + r = a
-			if (!t.second.is_nil())
-			{
-				t.first = t.first - 1;
-				t.second = divider - t.second;
-			}
-
-			return t;
-		}
-		return this->quot_rem_small(divider);
+		auto t = this->qr_choose_size(divider);
+		t.first.negate_this();
+		return t;
 	}
-	else //division of big numbers
+	if (!m_positive)
 	{
-		if (!divider.m_positive)
-		{
-			auto t = this->quot_rem_big(divider);
-			t.first.negate_this();
-			return t;
-		}
-		if (!m_positive)
-		{
-			auto t = this->quot_rem_big(divider);
-			t.first.negate_this();
+		auto t = this->qr_choose_size(divider);
+		t.first.negate_this();
 
-			// make the remainder be positive and conforming to
-			// q * b + r = a
-			if (!t.second.is_nil())
-			{
-				t.first = t.first - 1;
-				t.second = divider - t.second;
-			}
-
-			return t;
+		// make the remainder be positive and conforming to
+		// q * b + r = a
+		if (!t.second.is_nil())
+		{
+			t.first = t.first - 1;
+			t.second = divider - t.second;
 		}
-		return this->quot_rem_big(divider);
+
+		return t;
 	}
+	// if both are positive, return regular results
+	return this->qr_choose_size(divider);
 }
 
 
@@ -882,6 +891,10 @@ Big Big::operator>> (size_t amount) const
 	{
 		return Big(0);
 	}
+	if (amount == 0)
+	{
+		return *this;
+	}
 	if (amount % CellBits == 0)
 	{
 		return this->shift_r(amount / CellBits);
@@ -908,7 +921,7 @@ Big Big::operator>> (size_t amount) const
 		result.push_back(higher | lower);
 	}
 	// put the highest bits of last digit to lower positions
-	cell lower = temp.at(temp.m_cell_amount - 1) >> amount;
+	cell lower = temp.last() >> amount;
 	result.push_back(lower);
 
 	return Big(std::move(result));
@@ -921,35 +934,40 @@ Big Big::operator<< (size_t amount) const
 	{
 		return Big(0);
 	}
+	if (amount == 0)
+	{
+		return *this;
+	}
 	if (amount % CellBits == 0)
 	{
 		return this->shift_l(amount / CellBits);
 	}
 
-	// shift all cells so remaining shifts are only to neighbooring cells
-	Big&& temp = this->shift_l(amount / CellBits);
-	amount %= CellBits;
+	// first shift this by mini amount, then add leading zeroes
 
-	// TODO: this can be optimized with virtual zeroes
-	// but requires writing a new constructor
+	size_t mini_amount = amount % CellBits;
+	size_t big_amount  = amount / CellBits;
 
-	init_vect result;
-	result.reserve(temp.m_cell_amount);
-	result.push_back(temp.at(0) << amount);
+	init_vect pre_result;
+	pre_result.reserve(m_cell_amount + 1);
+	pre_result.push_back(at(0) << mini_amount);
 
-	for (size_t i = 1; i < temp.m_cell_amount; ++i)
+	for (size_t i = 1; i < m_cell_amount; ++i)
 	{
 		// put the highest bits of previous to lower positions
-		cell lower = temp.at(i - 1) >> (CellBits - amount);
+		cell lower = at(i - 1) >> (CellBits - mini_amount);
 		// put the lowest bits of current to higher positions
-		cell higher = temp.at(i) << amount;
+		cell higher = at(i) << mini_amount;
 		// jamble them together
-		result.push_back(higher | lower);
+		pre_result.push_back(higher | lower);
 	}
-	cell lower = temp.at(temp.m_cell_amount - 1) >> (CellBits - amount);
-	result.push_back(lower);
+	cell lower = last() >> (CellBits - mini_amount);
+	pre_result.push_back(lower);
 
-	return Big(std::move(result));
+	Big temp (std::move(pre_result));
+	Big&& result = temp.shift_l(big_amount);
+
+	return result;
 }
 
 

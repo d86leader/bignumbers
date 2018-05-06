@@ -1,12 +1,13 @@
 #include <iostream>
 #include <random>
 
+#define DEBUG
 #include "../Big.h"
 
 using std::endl;
 using std::cout;
 
-int main(int argc, char** _argv)
+int main()
 {
 	Big::generator_type gen;
 	Big::distribution_type dist;
@@ -41,6 +42,7 @@ int main(int argc, char** _argv)
 			a = Big::generate(asize, dist, gen);
 
 			shl = a << shiftam;
+			// use atomic operations as i'm going to make division shift
 			mul = a.atomic_product(multiplier);
 
 			shiftback = shl >> shiftam;
@@ -54,6 +56,7 @@ int main(int argc, char** _argv)
 			}
 
 			shr = a >> shiftam;
+			// use atomic operations as i'm going to make division shift
 			if (multiplier.m_cell_amount > 1)
 			{
 				div = a.quot_rem_big(multiplier).first;
@@ -81,10 +84,14 @@ int main(int argc, char** _argv)
 	catch (const char* errtype)
 	{
 		std::cout << "error when " << errtype <<". Values:\n";
+		std::cerr << "shiftam: " << shiftam << std::endl;
 		std::cerr << "a: "    << a.dump() << std::endl;
-		std::cerr << "shr "    << shr.dump() << std::endl;
-		std::cerr << "shl "    << shl.dump() << std::endl;
-		std::cerr << "shiftback:" << shiftback.dump() << std::endl;
+		std::cerr << "shr: "    << shr.dump() << std::endl;
+		std::cerr << "div: "    << div.dump() << std::endl;
+		std::cerr << "shl: "    << shl.dump() << std::endl;
+		std::cerr << "mul: "    << mul.dump() << std::endl;
+		std::cerr << "multiplier: " << multiplier.dump() << std::endl;
+
 		return 1;
 	}
 

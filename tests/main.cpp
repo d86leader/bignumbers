@@ -5,12 +5,12 @@
 
 using std::endl;
 
-int main(int argc, char** _argv)
+int main()
 {
 	Big::generator_type gen;
 	Big::distribution_type dist;
 
-	constexpr size_t min_size = 2;
+	constexpr size_t min_size = 1;
 	constexpr size_t max_size = 1000;
 	constexpr size_t tries = 1000;
 	constexpr size_t print_each = tries / 10;
@@ -22,7 +22,7 @@ int main(int argc, char** _argv)
 
 	try
 	{
-		for (int i = 0; i < tries; ++i)
+		for (size_t i = 0; i < tries; ++i)
 		{
 			if (i % print_each == 0)
 			{

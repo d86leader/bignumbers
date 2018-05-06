@@ -88,6 +88,13 @@ inline Big::cell& Big::mut_ref_at (const size_t& index)
 	return nonconst_arr[index];
 }
 
+inline Big::cell Big::last() const
+{
+	// zero number means there are no cells at all
+	if (this->is_nil()) return cell(0);
+	return at(m_cell_amount - 1);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
