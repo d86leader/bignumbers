@@ -84,10 +84,14 @@ int main()
 	catch (const char* errtype)
 	{
 		std::cout << "error when " << errtype <<". Values:\n";
+		std::cerr << "shiftam: " << shiftam << std::endl;
 		std::cerr << "a: "    << a.dump() << std::endl;
-		std::cerr << "shr "    << shr.dump() << std::endl;
-		std::cerr << "shl "    << shl.dump() << std::endl;
-		std::cerr << "shiftback:" << shiftback.dump() << std::endl;
+		std::cerr << "shr: "    << shr.dump() << std::endl;
+		std::cerr << "div: "    << div.dump() << std::endl;
+		std::cerr << "shl: "    << shl.dump() << std::endl;
+		std::cerr << "mul: "    << mul.dump() << std::endl;
+		std::cerr << "multiplier: " << multiplier.dump() << std::endl;
+
 		return 1;
 	}
 
