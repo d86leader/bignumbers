@@ -592,8 +592,8 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	if (*this < divider)
 		return std::make_pair(Big(0), *this);
 	//normalization
-	d_cell last_digit = divider.at(divider.m_cell_amount-1);
-	d_cell d = CellModulo / ( last_digit + 1 );
+	d_cell last_cell = last(); // cast to d_cell
+	d_cell d = CellModulo / ( last_cell + 1 );
 	Big&& u = *this * d;   //normalized divident
 	Big&& v = divider * d; //normalized divisor
 
