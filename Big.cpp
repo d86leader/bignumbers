@@ -32,9 +32,11 @@ bool Big::is_power_of_2() const
 	if ( (last() & (last() - 1)) != 0 ) return false;
 	// if it was true, check if all other digits are zero
 	if (m_cell_amount == 1) return true;
-	for (size_t i = m_cell_amount - 2; i >= m_first_nonzero; --i)
+	for (size_t i = m_cell_amount - 1; i > m_first_nonzero; --i)
 	{
-		if (at(i) != 0) return false;
+		// m_first_nonzero coult be 0, so comparing with >= is dangerous
+		size_t index = i - 1;
+		if (at(index) != 0) return false;
 	}
 	return true;
 }
