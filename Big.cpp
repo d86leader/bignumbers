@@ -37,14 +37,13 @@ size_t Big::last_bit_index() const
 	if (is_nil()) return 0;
 
 	size_t pre_answer = (m_cell_amount - 1) * CellBits;
-	cell last = at(m_cell_amount - 1);
 
 	// a simple algorithm as i can't be bothered now
 
 	cell current_mask = CellMaxValue;
 	// + 1 as it only stops decrementing after reaching zero
 	size_t last_index = CellBits + 1;
-	while ((last & current_mask) != 0)
+	while ((last() & current_mask) != 0)
 	{
 		current_mask >>= 1;
 		last_index -= 1;
@@ -552,7 +551,7 @@ pair<Big, Big> Big::quot_rem_small(const Big& r) const
 	quot_i.reserve(m_cell_amount);
 	d_cell current = 0;
 
-	if (at(m_cell_amount - 1) == 0)
+	if (last() == 0)
 	{
 		throw "checking for leading zero";
 	}
@@ -904,7 +903,7 @@ Big Big::operator>> (size_t amount) const
 		result.push_back(higher | lower);
 	}
 	// put the highest bits of last digit to lower positions
-	cell lower = temp.at(temp.m_cell_amount - 1) >> amount;
+	cell lower = temp.last() >> amount;
 	result.push_back(lower);
 
 	return Big(std::move(result));
@@ -942,7 +941,7 @@ Big Big::operator<< (size_t amount) const
 		// jamble them together
 		result.push_back(higher | lower);
 	}
-	cell lower = temp.at(temp.m_cell_amount - 1) >> (CellBits - amount);
+	cell lower = temp.last() >> (CellBits - amount);
 	result.push_back(lower);
 
 	return Big(std::move(result));
