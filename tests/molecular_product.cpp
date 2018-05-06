@@ -1,5 +1,6 @@
 #include <iostream>
 
+#define DEBUG
 #include "../Big.h"
 
 using std::endl;

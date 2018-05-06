@@ -54,7 +54,7 @@ Big.o: Big.cpp Big.h Big-inline.inc constructors.inc
 	${CXX} -c $< -o $@ $(CXXHEADERS)
 
 tests/%: tests/%.cpp Big.o
-	${CXX} -D DEBUG -g $^ -o $@ $(CXXHEADERS)
+	${CXX} -g $^ -o $@ $(CXXHEADERS)
 
 run-%: tests/%
 	$<

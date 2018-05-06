@@ -1,6 +1,7 @@
 #include <iostream>
 #include <random>
 
+#define DEBUG
 #include "../Big.h"
 
 using std::cout;

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <chrono>
 
+#define DEBUG
 #include "../Big.h"
 
 using std::endl;
