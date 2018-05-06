@@ -9,3 +9,5 @@ tests/power_test
 tests/specific
 tests/mult_test
 tests/minus_test
+tests/div_shifts
+tests/mul_shifts
