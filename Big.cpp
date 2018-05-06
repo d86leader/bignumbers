@@ -595,7 +595,7 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 	d_cell last_cell = last(); // cast to d_cell
 	d_cell d = CellModulo / ( last_cell + 1 );
 	Big&& u = *this * d;   //normalized divident
-	Big&& v = divider * d; //normalized divisor
+	Big&& v = divider.atomic_product(d); //normalized divisor
 
 	//initialization
 	Big::init_vect quot;       //result vector
