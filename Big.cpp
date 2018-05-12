@@ -983,11 +983,11 @@ auto Big::prepare_barrett_reduce () const
 	// last_bit_index is the lowest number x such that (1 << x) > modulo
 	// we multiply it by two because wiki said so :P
 	// probably for the division to be more precise
-	size_t shift_amount = modulo.last_bit_index() * 2;
+	size_t shift_amount = modulo.m_cell_amount * 2;
 
 	// the number such that multipling by it and shifting by shift_amount
 	// is similar to dividing by n
-	Big&& multipiler = (Big(1) << shift_amount) / modulo;
+	Big&& multipiler = (Big(1).shift_l(shift_amount)) / modulo;
 
 	auto f =
 		[modulo, shift_amount, multipiler]
@@ -999,7 +999,7 @@ auto Big::prepare_barrett_reduce () const
 				return value % modulo;
 			}
 			// compute result representing value divided by modulo
-			Big&& nearly_v_div_m = (value * multipiler) >> shift_amount;
+			Big&& nearly_v_div_m = (value * multipiler).shift_r(shift_amount);
 
 			Big&& pre_result = value - nearly_v_div_m * modulo;
 
