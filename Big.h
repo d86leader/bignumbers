@@ -123,7 +123,9 @@ public:
 	size_t get_bit_amount() const;
 
 	bool is_power_of_2() const;
-	size_t last_bit_index() const; // indicies start from 1; 0 for no bit present
+	// indicies start from 1; 0 for no bit present
+	size_t last_bit_index() const;
+	size_t first_one_index() const;
 
 	Big  shift(int) const; //cellwise shift
 
@@ -167,6 +169,8 @@ public:
 	template<typename T> Big& operator%= (const T& r);
 
 	std::pair<Big, Big> quot_rem(const Big& r) const;
+
+	bool lax_prime_test(size_t reliance_parameter) const;
 
 	friend std::ostream& operator<< (std::ostream& out, const Big&);
 	friend std::istream& operator>> (std::istream& in, Big&);
