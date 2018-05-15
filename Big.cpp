@@ -1018,17 +1018,19 @@ bool Big::lax_prime_test(size_t reliance_parameter) const
 	if (*this % 2 == 0) return false;
 	if (*this <= 3) return false; // includes negative numbers
 
-	Big&& predecessor = *this - 1;
-	size_t repeats = predecessor.first_one_index();
-	Big&& exponent = predecessor >> repeats;
+	Big&& minus_one = *this - 1;
+	size_t repeats = minus_one.first_one_index() - 1;
+	Big&& exponent = minus_one >> repeats;
 
 	generator_type gen;
 	distribution_type dist;
 
 	for (size_t i = 0; i < reliance_parameter; ++i)
 	{
-		Big&& random = Big::generate(this->m_cell_amount, dist, gen);
+		Big&& random = Big::generate(this->m_cell_amount, dist, gen) % *this;
 		Big&& cur_power = random.exp(exponent, *this);
+
+		if (random == minus_one or random == 0) continue;
 
 		if (cur_power == 1)
 		{
@@ -1039,7 +1041,7 @@ bool Big::lax_prime_test(size_t reliance_parameter) const
 
 		for(size_t j = 0; j < repeats; ++j)
 		{
-			if (cur_power == -1)
+			if (cur_power == minus_one)
 			{
 				// reached second case of rabin criteria, which indicates
 				// primality. No need to further exponentiate
@@ -1057,7 +1059,7 @@ bool Big::lax_prime_test(size_t reliance_parameter) const
 		}
 
 		// check the second case of rabin criteria
-		if (cur_power != -1)
+		if (cur_power != minus_one)
 		{
 			return false;
 		}
