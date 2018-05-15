@@ -1028,5 +1028,41 @@ bool Big::lax_prime_test(size_t reliance_parameter) const
 	for (size_t i = 0; i < reliance_parameter; ++i)
 	{
 		Big&& random = Big::generate(this->m_cell_amount, dist, gen);
+		Big&& cur_power = random.exp(exponent, *this);
+
+		if (cur_power == 1)
+		{
+			// the first case of rabin criteria, indicates primality
+			// no need for exponentiations in the following for cycle
+			continue;
+		}
+
+		for(size_t j = 0; j < repeats; ++j)
+		{
+			if (cur_power == -1)
+			{
+				// reached second case of rabin criteria, which indicates
+				// primality. No need to further exponentiate
+				break;
+			}
+
+			cur_power = (cur_power * cur_power) % *this;
+
+			if (cur_power == 1)
+			{
+				// if random number in some certain power is one, the base
+				// was not prime
+				return false;
+			}
+		}
+
+		// check the second case of rabin criteria
+		if (cur_power != -1)
+		{
+			return false;
+		}
 	}
+
+	// if we didn't exit in the tries above, the number is probably prime
+	return true;
 }
