@@ -13,7 +13,7 @@ int main()
 	else                   std::cout << " is not a power of two\n";
 
 	std::cout << a.dump() <<"'s last 1: " << a.last_bit_index() << std::endl;
-	std::cout << "btw, cellBits = " << Big::CellBits << std::endl;
+//	std::cout << a.dump() <<"'s first 1: " << a.first_one_index() << std::endl;
 
 	return 0;
 }
