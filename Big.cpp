@@ -1015,8 +1015,11 @@ Big Big::operator<< (size_t amount) const
 
 bool Big::lax_prime_test(size_t reliance_parameter) const
 {
+	// some special cases:
+	if (*this == 3) return true;
+	if (*this == 2) return true;
 	if (*this % 2 == 0) return false;
-	if (*this <= 3) return false; // includes negative numbers
+	if (*this <= 1) return false; // includes negative numbers
 
 	Big&& minus_one = *this - 1;
 	size_t repeats = minus_one.first_one_index() - 1;

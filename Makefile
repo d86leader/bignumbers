@@ -18,6 +18,8 @@ CURRENT_TEST := run-mul_shifts
 GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
 CURRENT_TEST := run-bit_index
 GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
+CURRENT_TEST := run-prime_test
+GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
 # i fixed main so now it should work if everything's fine but still
 # it is added manually and at the end
 GENERAL_TESTS := $(GENERAL_TESTS) run-main
