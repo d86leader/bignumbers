@@ -1020,7 +1020,7 @@ bool Big::lax_prime_test(size_t reliance_parameter) const
 
 	Big&& predecessor = *this - 1;
 	size_t repeats = predecessor.first_one_index();
-	Big&& power = predecessor >> repeats;
+	Big&& exponent = predecessor >> repeats;
 
 	generator_type gen;
 	distribution_type dist;
