@@ -1013,9 +1013,9 @@ Big Big::operator<< (size_t amount) const
 //////////////////////////////////////////////////////////////////////////////
 
 
-//bool Big::lax_prime_test(size_t reliance_parameter) const
-//{
-//	if (*this % 2 == 0) return false;
-//	if (*this <= 3) return false; // includes negative numbers
-//
-//}
+bool Big::lax_prime_test(size_t reliance_parameter) const
+{
+	if (*this % 2 == 0) return false;
+	if (*this <= 3) return false; // includes negative numbers
+
+}
