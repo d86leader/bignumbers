@@ -48,9 +48,12 @@ size_t Big::last_bit_index() const
 
 	size_t pre_result = (m_cell_amount - 1) * CellBits;
 
+	// flipped algorithm from below. For documentation see first_one_index
 	cell x = last();
 	size_t shifted = CellBits / 2;
 	cell mask = CellMaxValue << shifted;
+	// we could just use 1 below, but here it's the number with only the
+	// leftmost 1
 	cell brk = CellModulo >> 1;
 	size_t index_from_left = 0;
 	while (x != brk)
@@ -80,8 +83,14 @@ size_t Big::first_one_index() const
 		pre_result += CellBits;
 	}
 
+	// recursive algorithm: split bitvector in half, check the lower half, if
+	// not there, check the higher one
 	cell x = at(first_ind);
+	// amount by which the vector will be shifted to obtain the next vector
+	// also used to calculate the offset of the bit
 	size_t shifted = CellBits / 2;
+	// mask for the current bitvector. Half of its size to check only the
+	// lower half of the vector
 	cell mask = CellMaxValue >> shifted;
 	while (x != 1)
 	{
@@ -91,6 +100,9 @@ size_t Big::first_one_index() const
 			x >>= shifted;
 		}
 		x &= mask;
+		// after this, 0 < x <= mask
+		// in the end mask will be 1, so x will be 1,
+		// so the algorithm terminates
 		shifted /= 2;
 		mask >>= shifted;
 	}
