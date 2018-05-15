@@ -1018,4 +1018,15 @@ bool Big::lax_prime_test(size_t reliance_parameter) const
 	if (*this % 2 == 0) return false;
 	if (*this <= 3) return false; // includes negative numbers
 
+	Big&& predecessor = *this - 1;
+	size_t repeats = predecessor.first_one_index();
+	Big&& power = predecessor >> repeats;
+
+	generator_type gen;
+	distribution_type dist;
+
+	for (size_t i = 0; i < reliance_parameter; ++i)
+	{
+		Big&& random = Big::generate(this->m_cell_amount, dist, gen);
+	}
 }
