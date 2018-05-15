@@ -46,26 +46,25 @@ size_t Big::last_bit_index() const
 {
 	if (is_nil()) return 0;
 
-	size_t pre_answer = (m_cell_amount - 1) * CellBits;
+	size_t pre_result = (m_cell_amount - 1) * CellBits;
 
-	// a simple algorithm as i can't be bothered now
-
-	cell current_mask = CellMaxValue;
-	// + 1 as it only stops decrementing after reaching zero
-	size_t last_index = CellBits + 1;
-	while ((last() & current_mask) != 0)
+	cell x = last();
+	size_t shifted = CellBits / 2;
+	cell mask = CellMaxValue << shifted;
+	cell brk = CellModulo >> 1;
+	size_t index_from_left = 0;
+	while (x != brk)
 	{
-		current_mask >>= 1;
-		last_index -= 1;
-		if (last_index > CellBits)
+		if ((x & mask) == 0)
 		{
-			throw std::runtime_error(
-				"Big: encountered a number with leading zero");
+			index_from_left += shifted;
+			x <<= shifted;
 		}
+		x &= mask;
+		shifted /= 2;
+		mask <<= shifted;
 	}
-
-	size_t answer = pre_answer + last_index;
-	return answer;
+	return pre_result + (CellBits - index_from_left);
 }
 
 
@@ -91,11 +90,12 @@ size_t Big::first_one_index() const
 			pre_result += shifted;
 			x >>= shifted;
 		}
+		x &= mask;
 		shifted /= 2;
 		mask >>= shifted;
 	}
 	// as i'm counting from 1, it's neccesary to add it
-	return pre_result + 1;;
+	return pre_result + 1;
 }
 
 
