@@ -73,24 +73,29 @@ size_t Big::first_one_index() const
 {
 	if (is_nil()) return 0;
 
-	size_t first_nonzero = 0;
-	while (at(first_nonzero) == 0) ++first_nonzero;
-	size_t pre_answer = first_nonzero * CellBits;
-	cell first_cell = at(first_nonzero);
-
-	// a simple algorithm as i can't be bothered now
-
-	cell current_mask = CellMaxValue;
-	// + 1 as it only stops decrementing after reaching zero
-	size_t first_index = CellBits + 1;
-	while ((first_cell & current_mask) != 0)
+	size_t first_ind = 0;
+	size_t pre_result = 0;
+	while (at(first_ind) == 0)
 	{
-		current_mask <<= 1;
-		first_index += 1;
+		first_ind += 1;
+		pre_result += CellBits;
 	}
 
-	size_t answer = pre_answer + first_index;
-	return answer;
+	cell x = at(first_ind);
+	size_t shifted = CellBits / 2;
+	cell mask = CellMaxValue >> shifted;
+	while (x != 1)
+	{
+		if ((x & mask) == 0)
+		{
+			pre_result += shifted;
+			x >>= shifted;
+		}
+		shifted /= 2;
+		mask >>= shifted;
+	}
+	// as i'm counting from 1, it's neccesary to add it
+	return pre_result + 1;;
 }
 
 
@@ -996,9 +1001,9 @@ Big Big::operator<< (size_t amount) const
 //////////////////////////////////////////////////////////////////////////////
 
 
-bool Big::lax_prime_test(size_t reliance_parameter) const
-{
-	if (*this % 2 == 0) return false;
-	if (*this <= 3) return false; // includes negative numbers
-
-}
+//bool Big::lax_prime_test(size_t reliance_parameter) const
+//{
+//	if (*this % 2 == 0) return false;
+//	if (*this <= 3) return false; // includes negative numbers
+//
+//}
