@@ -1068,7 +1068,7 @@ auto Big::prepare_barrett_reduce () const
 
 			// if value was big enough, it's neccessary to subtract;
 			// this is where it would hang if the value was too big
-			while (pre_result > modulo)
+			while (pre_result >= modulo)
 			{
 				pre_result -= modulo;
 			}
