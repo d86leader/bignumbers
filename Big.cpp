@@ -1095,13 +1095,14 @@ bool Big::lax_prime_test(size_t reliance_parameter) const
 
 	generator_type gen;
 	distribution_type dist;
+	auto mod = this->prepare_barrett_reduce();
 
 	for (size_t i = 0; i < reliance_parameter; ++i)
 	{
 		Big&& random = Big::generate(this->m_cell_amount, dist, gen) % *this;
 		if (random == minus_one or random == 0 or random == 1) continue;
 
-		Big&& cur_power = random.exp(exponent, *this);
+		Big&& cur_power = random.exp(exponent, mod);
 
 		if (cur_power == 1)
 		{
@@ -1119,7 +1120,7 @@ bool Big::lax_prime_test(size_t reliance_parameter) const
 				break;
 			}
 
-			cur_power = (cur_power * cur_power) % *this;
+			cur_power = mod(cur_power * cur_power);
 
 			if (cur_power == 1)
 			{
