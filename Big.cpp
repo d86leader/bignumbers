@@ -1099,7 +1099,7 @@ bool Big::lax_prime_test(size_t reliance_parameter) const
 
 	for (size_t i = 0; i < reliance_parameter; ++i)
 	{
-		Big&& random = Big::generate(this->m_cell_amount, dist, gen) % *this;
+		Big&& random = mod(Big::generate(this->m_cell_amount, dist, gen));
 		if (random == minus_one or random == 0 or random == 1) continue;
 
 		Big&& cur_power = random.exp(exponent, mod);
