@@ -76,6 +76,11 @@ clean-tests:
 	read -ra files <<< "$(GENERAL_TESTS)"; for file in "$${files[@]}"; do rm -f "$${file//run-/tests\/}"; done
 	read -ra files <<< "$(SPECIFIC_TESTS)"; for file in "$${files[@]}"; do rm -f "$${file//run-/tests\/}"; done
 
+.PHONY: list-tests
+list-tests:
+	@echo "general: $(GENERAL_TESTS)"
+	@echo "specific: $(SPECIFIC_TESTS)"
+
 .PHONY: clean
 clean: clean-tests
 	rm -f Big.o
