@@ -1071,3 +1071,9 @@ bool Big::lax_prime_test(size_t reliance_parameter) const
 	// if we didn't exit in the tries above, the number is probably prime
 	return true;
 }
+
+
+Big Big::generate_prime(size_t bits, distribution_type& d, generator_type& e)
+{
+
+}

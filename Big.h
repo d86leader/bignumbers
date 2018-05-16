@@ -104,6 +104,8 @@ private:
 
 public:
 	static Big generate(size_t size, distribution_type&, generator_type&);
+	static Big generate_prime(size_t bits,
+	                          distribution_type&, generator_type&);
 
 	Big();
 
