@@ -1042,7 +1042,7 @@ bool Big::lax_prime_test(size_t reliance_parameter) const
 			continue;
 		}
 
-		for(size_t j = 0; j < repeats; ++j)
+		for(size_t j = 0; j < repeats - 1; ++j)
 		{
 			if (cur_power == minus_one)
 			{
