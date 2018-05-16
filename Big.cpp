@@ -890,31 +890,52 @@ std::istream& operator >> (std::istream& in, Big& number)
 //////////////////////////////////////////////////////////////////////////////
 
 
-Big Big::exp (const Big& r, const Big& modulo) const
+Big Big::exp(const Big& e, const Big& modulo) const
 {
 	if (this->is_nil())
 	{
 		return *this;
 	}
-	if (r.is_nil())
+	if (e.is_nil())
 	{
 		return Big (1);
 	}
-	return this->exponentiate_rtl(r, modulo);
+	return this->exponentiate_rtl(e, modulo);
+}
+
+Big Big::exp(const Big& e,
+	         const std::function< Big(const Big&)>& reduce) const
+{
+	if (this->is_nil())
+	{
+		return *this;
+	}
+	if (e.is_nil())
+	{
+		return Big (1);
+	}
+	return this->exponentiate_rtl(e, reduce);
 }
 
 
-Big Big::exponentiate_rtl(const Big& r, const Big& modulo) const
+Big Big::exponentiate_rtl(const Big& e, const Big& modulo) const
+{
+	auto mod = modulo.prepare_barrett_reduce();
+
+	return this->exponentiate_rtl(e, mod);
+}
+
+Big Big::exponentiate_rtl(const Big& e,
+	                      const std::function< Big(const Big&)>& mod) const
 {
 	// r is nont-nil
 	Big this_power = *this;
 	Big result = 1;
-	auto mod = modulo.prepare_barrett_reduce();
 
-	size_t bit_amount = r.get_bit_amount();
+	size_t bit_amount = e.get_bit_amount();
 	for (size_t bit_index = 0; bit_index < bit_amount; ++bit_index)
 	{
-		if (r.bit_at(bit_index) == 1)
+		if (e.bit_at(bit_index) == 1)
 		{
 			result = mod(result * this_power);
 		}

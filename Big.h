@@ -98,6 +98,8 @@ private:
 
 	// disregards the sign. Right-to-left algorithm
 	Big exponentiate_rtl(const Big&, const Big&) const;
+	Big exponentiate_rtl(const Big&,
+	                     const std::function< Big(const Big&)>&) const;
 
 	// efficient shifts
 	Big shift_l(int) const;
@@ -151,7 +153,9 @@ public:
 	Big operator^ (const Big&) const;
 	Big operator~ () const;
 
-	Big exp  (const Big& r, const Big& m) const;
+	Big exp  (const Big& e, const Big& m) const;
+	Big exp  (const Big& e,
+	          const std::function< Big(const Big&)>& reduce) const;
 	Big slice(size_t start, size_t length) const;
 
 	Big operator>> (size_t) const;
