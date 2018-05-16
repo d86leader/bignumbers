@@ -1073,7 +1073,61 @@ bool Big::lax_prime_test(size_t reliance_parameter) const
 }
 
 
+Big Big::generate_by_bits(size_t bits,
+                          distribution_type& dist, generator_type& gen)
+{
+	size_t cells = 0;
+	cell or_mask = 0;
+	cell and_mask = 0;
+	if (bits % CellBits == 0)
+	{
+		cells = bits / CellBits;
+		or_mask = CellModulo >> 1;
+		and_mask = CellMaxValue;
+	}
+	else
+	{
+		cells = bits / CellBits + 1;
+		or_mask = 1 << (bits % CellBits - 1);
+		and_mask = (or_mask << 1) - 1;
+	}
+
+	Big&& result = Big::generate(cells, dist, gen);
+	cell& last = result.mut_ref_at(result.m_cell_amount - 1);
+
+	do
+	{
+		last = dist(gen);
+		last &= and_mask;
+	}
+	while (last == 0);
+
+	last |= or_mask;
+
+	return result;
+}
+
+
 Big Big::generate_prime(size_t bits, distribution_type& d, generator_type& e)
 {
+	constexpr size_t reliance = 10;
+	int brk = bits * 1000;
 
+	Big result;
+
+	do
+	{
+		result = Big::generate_by_bits(bits, d, e);
+
+//		std::cout << "generated number " << result.dump() << std::endl;
+
+		brk -= 1;
+		if (brk == 0)
+		{
+			throw std::runtime_error("Big: could not generate prime");
+		}
+	}
+	while (result.lax_prime_test(reliance) == false);
+
+	return result;
 }
