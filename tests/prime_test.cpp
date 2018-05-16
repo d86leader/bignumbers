@@ -22,8 +22,15 @@ int main()
 	Big num;
 	bool expect = false;
 
-	constexpr size_t amount = 1ll << 16;
-	constexpr size_t start_at = amount / 3 * 2;
+	// some untrivial logic: shift gets us the largest number we generate
+	// base_shift gets us how far back we start checking
+	// lowering base_shift increases speed by reducing the amount of numbers checked
+	// the largest number generated will always be checked
+	constexpr size_t base_shift = 13;
+	constexpr size_t shift = 25;
+
+	constexpr size_t amount = 1ll << shift;
+	constexpr size_t start_at = amount - (amount >> (shift - base_shift));
 	constexpr size_t print_each = (amount - start_at) / 10;
 
 	cout << "generating first " << amount << " primes... ";
@@ -55,7 +62,7 @@ int main()
 		{
 			if (i % print_each == 0)
 			{
-				cout << "on test number " << i << endl;
+				cout << "on number " << i << endl;
 			}
 			expect = sieve.at(i) != 'c';
 			num = i;
