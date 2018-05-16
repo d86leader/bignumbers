@@ -682,15 +682,16 @@ pair<Big, Big> Big::quot_rem_big  (const Big& divider) const
 		}
 
 		//improving accuracy of q
-		while ( get(v,2) * q > ( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2) )
+		while (get(v,2) * q >
+			( get_u(j)*b + get_u(j+1) - q*get(v, 1) )*b + get_u(j+2))
 		{
 			if (q == 0) throw "inside division: trying to decrement q = 0";
 			q -= 1;
 			if (not (q < b)) throw "inside division: comparing with b";
 		}
 
-		// maybe sometimes this shiftam is wrong?
-		size_t shiftam = m - j; // amount to shift by; inductibly proved to be correct
+		// amount to shift by; inductibly proved to be correct
+		size_t shiftam = m - j;
 		Big&& slice = (v*q).shift(shiftam);
 		// check for shiftam correctness
 		if (slice.m_cell_amount > u.m_cell_amount)
@@ -824,7 +825,8 @@ namespace
 			return 10 + c - 'A';
 		if (c >= '0' && c <= '9')
 			return c - '0';
-		throw std::runtime_error("Big: error parsing a digit (perhaps your string contains non-hexadecimal symbols)");
+		throw std::runtime_error("Big: error parsing a digit"
+			" (perhaps your string contains non-hexadecimal symbols)");
 	}
 
 	cell unhex(const string& s)
@@ -907,15 +909,16 @@ Big Big::exponentiate_rtl(const Big& r, const Big& modulo) const
 	// r is nont-nil
 	Big this_power = *this;
 	Big result = 1;
+	auto mod = modulo.prepare_barrett_reduce();
 
 	size_t bit_amount = r.get_bit_amount();
 	for (size_t bit_index = 0; bit_index < bit_amount; ++bit_index)
 	{
 		if (r.bit_at(bit_index) == 1)
 		{
-			result = (result * this_power) % modulo;
+			result = mod(result * this_power);
 		}
-		this_power = (this_power * this_power) % modulo;
+		this_power = mod(this_power * this_power);
 	}
 	return result;
 }
@@ -1007,6 +1010,50 @@ Big Big::operator<< (size_t amount) const
 	Big&& result = temp.shift_l(big_amount);
 
 	return result;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+auto Big::prepare_barrett_reduce () const
+    -> std::function< Big(const Big& value) >
+{
+	// need to rename as it is passed by value to lambda closure
+	const Big& modulo = *this;
+
+	// last_bit_index is the lowest number x such that (1 << x) > modulo
+	// we multiply it by two because wiki said so :P
+	// probably for the division to be more precise
+	size_t shift_amount = modulo.m_cell_amount * 2;
+
+	// the number such that multipling by it and shifting by shift_amount
+	// is similar to dividing by n
+	Big&& multipiler = (Big(1).shift_l(shift_amount)) / modulo;
+
+	auto f =
+		[modulo, shift_amount, multipiler]
+		(const Big& value) -> Big
+		{
+			// first of all, if value too big, we perform standart modulation
+			if (value.m_cell_amount >= modulo.m_cell_amount * 2)
+			{
+				return value % modulo;
+			}
+			// compute result representing value divided by modulo
+			Big&& nearly_v_div_m = (value * multipiler).shift_r(shift_amount);
+
+			Big&& pre_result = value - nearly_v_div_m * modulo;
+
+			// if value was big enough, it's neccessary to subtract;
+			// this is where it would hang if the value was too big
+			while (pre_result > modulo)
+			{
+				pre_result -= modulo;
+			}
+			return pre_result;
+		};
+	return f;
 }
 
 
