@@ -20,6 +20,8 @@ CURRENT_TEST := run-bit_index
 GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
 CURRENT_TEST := run-prime_test
 GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
+CURRENT_TEST := run-bit_generator
+GENERAL_TESTS := $(GENERAL_TESTS) $(CURRENT_TEST)
 # i fixed main so now it should work if everything's fine but still
 # it is added manually and at the end
 GENERAL_TESTS := $(GENERAL_TESTS) run-main
@@ -35,6 +37,8 @@ SPECIFIC_TESTS := $(SPECIFIC_TESTS) $(CURRENT_SPECIFIC)
 CURRENT_SPECIFIC := run-last_bit
 SPECIFIC_TESTS := $(SPECIFIC_TESTS) $(CURRENT_SPECIFIC)
 CURRENT_SPECIFIC := run-div_spec
+SPECIFIC_TESTS := $(SPECIFIC_TESTS) $(CURRENT_SPECIFIC)
+CURRENT_SPECIFIC := run-some_primes
 SPECIFIC_TESTS := $(SPECIFIC_TESTS) $(CURRENT_SPECIFIC)
 
 # main part
